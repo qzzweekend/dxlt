@@ -401,7 +401,7 @@ new Vue({
             //window.onresize = powerNumChart.resize;
             powerNumChart.setOption(powerNum_option, true);
         },
-        //获取总电量、节能减排、电站建设数据define
+        //获取总电量、节能减排、电站建设数据
         getAllPower: function () {
             var _this = this;
             var Parameters = {
@@ -416,64 +416,68 @@ new Vue({
             //console.log(Parameters);
             vlm.loadJson("", JSON.stringify(Parameters), function (result) {
                 //console.log(result);
-                var data = result.data;
-                //左上角数值
-                _this.fd_all_power_day = data.fd_all_power_day;
-                _this.fd_all_pw = data.fd_all_pw;
-                _this.fd_all_power_year = data.fd_all_power_year;
-                _this.fd_all_power = data.fd_all_power;
-                //单位
-                _this.fd_all_power_day_unit = data.fd_all_power_day_unit;
-                _this.fd_all_pw_unit = data.fd_all_pw_unit;
-                _this.fd_all_power_year_unit = data.fd_all_power_year_unit;
-                _this.fd_all_power_unit = data.fd_all_power_unit;
+                if(result.success){
+                    var data = result.data;
+                    //左上角数值
+                    _this.fd_all_power_day = data.fd_all_power_day;
+                    _this.fd_all_pw = data.fd_all_pw;
+                    _this.fd_all_power_year = data.fd_all_power_year;
+                    _this.fd_all_power = data.fd_all_power;
+                    //单位
+                    _this.fd_all_power_day_unit = data.fd_all_power_day_unit;
+                    _this.fd_all_pw_unit = data.fd_all_pw_unit;
+                    _this.fd_all_power_year_unit = data.fd_all_power_year_unit;
+                    _this.fd_all_power_unit = data.fd_all_power_unit;
 
-                //节能减排
-                _this.fd_co2_reduce = data.fd_co2_reduce + data.fd_co2_reduce_unit;
-                _this.fd_coal_reduce = data.fd_coal_reduce + data.fd_coal_reduce_unit;
-                _this.fd_tree_reduce = data.fd_tree_reduce + data.fd_tree_reduce_unit;
-                _this.fd_so2_reduce = data.fd_so2_reduce + data.fd_so2_reduce_unit;
+                    //节能减排
+                    _this.fd_co2_reduce = data.fd_co2_reduce + data.fd_co2_reduce_unit;
+                    _this.fd_coal_reduce = data.fd_coal_reduce + data.fd_coal_reduce_unit;
+                    _this.fd_tree_reduce = data.fd_tree_reduce + data.fd_tree_reduce_unit;
+                    _this.fd_so2_reduce = data.fd_so2_reduce + data.fd_so2_reduce_unit;
 
-                //安全运营天数
-                _this.fd_safety_daycount = data.fd_safety_daycount;
+                    //安全运营天数
+                    _this.fd_safety_daycount = data.fd_safety_daycount;
 
-                //电站建设
-                var dz_data = [];
-                var pieName = LANG["powerStationConstruct"];
-                var lengendData = [];
-                var title = 'abc';
-                var ps_exist_capacity, ps_just_capacity, no_just_capacity;
-                _this.fd_intercon_cap = data.tbpowertypes[data.tbpowertypes.length - 1].fd_intercon_cap;
-                _this.fd_unit = data.tbpowertypes[data.tbpowertypes.length - 1].fd_unit;
+                    //电站建设
+                    var dz_data = [];
+                    var pieName = LANG["powerStationConstruct"];
+                    var lengendData = [];
+                    var title = 'abc';
+                    var ps_exist_capacity, ps_just_capacity, no_just_capacity;
+                    _this.fd_intercon_cap = data.tbpowertypes[data.tbpowertypes.length - 1].fd_intercon_cap;
+                    _this.fd_unit = data.tbpowertypes[data.tbpowertypes.length - 1].fd_unit;
 
-                var colorArray = ["#0CCA26", "#FDD600", "#2E7FF9"];
+                    var colorArray = ["#0CCA26", "#FDD600", "#2E7FF9"];
 
-                for (var i = 0; i < data.tbpowertypes.length - 1; i++) {
-                    if (data.tbpowertypes[i].fd_station_status == 1) { //并网
-                        _this.fd_intercon_cap_finish = data.tbpowertypes[i].fd_intercon_cap + data.tbpowertypes[i].fd_unit;
-                        ps_exist_capacity = data.tbpowertypes[i].fd_intercon_cap;
-                        _this.fd_station_count_finish = data.tbpowertypes[i].fd_station_count + LANG["psUnit_zuo"];
-                    } else if (data.tbpowertypes[i].fd_station_status == 0) { //在建
-                        _this.fd_intercon_cap_on = data.tbpowertypes[i].fd_intercon_cap + data.tbpowertypes[i].fd_unit;
-                        ps_just_capacity = data.tbpowertypes[i].fd_intercon_cap;
-                        _this.fd_station_count_on = data.tbpowertypes[i].fd_station_count + LANG["psUnit_zuo"];
+                    for (var i = 0; i < data.tbpowertypes.length - 1; i++) {
+                        if (data.tbpowertypes[i].fd_station_status == 1) { //并网
+                            _this.fd_intercon_cap_finish = data.tbpowertypes[i].fd_intercon_cap + data.tbpowertypes[i].fd_unit;
+                            ps_exist_capacity = data.tbpowertypes[i].fd_intercon_cap;
+                            _this.fd_station_count_finish = data.tbpowertypes[i].fd_station_count + LANG["psUnit_zuo"];
+                        } else if (data.tbpowertypes[i].fd_station_status == 0) { //在建
+                            _this.fd_intercon_cap_on = data.tbpowertypes[i].fd_intercon_cap + data.tbpowertypes[i].fd_unit;
+                            ps_just_capacity = data.tbpowertypes[i].fd_intercon_cap;
+                            _this.fd_station_count_on = data.tbpowertypes[i].fd_station_count + LANG["psUnit_zuo"];
 
-                    } else if (data.tbpowertypes[i].fd_station_status == 2) { //未建
-                        _this.fd_intercon_cap_undo = data.tbpowertypes[i].fd_intercon_cap + data.tbpowertypes[i].fd_unit;
-                        no_just_capacity = data.tbpowertypes[i].fd_intercon_cap;
-                        _this.fd_station_count_undo = data.tbpowertypes[i].fd_station_count + LANG["psUnit_zuo"];
+                        } else if (data.tbpowertypes[i].fd_station_status == 2) { //未建
+                            _this.fd_intercon_cap_undo = data.tbpowertypes[i].fd_intercon_cap + data.tbpowertypes[i].fd_unit;
+                            no_just_capacity = data.tbpowertypes[i].fd_intercon_cap;
+                            _this.fd_station_count_undo = data.tbpowertypes[i].fd_station_count + LANG["psUnit_zuo"];
 
+                        }
                     }
+                    var ps_array = [ps_exist_capacity, ps_just_capacity, no_just_capacity];
+                    for (var i = 0; i < ps_array.length; i++) {
+                        var tempp = {};
+                        tempp["value"] = ps_array[i];
+                        tempp["color"] = colorArray[i];
+                        dz_data.push(tempp);
+                    }
+                    //console.log(dz_data);
+                    _this.loadPowerNumChart(dz_data, pieName, lengendData, title);
+                }else{
+                    alert(result.message);
                 }
-                var ps_array = [ps_exist_capacity, ps_just_capacity, no_just_capacity];
-                for (var i = 0; i < ps_array.length; i++) {
-                    var tempp = {};
-                    tempp["value"] = ps_array[i];
-                    tempp["color"] = colorArray[i];
-                    dz_data.push(tempp);
-                }
-                //console.log(dz_data);
-                _this.loadPowerNumChart(dz_data, pieName, lengendData, title);
 
             });
         },
