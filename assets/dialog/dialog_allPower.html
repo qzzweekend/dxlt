@@ -1,0 +1,62 @@
+<html>
+<head>
+    <title>集团当年累计发电</title>
+    <link rel="stylesheet" type="text/css" href="css/basic.css"/>
+    <link rel="stylesheet" type="text/css" href="css/dialog_main.css"/>
+    <!--<link rel="stylesheet" type="text/css" href="/css/basic.css?vs=2.1221"/>-->
+
+
+    <!--<script type="text/javascript" src="js/lib/DatePicker.js"></script>-->
+    <!--<script type="text/javascript" src="/js/DateUtil.js?vs=2.1221"></script>-->
+    <!--<script type="text/javascript" src="/js/common/esmpbase.js?vs=2.1221"></script>-->
+    <!--<script type="text/javascript" src="/js/common/common.js?vs=2.1221"></script>-->
+    <!--<script type="text/javascript" src="/js/plugin/echart/echarts.js"></script>-->
+
+    <!--<script type="text/javascript" src="/js/i18n/common_zh_CN.js?vs=2.1221"></script>-->
+
+
+    <script>
+        var ctx = '';
+    </script>
+
+</head>
+<body>
+<input id="psId" type="hidden" value=""/>
+<input id="psType" type="hidden" value=""/>
+<input id="screenVersion" type="hidden" value="3"/>
+<div class="box_show clearfix" id="allPowerDialog">
+    <div class="showm_List clearfix">
+        <div class="showm_List_title">集团当年累计发电</div>
+        <div class="list_top_icon clearfix">
+            <div class="list_icon1">累计发电（截止昨日）</div>
+            <div class="list_icon2">总辐射量（昨日）</div>
+        </div>
+        <div class="showm_List_main">
+            <ul id="iconsUl">
+
+            </ul>
+        </div>
+        <a href="javascript:;" class="Prev_btn" id="left_max_btn">左边大按钮</a>
+        <a href="javascript:;" class="Next_btn" id="right_max_btn">右边大按钮</a>
+        <a href="javascript:;" class="close List_close">close</a>
+        <div align="center" style="height: 100%;width: 100%;background-color: transparent; position: absolute" class="loadingDiv">
+            <img style='top: 31%;' src="images/loading.gif"/>
+        </div>
+        <div class="nav_hd clearfix">
+            <ul id="pagenation">
+            </ul>
+        </div>
+    </div>
+
+</div>
+
+<script type="text/javascript" src="../js/lib/jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="../js/lib/vlm.js"></script>
+<script type="text/javascript" src="../js/lib/vue.js"></script>
+<script type="text/javascript" src="../js/common/common.js"></script>
+<script type="text/javascript" src="../js/common/esmpbase.js"></script>
+<script type="text/javascript" src="js/lib/TouchSlide.js"></script>
+<script type="text/javascript" src="js/allPower.js"></script>
+
+</body>
+</html>

@@ -1,0 +1,33 @@
+/*
+ *@desc jshint options    http://jshint.com/docs/options/ http://www.cnblogs.com/rdst/p/4704151.html
+ *@version 0.1
+ *@author Jason
+ *@time 2016-04-26
+ */
+{
+    "strict": true, //非严格模式
+    "bitwise": true, //禁止位运算
+    "curly": true, //循环 if 必须使用{}
+    "eqeqeq": false, //严格等号
+    //"forin": false,
+    //"immed": true,
+    //"latedef": true,true
+    //"newcap": true,
+    //"noarg": true,
+    //"noempty": true,
+    //"nonew": true,
+    //"plusplus": false,
+    //"undef": true,
+    //"trailing": false,
+    //"globalstrict": true,
+    //"nonstandard": true,
+    //"expr": true,
+    //"onevar": false
+    //依赖
+    "jquery": true,
+    "node": true,
+    //"es5": true,
+    //环境设置
+    "devel": true,
+    "debug": false //代码提交时取消debugger
+}

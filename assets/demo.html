@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8" />
+    <meta http-equiv="expires" content="mon, 18 apr 2116 14:30:00 GMT">
+    <meta name="author" content="ChuD/" />
+    <title>东旭蓝天光伏电站智能运维管理平台</title>
+
+    <link rel="stylesheet" type="text/css" href="/css/basic.css?vs="/>
+    <link rel="stylesheet" type="text/css" href="/screen_3.0/css/screen_3.css?vs="/>
+    <link href='http://cdn.webfont.youziku.com/webfonts/nomal/94892/19518/5836a656f629db1688e4b872.css' rel='stylesheet' type='text/css' />
+    <link href='http://cdn.webfont.youziku.com/webfonts/nomal/94892/32780/582e8c7ff629d810c4e70dcd.css' rel='stylesheet' type='text/css' />
+    <script language="javascript">
+        var ctx = '';
+        var bathPath = '';
+    </script>
+
+    <script type="text/javascript" src="/js/i18n/common_zh_CN.js?vs="></script>
+
+
+    <!---http://www.youziku.com/webfont/index/19518    字体设置-->
+</head>
+
+
+<body>
+<input type="hidden" id="currentPowerValue" value="">
+<input type="hidden" id="currentPowerValue_virgin" value="">
+<input type="hidden" id="user_id" value="8643"/>
+<input type="hidden" id="org_id" value="3040"/>
+<input type="hidden" id="operateSysUrl" value="http://www.isolarcloud.com/"/><div class="alert alert-info" role="alert" id="failInfo" STYLE="position: absolute;top:0;width: 100%;display: none;font-weight: 700;z-index: 999999;" align="center">数据请求失败，请重试!</div>
+<div class="Monitor_main">
+    <div class="Monitor_top clearfix">
+        <div class="Monitor_top_user_logo fl">
+            <img id="pageLogImg" src="" />
+        </div>
+        <div class="Monitor_top_title css73aa30a52172ac" id="pageTitle"></div>
+        <div class="Monitor_top_copy_logo fr">
+            <img src="/screen_3.0/images/new_img/copy_logo.png" onclick="gotoSys()"/>
+        </div>
+    </div>
+    <div class="Monitor_con clearfix">
+        <div class="Monitor_left fl">
+            <div class="Monitor_left_c1 clearfix" name="portal">
+                <div class="Monitor_left_c1_on"></div>
+                <div class="Mc1_left fl">
+                    <div class="Mc1_left_top">
+                        <div class="Mc1_left_t1">今日发电</div>
+                        <div class="Mc1_left_t2" id="currentPower">--</div>
+                        <div class="Mc1_left_t3" id="currentPowerUnit"></div>
+                    </div>
+                    <div class="Mc1_left_bottom">
+                        <div class="Mc1_left_t1">当前功率<div id="messages"></div></div>
+                        <div class="Mc1_left_t2" id="currentGL">--</div>
+                        <div class="Mc1_left_t3" id="currentGLUnit"></div>
+                    </div>
+                </div>
+                <div class="Mc1_right fl module" id="power_lj">
+                    <div class="Mc1_right_t1">集团当年累计发电（<span id="year_gen_unit"></span>）</div>
+                    <div class="Mc1_right_t2" id="year_gen_value">--</div>
+                    <div class="Mc1_right_t3">累计总发电：<span id="total_gen_value">--</span><span id="total_gen_unit"></span></div>
+                </div>
+            </div>
+            <div class="Monitor_left_c2" name="portal">
+                <div class="Monitor_left_c2_on"></div>
+                <div class="Mc2_title">性能排名<span style="font-size: 14px">(近30天)</span></div>
+                <div class="Mc5_nav fr clearfix">
+                    <ul>
+                        <li onclick="top10(0)" class="capacity_btn on"><a href="javascript:;">前七名</a></li>
+                        <li onclick="top10(1)" class="capacity_btn"><a href="javascript:;">后七名</a></li>
+                    </ul>
+                </div>
+                <div class="Mc5_con module" id="capacity">
+                </div>
+
+            </div>
+            <div class="Monitor_left_c3" name="portal">
+                <div class="Monitor_left_c3_on"></div>
+                <div class="Mc2_title">当年发电计划</div>
+                <div class="Mc6_con module" id="plan">
+
+                </div>
+                <div class="Mc6_bottom">
+                    <div><img src="/screen_3.0/images/new_img/ico5.png" /></div>
+                    <div class="Mc6_bottom_t1">年完成率</div>
+                    <div class="Mc6_bottom_t2" id="yearCompleteRate">--</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="Monitor_center fl">
+            <div class="Monitor_center_header clearfix" id="returnClick">
+                <a href="javascript:;" class="M_main_goup fl" onclick="back();">返回</a>
+                <div class="Monitor_header_right clearfix fl">
+                    <div class="M_search_sel fl">
+
+                        <select id="psSearchName" class="M_search_ipt" onchange="searchPS(this.value)">
+                        </select>
+                    </div>
+                    <div class="Monitor_header_tag fl clearfix">
+                        <div class="Monitor_header_tag_title fl">电站状态：</div>
+                        <div class="Monitor_header_tag_list fl clearfix">
+                            <ul>
+                                <li class="clearfix" id="mtag1"><div class="Mtag_title">并网</div><div class="Mtag_green"></div></li>
+                                <li class="clearfix" id="mtag2"><div class="Mtag_title">在建</div><div class="Mtag_yellow"></div></li>
+                                <li class="clearfix" id="mtag3"><div class="Mtag_title">未建</div><div class="Mtag_blue"></div></li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div style="display: none;position: absolute;left:200px; top:-20px" id="saveMapInfo">
+                <button class="btn btn-primary" onclick="saveMapInfo()" >保存</button>
+            </div>
+            <div class="Monitor_center_con" id="img_china">
+            </div>
+
+            <div class="big_showbox main" id="main_power" style="display:none;">
+                <a href="javascript:;" class="goback">返回上一步</a>
+                <div class="box_t4 clearfix">集团当年累计发电</div>
+                <div class="box_title clearfix">
+                    <span><div class="title1">昨日发电</div></span>
+                    <span><div class="title3">电站当年累计发电</div></span>
+                </div>
+
+                <div class="box_tslide" id="box_tslide3">
+                    <div class="box_list1 clearfix bd">
+                        <ul></ul>
+                    </div>
+                    <div class="box_nav1 clearfix hd">
+                        <a href="javascript:;" class="prev">上一页</a>
+                        <ul>
+                        </ul>
+                        <a href="javascript:;" class="next">下一页</a>
+                    </div>
+                </div>
+            </div>
+            <div class="big_showbox main" id="main_shgx"  style="display:none;">
+                <a href="javascript:;" class="goback">返回上一步</a>
+                <div class="box_t4 clearfix">节能减排</div>
+                <div class="table_title">
+                    <div class="tab_title1">电站名称</div>
+                    <div class="tab_title2">二氧化碳</div>
+                    <div class="tab_title3">汽车里程</div>
+                    <div class="tab_title4">等效植树</div>
+                    <div class="tab_title5">二氧化硫</div>
+                </div>
+                <div class="box_slidetab clearfix">
+                    <div class="list_slide">
+                        <ul>
+                            <li>
+                                <div class="">
+                                    <table class="table table-striped"></table>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="big_showbox main" id="main_powerBuild"  style="display:none;">
+            <a href="javascript:;" class="goback">返回上一步</a>
+            <div class="box_t4 clearfix">电站建设</div>
+            <ul class="nav nav-tabs" style="margin-top: 2px" id="powerConstruct">
+            </ul>
+            <div class="table_title" style="margin-top: 0px">
+                <div class="tab_title1" style="width:300px;">电站名称</div>
+                <div class="tab_title2" style="width:210px;">装机容量</div>
+
+                <div class="tab_title3" style="width:220px;">系统方案</div>
+                <div class="tab_title4" style="width:170px;">地理位置</div>
+            </div>
+            <div class="box_slidetab clearfix">
+                <div class="list_slide" id="powerbyType">
+                </div>
+            </div>
+        </div>
+
+        <div class="main_earth fl" id="main"></div>
+
+        <div class="Monitor_right fr">
+            <div class="Monitor_right_c1 clearfix">
+                <div class="Mc4_bg fr" name="portal">
+                    <div class="Mc4_bg_on"></div>
+                    <div class="Mc4_top clearfix">
+                        <div class="Mc4_title fl" id="powerTrendTitle">当月发电趋势</div>
+                        <div class="Mc4_nav fr">
+                            <ul>
+                                <li onclick="selectTrends(1)" class="trends_btn"><a href="javascript:;">日</a></li>
+                                <li onclick="selectTrends(2)" class="trends_btn on"><a href="javascript:;">月</a></li>
+                                <li onclick="selectTrends(3)" class="trends_btn"><a href="javascript:;">年</a></li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="Mc4_con" id="gen_trend">
+                        <div align="center" style="height: 100%;width: 100%;background-color: transparent; position: absolute; z-index: 9999" class="loadingDiv">
+                            <img style='left: 45%; top: 45%; position: absolute' src="/nyj/images/loading.gif"/>
+                        </div>
+                        <div class="Mc4_con_title" id="zfdl" style="display:none"></div>
+                        <div id="power" class="module"></div>
+                    </div>
+                </div>
+            </div>
+            <div class="Monitor_right_c2 clearfix">
+                <div class="Mc5_bg fr" name="portal">
+                    <div class="Mc5_bg_on"></div>
+                    <div class="Mc5_top clearfix">
+                        <div class="Mc5_title fl">节能减排</div>
+                    </div>
+                    <div class="Mc2_con module" id="dayChart">
+                        <ul>
+                            <li class="Mc2_con_yellow clearfix">
+                                <div class="Mc2_ico1 fl"></div>
+                                <div class="Mc2_list fl clearfix">
+                                    <div class="Mc2_list_left fl">二氧化碳</div>
+                                    <div class="Mc2_list_right fl" id="co2">--</div>
+                                </div>
+                            </li>
+                            <li class="Mc2_con_blue clearfix">
+                                <div class="Mc2_ico2 fl"></div>
+                                <div class="Mc2_list fl clearfix">
+                                    <div class="Mc2_list_left fl">标准煤</div>
+                                    <div class="Mc2_list_right fl" id="standard_coal">--</div>
+
+                                </div>
+                            </li>
+                            <li class="Mc2_con_green clearfix">
+                                <div class="Mc2_ico3 fl"></div>
+                                <div class="Mc2_list fl clearfix">
+                                    <div class="Mc2_list_left fl">等效植树</div>
+                                    <div class="Mc2_list_right fl" id="dxzs">--</div>
+                                </div>
+                            </li>
+                            <li class="Mc2_con_red clearfix">
+                                <div class="Mc2_ico4 fl"></div>
+                                <div class="Mc2_list fl clearfix">
+                                    <div class="Mc2_list_left fl">二氧化硫</div>
+                                    <div class="Mc2_list_right fl" id="so2">--</div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="Monitor_right_c3 clearfix" name="portal">
+                <div class="Mc6_bg_on"></div>
+                <div class="Mc6_top clearfix">
+                    <div class="Mc5_title fl">电站建设</div>
+                </div>
+
+                <div class="Mc3_con module clearfix" id="ps_build">
+                    <div class="clearfix Mc3_con_right fl">
+                        <ul>
+                            <li>
+                                <div class="Mc3_con_right_title">并网</div>
+                                <div class="clearfix">
+                                    <div class="fl box_green"></div>
+                                    <div class="Mc3_con_right_text fl"><span id="mc3_exist_capacity"></span>&nbsp;&nbsp;<span id="exist_ps_count"></span></div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="Mc3_con_right_title">在建</div>
+                                <div class="clearfix">
+                                    <div class="fl box_yellow"></div>
+                                    <div class="Mc3_con_right_text fl"><span id="mc3_just_capacity"></span>&nbsp;&nbsp;<span id="just_ps_count"></span></div>
+                                </div>
+                            </li>
+                            <li>
+                                <div class="Mc3_con_right_title">未建</div>
+                                <div class="clearfix">
+                                    <div class="fl box_blue"></div>
+                                    <div class="Mc3_con_right_text fl"><span id="no_capacity"></span>&nbsp;&nbsp;<span id="no_ps_count"></span></div>
+                                </div>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <div class="Mc3_con_left fl" style="position: relative">
+                        <div class="beforeClickPs" style="font-family: 'Microsoft YaHei';font-size: 18px" id="powerBuildTitle">
+                            <div style="font-size: 22px;font-weight: bold" id="title_a" align="center">--</div>
+                            <div  id="title_b" align="center"></div>
+                        </div>
+                        <div class="Mc3_con_left fl" id="powernumChart"></div>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+    <div class="M_main_bottom">
+        <div class="M_main_bottom_con clearfix">
+            <div class="M_bottom_b1 fl" style="cursor: pointer" id="just_capacity_span">
+                <div class="M_bottom_b1_con">
+                    <div class="M_bottom_t1">在建容量</div>
+                    <div class="M_bottom_t2"><span id="just_capacity">--</span><span id="just_capacity_unit"></span></div>
+                </div>
+            </div>
+            <div class="M_bottom_b2 fl">
+                <div class="M_bottom_t1">并网容量</div>
+                <div class="M_bottom_t2"><span id="exist_capacity">--</span><span id="exist_capacity_unit"></span></div>
+            </div>
+            <div class="M_bottom_b3 fr">
+                <div class="M_bottom_b3_con">
+                    <div class="M_bottom_t1">安全运营天数</div>
+                    <div class="M_bottom_t2"><span id="safe_operation">--</span> 天</div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="mask_showdiv">
+    <div class="mask_showdiv_header clearfix">
+        <div class="mask_showdiv_header_title fl">在线项目进度排名</div>
+        <a href="javascript:;" class="mask_showdiv_header_close fr">关闭</a>
+    </div>
+    <div class="mask_showdiv_con">
+
+    </div>
+</div>
+
+<div id="grayLayer">
+    <div id="showPsInfo" class="maps_show">
+        <div class="maps_showmain">
+            <div class="show_top clearfix">
+                <div class="show_top_title fl" id="powerInfoName"></div>
+                <a href="javascript:;" class="fl close" onclick="closeLayer()">关闭</a>
+            </div>
+            <div class="show_c1 clearfix">
+                <div class="show_c1_list fl">
+                    <div class="show_c1_con">
+                        <ul>
+                            <li>
+                                <span class="fl">地理位置</span>
+                                <div  class="fl" style="display: inline-block;">
+                                    <b id="powerInfoLocation" style="display: inline-block;width: 129px;overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"></b>
+                                </div>
+                            </li>
+                            <li>
+                                <span  class="fl">电站类型</span>
+                                <b  class="fl" id="powerInfoType"></b>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <div class="show_c1_list fl" style="border-right:none;">
+                    <div class="show_c1_con">
+                        <ul>
+                            <li>
+                                <span >预计并网时间</span>
+                                <b id="expectInstallDate"></b>
+                            </li>
+                            <li>
+                                <span >装机功率</span>
+                                <b id="powerInfoNormalCapacity"></b>
+                                <span id="powerInfoNormalCapacityUnit"></span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            <div class="show_c2 clearfix">
+                <ul>
+                    <li class="clearfix">
+                        <div class="fl showc2_left clearfix">
+                            <div class="showc2_left_ico1 fl"></div>
+                            <div class="showc2_left_text fl"><span>日发电量</span></div>
+                        </div>
+                        <div class="fl showc2_right clearfix">
+                            <b id="powerInfoDayEnergy"></b>
+                            <span id="powerInfoDayEnergyUnit"></span>
+                        </div>
+                    </li>
+                    <li class="clearfix">
+                        <div class="fl showc2_left clearfix">
+                            <div class="showc2_left_ico2 fl"></div>
+                            <div class="showc2_left_text fl"><span>日辐射量</span></div>
+                        </div>
+                        <div class="fl showc2_right clearfix">
+                            <b id="powerInfoRadiation"></b>
+                            <span id="powerInfoRadiationUnit"></span>
+                        </div>
+                    </li>
+                    <li class="clearfix">
+                        <div class="fl showc2_left clearfix">
+                            <div class="showc2_left_ico3 fl"></div>
+                            <div class="showc2_left_text fl"><span>环境温度</span></div>
+                        </div>
+                        <div class="fl showc2_right clearfix">
+                            <b id="powerInfoTemperature"></b>
+                            <span>度</span>
+                        </div>
+                    </li>
+                    <li class="clearfix">
+                        <div class="fl showc2_left clearfix">
+                            <div class="showc2_left_ico4 fl"></div>
+                            <div class="showc2_left_text fl"><span>风速</span></div>
+                        </div>
+                        <div class="fl showc2_right clearfix">
+                            <b id="powerInfoWindLevel"></b>
+                        </div>
+                    </li>
+                    <li class="clearfix">
+                        <div class="fl showc2_left clearfix">
+                            <div class="showc2_left_ico5 fl"></div>
+                            <div class="showc2_left_text fl"><span>风向</span></div>
+                        </div>
+                        <div class="fl showc2_right clearfix">
+                            <b id="powerInfoWindDirection"></b>
+                        </div>
+                    </li>
+                </ul>
+            </div>
+            <div class="show_c3 clearfix">
+                <div class="show_c3_top clearfix">
+                    <div class="show_c3_top_title fl">电站介绍</div>
+
+                    <a href="#" class="show_c3_top_link fr" onclick="psDetailInfo()">电站详细信息</a>
+                </div>
+                <div class="show_c3_con clearfix">
+                    <img src="images/sungrowsamsung.png" class="fl" id="powerInfoPic"/>
+                    <p id="powerInfoContent">
+
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<iframe id="equalHourFm" style="display: none; position: absolute; width: 100%; height: 1080px; overflow: hidden; border: 0px; z-index: 9999; top: 0px;" src="">
+</iframe>
+<canvas id="canvas" width="1893" height="1080"></canvas>
+<script src="/screen_yy_1.1/js/html5_start.js"></script>
+<script type="text/javascript" src="/js/jquery.min.js"></script>
+<script src="/js/websocket/reconnecting-websocket.min.js"></script>
+<script src="/js/websocket/websocket.js"></script>
+<script type="text/javascript" src="/js/jquery-ui.min.js"></script>
+<link rel="stylesheet" type="text/css" href="/js/plugin/jquery-select/css/select2_screen3.css"/>
+<script type="text/javascript" src="/js/plugin/jquery-select/js/select2.min.js"></script>
+<script type="text/javascript" src="/css/layer/layer.js"></script>
+<script type="text/javascript" src="/js/common/esmpbase.js"></script>
+<script type="text/javascript" src="/js/common/common.js?vs="></script>
+<script type="text/javascript" src="/js/DateUtil.js?vs="></script>
+<script type="text/javascript" src="/js/TouchSlide.js"></script>
+<link rel="stylesheet" href="/css/jquery.mCustomScrollbar.css">
+<script type="text/javascript" src="/js/jquery.mCustomScrollbar.js?vs="></script>
+<script type="text/javascript" src="/js/plugin/echart/echarts.js"></script>
+<script type="text/javascript" src="/js/3d/echarts_x/build/dist/echarts-x.js"></script>
+<script type="text/javascript" src="/screen_3.0/js/screen_3.js?vs="></script>
+<script type="text/javascript" src="/screen_3.0/js/screen_3_left.js?vs="></script>
+<script type="text/javascript" src="/screen_3.0/js/screen_3_right.js?vs="></script>
+<script type="text/javascript" src="/screen_3.0/js/screen_3_common.js?vs="></script>
+
+</body>
+</html>
+
