@@ -115,6 +115,19 @@
                     var val = d.getFullYear()+''+month+''+day+''+hour+''+minute+''+second;
                     return val;
                 },
+                //当年1月1号0000
+                currentYear:function(){
+                    var d=new Date();
+                    var val = d.getFullYear()+'0101000000';
+                    return val;
+                },
+
+                //明年1月1号0000
+                nextYear:function(){
+                    var d=new Date();
+                    var val = (d.getFullYear()+1)+'0101000000';
+                    return val;
+                },
 
                 //格式验证
                 validate: {

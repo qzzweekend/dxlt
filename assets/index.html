@@ -8,11 +8,13 @@
           type='text/css'/>
     <link href='http://cdn.webfont.youziku.com/webfonts/nomal/94892/32780/582e8c7ff629d810c4e70dcd.css' rel='stylesheet'
           type='text/css'/>
+    <link rel="stylesheet" href="css/plugin/select/select2.css"/>
     <link rel="stylesheet" href="css/index.css"/>
     <script src="js/lib/jquery-1.10.2.min.js"></script>
     <script src="js/lib/vlm.js"></script>
     <script src="js/lib/vue.js"></script>
     <script src="js/lib/ejs.js"></script>
+    <script src="js/plugin/jquery-select/select2.min.js"></script>
     <script src="js/common/common.js"></script>
     <script src="js/common/esmpbase.js"></script>
     <script src="js/lib/lang.js"></script>
@@ -91,34 +93,34 @@
                 <div class="Mc6_bottom">
                     <div><img src="images/icon/ico5.png"/></div>
                     <div class="Mc6_bottom_t1">年完成率</div>
-                    <div class="Mc6_bottom_t2" id="yearCompleteRate">--</div>
+                    <div class="Mc6_bottom_t2" id="yearCompleteRate" v-text="fd_scheduledata"></div>
                 </div>
             </div>
         </div>
 
         <div class="Monitor_center fl">
             <div class="Monitor_center_header clearfix" id="returnClick">
-                <a href="javascript:;" class="M_main_goup fl">返回</a>
+                <a href="javascript:;" class="M_main_goup fl" @click="mapBack">返回</a>
 
                 <div class="Monitor_header_right clearfix fl">
                     <div class="M_search_sel fl">
-
-                        <select id="psSearchName" class="M_search_ipt" @change="searchPS(option.value)">
+                        <select id="psSearchName" class="M_search_ipt" onchange="searchPS(this.value)">
+                            <!--<option v-for="option in options" v-text="option.text"></option>-->
                         </select>
                     </div>
                     <div class="Monitor_header_tag fl clearfix">
                         <div class="Monitor_header_tag_title fl">电站状态：</div>
-                        <div class="Monitor_header_tag_list fl clearfix">
+                        <div class="Monitor_header_tag_list fl clearfix" @click="powerStatus($event)">
                             <ul>
-                                <li class="clearfix" id="mtag1">
+                                <li class="clearfix" id="mtag1" data-powerStatus="complete">
                                     <div class="Mtag_title">并网</div>
                                     <div class="Mtag_green"></div>
                                 </li>
-                                <li class="clearfix" id="mtag2">
+                                <li class="clearfix" id="mtag2" data-powerStatus="building">
                                     <div class="Mtag_title">在建</div>
                                     <div class="Mtag_yellow"></div>
                                 </li>
-                                <li class="clearfix" id="mtag3">
+                                <li class="clearfix" id="mtag3" data-powerStatus="scheme">
                                     <div class="Mtag_title">未建</div>
                                     <div class="Mtag_blue"></div>
                                 </li>
@@ -255,7 +257,7 @@
     <div class="M_main_bottom">
         <div class="M_main_bottom_con clearfix">
             <div class="M_bottom_b1 fl" style="cursor: pointer" id="just_capacity_span">
-                <div class="M_bottom_b1_con">
+                <div class="M_bottom_b1_con" @click="showDialogIframe('dialog/dialog_proceeding.html')">
                     <div class="M_bottom_t1">在建容量</div>
                     <div class="M_bottom_t2"><span id="just_capacity"></span><span id="just_capacity_unit" v-text="fd_intercon_cap_on"></span>
                     </div>
@@ -405,19 +407,19 @@
 <script type="text/template" id="tpl">
     <%for(var i=0;i< dataArr.length; i++){ %>
         <% if(dataArr[i].fd_station_status == 1){ %>
-        <div id="<%=dataArr[i].ps_id %>" class="location" style="left:<%=dataArr[i].fd_left%>px;top:<%=dataArr[i].fd_top%>px">
-            <em title="<%=dataArr[i].fd_station_name%>" onclick="powerInfo_detail(108816,1,2)"><%=dataArr[i].fd_short_station_name%></em>
-            <div class="map_title" style="display: none;"><%=dataArr[i].fd_short_station_name%></div>
+        <div id="<%=dataArr[i].fd_station_id %>" class="location" style="left:<%=dataArr[i].fd_left%>px;top:<%=dataArr[i].fd_top%>px">
+            <em title="<%=dataArr[i].fd_station_name%>" onclick="powerInfo_detail(108816,1,2)"><%=dataArr[i].fd_station_name%></em>
+            <div class="map_title" style="display: none;"><%=dataArr[i].fd_station_name%></div>
         </div>
         <% }else if(dataArr[i].fd_station_status == 0){ %>
-        <div id="<%=dataArr[i].ps_id %>" class="location2" style="left:<%=dataArr[i].fd_left%>px;top:<%=dataArr[i].fd_top%>px">
-            <em title="<%=dataArr[i].fd_station_name%>" ><%=dataArr[i].fd_short_station_name%></em>
-            <div class="map_title" style="display: none;"><%=dataArr[i].fd_short_station_name%></div>
+        <div id="<%=dataArr[i].fd_station_id %>" class="location2" style="left:<%=dataArr[i].fd_left%>px;top:<%=dataArr[i].fd_top%>px">
+            <em title="<%=dataArr[i].fd_station_name%>" ><%=dataArr[i].fd_station_name%></em>
+            <div class="map_title" style="display: none;"><%=dataArr[i].fd_station_name%></div>
         </div>
         <% }else if(dataArr[i].fd_station_status == 2){ %>
-        <div id="<%=dataArr[i].ps_id %>" class="location3" style="left:<%=dataArr[i].fd_left%>px;top:<%=dataArr[i].fd_top%>px">
-            <em title="<%=dataArr[i].fd_station_name%>" ><%=dataArr[i].fd_short_station_name%></em>
-            <div class="map_title" style="display: none;"><%=dataArr[i].fd_short_station_name%></div>
+        <div id="<%=dataArr[i].fd_station_id %>" class="location3" style="left:<%=dataArr[i].fd_left%>px;top:<%=dataArr[i].fd_top%>px">
+            <em title="<%=dataArr[i].fd_station_name%>" ><%=dataArr[i].fd_station_name%></em>
+            <div class="map_title" style="display: none;"><%=dataArr[i].fd_station_name%></div>
         </div>
         <% } %>
     <% } %>

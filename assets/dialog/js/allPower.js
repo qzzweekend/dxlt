@@ -150,8 +150,6 @@ new Vue({
 
 
         }
-
-        currentYearGenAll();
     }
 
 })

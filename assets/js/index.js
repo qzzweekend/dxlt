@@ -25,20 +25,20 @@ var detailInfo = false;
 function closeEqualHourFm() {
     $("#equalHourFm").slideToggle();
     $("#equalHourFm").attr("src", "");
-    showMap();
-    if (detailInfo) {
-        $("#grayLayer").removeClass("grayLayer");
-        detailInfo = false;
-    }
 }
 
-function showMap() {
-    $(".Monitor_left_c2_highLt").removeClass("Monitor_left_c2_highLt");
-    $(".main").hide();
-    $("#main").show();
-    $("div[name='portal']").removeClass("grayDiv");
-    if (!screen3.showEarthOrChina) {
-        chinaClick();
+function searchPS(psName) {
+    $("#img_china em").each(function (i, obj) {
+        $(obj).removeClass();
+        $(obj).parent().css("z-index", "1000");
+        $(obj).css("zoom", "");
+    });
+    if (psName) {
+        $("#img_china em").each(function (i, obj) {
+            if ($(obj).text().indexOf(psName) >= 0) {
+                $(obj).addClass("slideInUp animated").parent().css("z-index", "9999");
+            }
+        });
     }
 }
 
@@ -48,6 +48,8 @@ new Vue({
     el: '#dx_tot',
     data: {
         earthTimer: null,
+        topTimer: null,
+        allTimer: null,
         myDate: new Date(),
         //左上角
         fd_all_power_day: '--',    //今日发电
@@ -59,6 +61,9 @@ new Vue({
         fd_all_pw_unit: '',
         fd_all_power_year_unit: '',
         fd_all_power_unit: '',
+
+        //左3   年完成率
+        fd_scheduledata: '--',
 
         //右中节能减排
         fd_co2_reduce: '--',    //co2
@@ -76,6 +81,9 @@ new Vue({
         fd_intercon_cap: '',    //总MW数
         fd_unit: '',   //总MW单位
         fd_safety_daycount: '--',   //安全天数
+
+
+        options: []
 
 
     },
@@ -264,7 +272,7 @@ new Vue({
 
         //获取flatChina地图
         getMapByUser: function () {
-
+            var _this = this;
             var Parameters = {
                 "parameters": {"stationid": "", "statusstr": ""},
                 "foreEndType": 2,
@@ -277,62 +285,57 @@ new Vue({
                 var mapStr = $('#tpl').html(), dataArr = result.data, optStr = '';
                 var mapdata = ejs.render(mapStr, {dataArr: dataArr});
                 $('#img_china').html(mapdata);
+                var optStr = '<option>' + '请输入电站名称' + '</option>';//电站查找下拉框
                 for (var i = 0; i < dataArr.length; i++) {
                     optStr += "<option>" + dataArr[i]["fd_station_name"] + "</option>";
-
                 }
                 $("#psSearchName").html(optStr);
+                $('#psSearchName').select2()
+
             }
         },
 
-        searchPS: function (psName) {
-            alert(psName);
-            var _this=this;
-            //var psName = $("#psSearchName").val();
-            $("#img_china .location em").each(function (i, obj) {
-                _this.resetTipCss(obj);
-            });
-            $("#img_china .location2 em").each(function (i, obj) {
-                _this.resetTipCss(obj);
-            });
-            $("#img_china .location3 em").each(function (i, obj) {
-                _this.resetTipCss(obj);
-            });
-            if (psName) {
-                $("#img_china .location em").each(function (i, obj) {
-                    var temPsNm = $(obj).text();
-                    if (temPsNm.indexOf(psName) >= 0) {
-                        _this.tipAnimal(obj);
+        //平面地图title的三个选项
+        powerStatus: function (e) {
+            var obj = null;
+            if ($(e.target).parent()[0].tagName == 'LI' || $(e.target)[0].tagName == 'LI') {
+                if ($(e.target).parent()[0].tagName == 'LI') {
+                    obj = $(e.target).parent();
+                } else if ($(e.target)[0].tagName == 'LI') {
+                    obj = $(e.target);
+                }
+                if (obj.attr('data-powerStatus') == 'complete') {
+                    $(".location").toggle();
+                    if ($("#mtag1").hasClass("grayDiv")) {
+                        $("#mtag1").removeClass("grayDiv");
+                    } else {
+                        $("#mtag1").addClass("grayDiv");
                     }
-                });
-                $("#img_china .location2 em").each(function (i, obj) {
-                    var temPsNm = $(obj).text();
-                    if (temPsNm.indexOf(psName) >= 0) {
-                        _this.tipAnimal(obj);
+                } else if (obj.attr('data-powerStatus') == 'building') {
+                    $(".location2").toggle();
+                    if ($("#mtag2").hasClass("grayDiv")) {
+                        $("#mtag2").removeClass("grayDiv");
+                    } else {
+                        $("#mtag2").addClass("grayDiv");
                     }
-                });
-                $("#img_china .location3 em").each(function (i, obj) {
-                    var temPsNm = $(obj).text();
-                    if (temPsNm.indexOf(psName) >= 0) {
-                        _this.tipAnimal(obj);
+                } else if (obj.attr('data-powerStatus') == 'scheme') {
+                    $(".location3").toggle();
+                    if ($("#mtag3").hasClass("grayDiv")) {
+                        $("#mtag3").removeClass("grayDiv");
+                    } else {
+                        $("#mtag3").addClass("grayDiv");
                     }
-                });
+                }
             }
+
         },
 
-        resetTipCss: function (obj) {
-            $(obj).removeClass();
-            $(obj).parent().css("z-index", "1000");
-            $(obj).css("zoom", "");
+        //flatmap 返回
+        mapBack: function () {
+            $(".Monitor_center").hide();
+            $('#img_china').hide();
+            $('#main').show();
         },
-
-        tipAnimal: function (obj) {
-            $(obj).addClass("slideInUp");
-            $(obj).addClass("animated");
-            $(obj).parent().css("z-index", "9999");
-        },
-
-
         //电站建设情况图表
         loadPowerNumChart: function (dz_data, pieName, lengendData, title) {
             var _this = this;
@@ -366,7 +369,7 @@ new Vue({
                     y: '90',
                     itemGap: 20,
                     textStyle: {
-                        color: '#ffffff',
+                        color: '#fff',
                         fontFamily: 'Microsoft YaHei',
                         fontSize: 18,
                         fontWeight: '100'
@@ -416,7 +419,7 @@ new Vue({
             //console.log(Parameters);
             vlm.loadJson("", JSON.stringify(Parameters), function (result) {
                 //console.log(result);
-                if(result.success){
+                if (result.success) {
                     var data = result.data;
                     //左上角数值
                     _this.fd_all_power_day = data.fd_all_power_day;
@@ -428,6 +431,29 @@ new Vue({
                     _this.fd_all_pw_unit = data.fd_all_pw_unit;
                     _this.fd_all_power_year_unit = data.fd_all_power_year_unit;
                     _this.fd_all_power_unit = data.fd_all_power_unit;
+                } else {
+                    alert(result.message);
+                }
+
+            });
+        },
+
+        getOther: function () {
+            var _this = this;
+            var Parameters = {
+                "parameters": {
+                    "CultureName": "",
+                    "VerifiationCCodeType": "1",
+                    "datas": ["ALL_POWER_DAY", "all_power", "ALL_PW", "all_power_year"]
+                },
+                "foreEndType": 2,
+                "code": "20000003"
+            };
+            //console.log(Parameters);
+            vlm.loadJson("", JSON.stringify(Parameters), function (result) {
+                //console.log(result);
+                if (result.success) {
+                    var data = result.data;
 
                     //节能减排
                     _this.fd_co2_reduce = data.fd_co2_reduce + data.fd_co2_reduce_unit;
@@ -475,7 +501,7 @@ new Vue({
                     }
                     //console.log(dz_data);
                     _this.loadPowerNumChart(dz_data, pieName, lengendData, title);
-                }else{
+                } else {
                     alert(result.message);
                 }
 
@@ -626,7 +652,7 @@ new Vue({
                     // 'top' ¦ 'bottom' ¦ 'center'
                     // ¦ {number}（y坐标，单位px）
                     textStyle: {
-                        color: '#FFFFFF',
+                        color: '#fff',
                         fontFamily: 'Microsoft YaHei'
                     },
                     data: ['PR']
@@ -651,7 +677,7 @@ new Vue({
                         axisLine: {
                             show: false,
                             lineStyle: { // 属性lineStyle控制线条样式
-                                color: '#ffffff'
+                                color: '#fff'
                             }
                         },
                         axisLabel: {
@@ -659,7 +685,7 @@ new Vue({
                             rotate: 0,//逆时针显示标签，不让文字叠加
                             interval: 0,
                             textStyle: {
-                                color: '#ffffff',
+                                color: '#fff',
                                 fontFamily: 'Microsoft YaHei'
                             }
                         },
@@ -680,13 +706,13 @@ new Vue({
                         axisLine: {
                             show: false,
                             lineStyle: { // 属性lineStyle控制线条样式
-                                color: '#ffffff'
+                                color: '#fff'
                             }
                         },
                         axisLabel: {
                             show: false,
                             textStyle: {
-                                color: '#ffffff'
+                                color: '#fff'
                             }
                         },
                         splitLine: {
@@ -751,28 +777,28 @@ new Vue({
                     //ptChart.on(ecConfig.EVENT.CLICK, function(params){
                     //
                     //});
-                    ptChart.on('click', function (params) {
-                        var index = params.dataIndex;
-                        event.stopPropagation();
-                        screen3.ps_id = psObj.psIdArr[index];
-                        screen3.psScheme = psObj.psSchemeArr[index];
-                        $("#grayLayer").addClass("grayLayer");
-                        detailInfo = true;
-                        _this.psDetailInfo();
-                    });
+                    //ptChart.on('click', function (params) {
+                    //    var index = params.dataIndex;
+                    //    event.stopPropagation();
+                    //    screen3.ps_id = psObj.psIdArr[index];
+                    //    screen3.psScheme = psObj.psSchemeArr[index];
+                    //    $("#grayLayer").addClass("grayLayer");
+                    //    detailInfo = true;
+                    //    _this.psDetailInfo();
+                    //});
                 });
         },
 
         //性能排名点击后的电站详细信息
         psDetailInfo: function () {
-            $("#showPsInfo").hide();
-            alert(1);
-            if (screen3.ps_id) {
-                hideLoading();
-                var url = bathPath + "/dialog/dialog_psDetailInfo.jsp?ps_id=" + screen3.ps_id + "&ps_scheme=" + screen3.psScheme + "&scrnvs=3";
-                $("#equalHourFm").attr("src", url);
-                $("#equalHourFm").slideToggle();
-            }
+            //$("#showPsInfo").hide();
+            //alert(1);
+            //if (screen3.ps_id) {
+            //    hideLoading();
+            //    var url = bathPath + "/dialog/dialog_psDetailInfo.jsp?ps_id=" + screen3.ps_id + "&ps_scheme=" + screen3.psScheme + "&scrnvs=3";
+            //    $("#equalHourFm").attr("src", url);
+            //    $("#equalHourFm").slideToggle();
+            //}
         },
 
         //PR电站性能点击
@@ -792,55 +818,38 @@ new Vue({
             //param["date"] = myDate.getFullYear();
             //param["date_type"] = "1";//年份
             //param["ps_id"] = screen3.ps_id;
-            var dates = new Date();
-            var endDate = dates.getFullYear() + '-' + (dates.getMonth() + 1) + '-' + dates.getDate() + 'T' + dates.getHours() + ':' + dates.getMinutes() + ':' + dates.getSeconds();
-            var endDateStr = vlm.Utils.format_date(endDate, 'YmdHis');
-            var startDateStr = vlm.Utils.lastMonth(dates, -3);
+            var endDateStr = vlm.Utils.nextYear();
+            var startDateStr = vlm.Utils.currentYear();
             var Parameters = {
                 "parameters": {
-                    "datatype": "day",
+                    "datatype": "year",
                     "sorttype": "1",
                     "sort": "1",
                     "starttime": startDateStr,
                     "endtime": endDateStr,
                     "topn": "7",
-                    "stationid": "ALL"
+                    "stationid": ""
                 },
                 "foreEndType": 2,
-                "code": "20000005"
+                "code": "20000004"
             };
-            vlm.loadJson("data/powerAction_getPowerPlan.json", JSON.stringify(Parameters), function (res) {
-                var result = res.result_data;
-                var actualData = result.actual_energy;
-                var newActualData = [];
-                var planData = result.plan_energy;
-                if (actualData.length == 0 && planData.length == 0) {
-                    return;
-                }
-                var unit = result.plan_energy_unit;
-                var maxPower = planData.max();//当月最大电量
-                if (actualData.length > 0 && $.isNumeric(maxPower) && parseFloat(maxPower) > 10000 && unit == LANG["degree"]) {
-                    unit = LANG["tenThousandDegree"];
-                    for (var i = 0; i < actualData.length; i++) {
-                        if ($.isNumeric(actualData[i])) {
-                            actualData[i] = (actualData[i] / 10000).toFixed(2);
-                            newActualData.push(actualData[i]);
-                        } else {
-                            newActualData.push("--");
-                        }
+            vlm.loadJson("", JSON.stringify(Parameters), function (res) {
+                //动态plan
+                if (res.success) {
+                    var result = res.data;
+                    var newActualData = [], planData = [], unit = result.fd_unit,
+                        planArray = result.datas, actualArray = result.datayears;
+                    _this.fd_scheduledata = actualArray[0].fd_scheduledata+'%';
+                    for (var i = 0; i < planArray.length; i++) {
+                        planData.push(planArray[i].fd_sched_power_mon);
+                        newActualData.push(planArray[i].datapower);
                     }
-                    for (var i = 0; i < planData.length; i++) {
-                        planData[i] = (planData[i] / 10000).toFixed(2);
-                    }
-                }
-                var bl = Math.round(sumArrayData(actualData) / sumArrayData(planData) * 100);
-                //newActualData = newActualData.slice(0,myDate.getMonth()+1);
-                $("#nwcl").html(LANG["yearFinish"] + "  " + ($.isNumeric(bl) ? bl : '--') + "%");
-                //unit = replaceUnit(unit);
-                _this.drawPowerPlanChart(dealEchartBarArr(newActualData), dealEchartBarArr(planData), unit);
+                    _this.drawPowerPlanChart(dealEchartBarArr(newActualData), dealEchartBarArr(planData), unit);
 
+                } else {
+                    alert(res.message);
+                }
             });
-
         },
 
         //绘制当年发电计划chart
@@ -900,7 +909,7 @@ new Vue({
                     // 'top' ¦ 'bottom' ¦ 'center'
                     // ¦ {number}（y坐标，单位px）
                     textStyle: {
-                        color: '#FFFFFF',
+                        color: '#fff',
                         fontFamily: 'Microsoft YaHei'
                     },
                     data: [LANG["planGeneration"], LANG["actualGeneration"], LANG["1_1_planned_completion_rate"]]
@@ -922,14 +931,14 @@ new Vue({
                         axisLine: {
                             show: true,
                             lineStyle: { // 属性lineStyle控制线条样式
-                                color: '#FFFFFF'
+                                color: '#fff'
                             }
                         },
                         axisLabel: {
                             show: true,
                             rotate: 0,//逆时针显示标签，不让文字叠加
                             textStyle: {
-                                color: '#FFFFFF'
+                                color: '#fff'
                             }
                         },
                         splitLine: {
@@ -946,13 +955,13 @@ new Vue({
                         axisLine: {
                             show: true,
                             lineStyle: { // 属性lineStyle控制线条样式
-                                color: '#FFFFFF'
+                                color: '#fff'
                             }
                         },
                         axisLabel: {
                             show: true,
                             textStyle: {
-                                color: '#FFFFFF'
+                                color: '#fff'
                             }
                         },
                         splitLine: {
@@ -972,13 +981,13 @@ new Vue({
                         axisLabel: {
                             show: true,
                             textStyle: {
-                                color: '#ffffff'
+                                color: '#fff'
                             }
                         },
                         axisLine: {
                             show: true,
                             lineStyle: { // 属性lineStyle控制线条样式
-                                color: '#ffffff'
+                                color: '#fff'
                             }
                         },
                         min: 0,
@@ -1079,33 +1088,35 @@ new Vue({
             if (genTrendsDateType == 3) {//year
                 $("#powerTrendTitle").text(LANG["generationTrend_year"]);
                 $(".trends_btn:eq(2)").addClass("on");
-                loadPowerChart_day(4);
             } else if (genTrendsDateType == 2) {//month
                 $("#powerTrendTitle").text(LANG["generationTrend_month"]);
                 $(".trends_btn:eq(1)").addClass("on");
-                _this.getResultTrends('2');
             } else {//day
                 $("#powerTrendTitle").text(LANG["generationTrend_day"]);
                 $(".trends_btn:eq(0)").addClass("on");
-                loadPowerChart_day(1);
             }
+            _this.getResultTrends(genTrendsDateType);
+
         },
 
         //发电趋势首次加载或者点击后发送请求
         getResultTrends: function (dateType) {
             var _this = this;
-            var dateStr = '', startDateStr;
+            var dateStr = '', sort = '', startDateStr;
             switch (dateType) {
                 case '1':
                     dateStr = 'day';
+                    sort = '2';
                     startDateStr = vlm.Utils.currentDay();
                     break;
                 case '2':
                     dateStr = 'month';
+                    sort = '1';
                     startDateStr = vlm.Utils.currentMonth();
                     break;
                 case '3':
-                    dateStr = 'year'
+                    dateStr = 'year';
+                    sort = '2';
                     break;
                 default :
                     ;
@@ -1117,7 +1128,7 @@ new Vue({
                 "parameters": {
                     "datatype": dateStr,
                     "sorttype": "1",
-                    "sort": "1",
+                    "sort": sort,
                     "starttime": startDateStr,
                     "endtime": endDateStr,
                     "topn": "300",
@@ -1126,7 +1137,7 @@ new Vue({
                 "foreEndType": 2,
                 "code": "20000005"
             };
-            console.log(Parameters);
+            //console.log(Parameters);
             vlm.loadJson("", JSON.stringify(Parameters), function (data) {
                 if (dateStr == 'month') {
                     _this.dealPowerData_month(data);
@@ -1228,7 +1239,7 @@ new Vue({
                     // 'top' ¦ 'bottom' ¦ 'center'
                     // ¦ {number}（y坐标，单位px）
                     textStyle: {
-                        color: '#FFFFFF',
+                        color: '#fff',
                         fontFamily: 'Microsoft YaHei'
                     },
                     data: [LANG["yy1.PowerGeneration"], LANG["todayGeneration"]]
@@ -1251,7 +1262,7 @@ new Vue({
                         axisLine: {
                             show: true,
                             lineStyle: { // 属性lineStyle控制线条样式
-                                color: '#ffffff'
+                                color: '#fff'
                             }
                         },
                         axisLabel: {
@@ -1259,7 +1270,7 @@ new Vue({
                             //interval:0,// 是否显示全部标签，0显示
                             rotate: 0,//逆时针显示标签，不让文字叠加
                             textStyle: {
-                                color: '#ffffff'
+                                color: '#fff'
                             }
                         },
                         splitLine: {
@@ -1279,13 +1290,13 @@ new Vue({
                         axisLabel: {
                             show: true,
                             textStyle: {
-                                color: '#ffffff'
+                                color: '#fff'
                             }
                         },
                         axisLine: {
                             show: true,
                             lineStyle: { // 属性lineStyle控制线条样式
-                                color: '#ffffff'
+                                color: '#fff'
                             }
                         },
                         nameTextStyle: {
@@ -1339,35 +1350,21 @@ new Vue({
         },
 
         //处理日发电数据
-        dealPowerData_day: function (res) {//解析发电趋势数据(日)
+        dealPowerData_day: function (res) {
             //console.log(res)
             var _this = this;
             if (res.success) {
                 var result = res.data;
-                //var unit = replaceUnit(result.powerMap.units);
-                //var actualData = result.powerMap.valStr.split(",");
-                //var glData = result.energyMap.valStr.split(",");//功率
-                //var glUnit = replaceUnit(result.energyunit);//功率单位
-                //var dateDate = result.powerMap.dates;
-
                 var glData = [], actualData = [], dateDate = []; //功率、发电量、日期区间
-                for (var i = 0; i < result.length; i++) {
-                    glData.push(result[i].fd_pw_curr);
-                    actualData.push(result[i].fd_power_day);
-                    dateDate.push(result[i].fd_datetime);
+                for (var i = 0; i < result.fd_datas.length; i++) {
+                    glData.push(result.fd_datas[i].fd_pw_curr);
+                    actualData.push(result.fd_datas[i].fd_power_day);
+                    dateDate.push(result.fd_datas[i].fd_datetime);
                 }
 
-                var unit = 'MW', glUnit = '万kWh';//功率单位、发电量单位
+                var unit = result.fd_unit, glUnit = 'kW';//功率单位、发电量单位
 
-                var maxGen = actualData.max();//当月最大电量
-                if ((maxGen - 10000) > 0 && (LANG["degree"] == unit || 'kWh' == unit)) {
-                    for (var i = 0; i < actualData.length; i++) {
-                        if ($.isNumeric(actualData[i])) {
-                            actualData[i] = parseFloat(actualData[i] / 10000).toFixed(2);
-                        }
-                    }
-                    unit = LANG["tenThousandDegree"]
-                }
+                console.log(actualData);
                 _this.drawDayChart(actualData, glData, dateDate, unit, glUnit);
             } else {
                 alert(res.message);
@@ -1377,7 +1374,6 @@ new Vue({
         //绘制日发电趋势
         drawDayChart: function (actualDataDay, glData, dateDate, punit, glUnit) {
             glData = dealArray(glData);
-            console.log(glData);
             var option = {
                 tooltip: {
                     trigger: 'axis',
@@ -1403,7 +1399,7 @@ new Vue({
                     // 'top' ¦ 'bottom' ¦ 'center'
                     // ¦ {number}（y坐标，单位px）
                     textStyle: {
-                        color: '#FFFFFF',
+                        color: '#fff',
                         fontFamily: 'Microsoft YaHei'
                     },
                     data: [LANG["yy1.powerful"], LANG["yy1.PowerGeneration"]]
@@ -1424,14 +1420,14 @@ new Vue({
                         axisLine: {
                             show: true,
                             lineStyle: { // 属性lineStyle控制线条样式
-                                color: '#FFFFFF'
+                                color: '#fff'
                             }
                         },
                         axisLabel: {
                             show: true,
                             rotate: 0,//逆时针显示标签，不让文字叠加
                             textStyle: {
-                                color: '#FFFFFF'
+                                color: '#fff'
                             }
                         },
                         splitLine: {
@@ -1448,13 +1444,13 @@ new Vue({
                         axisLine: {
                             show: true,
                             lineStyle: { // 属性lineStyle控制线条样式
-                                color: '#FFFFFF'
+                                color: '#fff'
                             }
                         },
                         axisLabel: {
                             show: true,
                             textStyle: {
-                                color: '#FFFFFF'
+                                color: '#fff'
                             }
                         },
                         splitLine: {
@@ -1467,16 +1463,17 @@ new Vue({
                     {
                         type: 'value',
                         name: glUnit,
+                        min: 0,
                         axisLine: {
                             show: true,
                             lineStyle: { // 属性lineStyle控制线条样式
-                                color: '#FFFFFF'
+                                color: '#fff'
                             }
                         },
                         axisLabel: {
                             show: true,
                             textStyle: {
-                                color: '#FFFFFF'
+                                color: '#fff'
                             }
                         },
                         splitLine: {
@@ -1539,29 +1536,28 @@ new Vue({
                     var ptChartDay = ec.init(document.getElementById('power'));
                     //var ptChartDay = ec.init(document.getElementById('dayChart'));
                     ptChartDay.setOption(option);
-                    alert('finish');
                     $(".Mc4_con .loadingDiv").hide();
                 });
         },
 
         //处理年发电趋势
-        dealPowerData_year: function (data) {//解析发电趋势数据(年)
-            var object = parseJson(data), _this = this;
-            if (data != null) {
-                if ($(object).length > 0 && object.result_code == 1) {
-                    var result = object.result_data;
-                    var unit = replaceUnit(result.echartunit);
-                    var actualData = result.powerMap.valStr.split(",");
-                    var glData = [];//功率
-                    var glUnit = replaceUnit(result.energyunit);//功率单位
-                    var dateDate = result.powerMap.dates;
-                    //for(var i = 0; i < dateDate.length; i ++){
-                    //    dateDate[i] = dateDate[i].replace("-", "/")
-                    //}
-                    _this.drawYearChart(actualData, glData, dateDate, unit, glUnit);
+        dealPowerData_year: function (res) {
+            var _this = this;
+            console.log(res);
+            if (res.success) {
+                var result = res.data, glData = [], actualData = [], dateDate = []; //功率、发电量、日期区间
+                var unit = 'MW', glUnit = result.fd_unit;//功率单位、发电量单位
+                for (var i = 0; i < result.fd_datas.length; i++) {
+                    glData.push(result.fd_datas[i].fd_pw_curr);
+                    actualData.push(result.fd_datas[i].fd_power_day);
+                    dateDate.push(result.fd_datas[i].fd_datetime);
                 }
+                for (var i = 0; i < dateDate.length; i++) {
+                    dateDate[i] = dateDate[i].replace("-", "/")
+                }
+                _this.drawYearChart(actualData, glData, dateDate, unit, glUnit);
             } else {
-                log("获取计划发电数据失败");
+                alert(data.message);
             }
         },
 
@@ -1590,7 +1586,7 @@ new Vue({
                     // 'top' ¦ 'bottom' ¦ 'center'
                     // ¦ {number}（y坐标，单位px）
                     textStyle: {
-                        color: '#FFFFFF',
+                        color: '#fff',
                         fontFamily: 'Microsoft YaHei'
                     },
                     data: [LANG["yy1.PowerGeneration"]]
@@ -1611,14 +1607,14 @@ new Vue({
                         axisLine: {
                             show: true,
                             lineStyle: { // 属性lineStyle控制线条样式
-                                color: '#FFFFFF'
+                                color: '#fff'
                             }
                         },
                         axisLabel: {
                             show: true,
                             rotate: 0,//逆时针显示标签，不让文字叠加
                             textStyle: {
-                                color: '#FFFFFF'
+                                color: '#fff'
                             }
                         },
                         splitLine: {
@@ -1635,13 +1631,13 @@ new Vue({
                         axisLine: {
                             show: true,
                             lineStyle: { // 属性lineStyle控制线条样式
-                                color: '#FFFFFF'
+                                color: '#fff'
                             }
                         },
                         axisLabel: {
                             show: true,
                             textStyle: {
-                                color: '#FFFFFF'
+                                color: '#fff'
                             }
                         },
                         splitLine: {
@@ -1706,17 +1702,24 @@ new Vue({
         this.initPageCss();  //3D地球
         this.draw3DMap();  //3D地球
         this.refreshEarth();  //更新地球状态
-        this.getAllPower(); //获取总电量、节能减排、电站建设数据调用
+        this.getAllPower(); //获取总电量
+        this.getOther(); //获取节能减排、电站建设数据调用
         this.getPRChart();  //性能排名
         this.loadPlanChart(); //发电计划
         this.showGenTrends('2'); //默认首次加载月发电趋势 1-日，月-2，年-3
-        setInterval(function () {
-            _this.getAllPower(); //获取总电量、节能减排、电站建设数据(5min)
+        clearInterval(this.allTimer);
+        this.allTimer = setInterval(function () {
+            _this.getOther(); //获取总电量、节能减排、电站建设数据(5min)
             _this.getPRChart(); //获取PR(5min)
-            _this.loadPlanChart();//当年发电计划(5min)
             _this.loadPlanChart();//当年发电计划(5min)
             _this.showGenTrends('2'); //月发电趋势(5min)
         }, 300000);
+
+        clearInterval(this.topTimer);
+        this.topTimer = setInterval(function () {
+            _this.getAllPower(); //获取总电量(1min)
+        }, 60000);
+
 
     }
 
