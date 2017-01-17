@@ -48,7 +48,7 @@
     <div class="Monitor_con clearfix">
         <!--主页内容左侧-->
         <div class="Monitor_left fl">
-            <div class="Monitor_left_c1 clearfix" name="portal" @click="showDialogIframe('dialog/dialog_allPower.html')">
+            <div class="Monitor_left_c1 clearfix" data-clicktip="Monitor_left_c1_highLt" name="portal" @click="showDialogIframe('dialog/dialog_allPower.html',$event)">
                 <div class="Monitor_left_c1_on"></div>
                 <div class="Mc1_left fl">
                     <div class="Mc1_left_top">
@@ -84,7 +84,7 @@
                 </div>
 
             </div>
-            <div class="Monitor_left_c3" name="portal">
+            <div class="Monitor_left_c3" data-clicktip="Monitor_left_c3_highLt" name="portal" @click="showDialogIframe('dialog/dialog_powerPlan.html',$event)" >
                 <div class="Monitor_left_c3_on"></div>
                 <div class="Mc2_title">当年发电计划</div>
                 <div class="Mc6_con module" id="plan">
@@ -257,7 +257,7 @@
     <div class="M_main_bottom">
         <div class="M_main_bottom_con clearfix">
             <div class="M_bottom_b1 fl" style="cursor: pointer" id="just_capacity_span">
-                <div class="M_bottom_b1_con" @click="showDialogIframe('dialog/dialog_proceeding.html')">
+                <div class="M_bottom_b1_con" data-clicktip="M_bottom_b1_clicked" @click="showDialogIframe('dialog/dialog_proceeding.html',$event)">
                     <div class="M_bottom_t1">在建容量</div>
                     <div class="M_bottom_t2"><span id="just_capacity"></span><span id="just_capacity_unit" v-text="fd_intercon_cap_on"></span>
                     </div>

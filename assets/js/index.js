@@ -1342,7 +1342,6 @@ new Vue({
                     'echarts/chart/bar'
                 ],
                 function (ec) {
-                    hideLoading();
                     ptChart = ec.init(document.getElementById('power'));
                     ptChart.setOption(option);
                     $(".Mc4_con .loadingDiv").hide();
@@ -1690,8 +1689,8 @@ new Vue({
 
 
         //点击各模块，相应dialog
-        showDialogIframe: function (url) {
-            hideLoading();
+        showDialogIframe: function (url,event) {
+            $(event.currentTarget).addClass($(event.currentTarget).attr('data-clicktip'));
             $(".main").hide();
             $("#equalHourFm").attr("src", url);
             $("#equalHourFm").slideToggle();

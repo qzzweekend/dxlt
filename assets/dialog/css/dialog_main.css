@@ -1,5 +1,7 @@
 /*2017年1月11日 */
-
+html,body{
+    background-color: transparent;
+}
 .box_show{
     background:url(../images/bj16.png);
     position:fixed;
@@ -44,7 +46,7 @@
 .showm_top_left ul li a{
     float:left;
     display:block;
-    background:url(../../images/navbg.png) no-repeat;
+    background:url(../images/navbg.png) no-repeat;
     width:170px;
     height:33px;
     line-height:33px;
@@ -69,9 +71,6 @@
     display: block;
     text-indent: -9999px;
     margin-top: 23px;
-}
-.close:hover{
-    /*background:url(../../images/equalHour_close.png) no-repeat center center #035F81;*/
 }
 .showm_top_right ul{
     display:block;
@@ -271,15 +270,15 @@
     font-size: 14px;
     color: #ffffff;
     display: block;
-    background:url(../../images/navbg2.png) no-repeat;
+    background:url(../images/navbg2.png) no-repeat;
     margin-left: -25px;
 }
 .time_menunav ul li.on a{
-    background:url(../../images/navbg2_on.png) no-repeat;
+    background:url(../images/navbg2_on.png) no-repeat;
 }
 
 .left_max_btn{
-    background:url(../../images/left_max_btn.png) no-repeat;
+    background:url(../images/left_max_btn.png) no-repeat;
     width: 26px;
     height:57px;
     display: block;
@@ -291,7 +290,7 @@
     z-index:999;
 }
 .right_max_btn{
-    background:url(../../images/right_max_btn.png) no-repeat;
+    background:url(../images/right_max_btn.png) no-repeat;
     width: 26px;
     height:57px;
     display: block;
@@ -316,7 +315,7 @@
     display: block;
     text-indent: -9999px;
     margin-top: 3px;
-    background:url(../../images/left_bg.png) no-repeat;
+    background:url(../images/left_bg.png) no-repeat;
 }
 .right_min_btn{
     width: 10px;
@@ -324,7 +323,7 @@
     display: block;
     text-indent: -9999px;
     margin-top: 3px;
-    background:url(../../images/right_bg.png) no-repeat;
+    background:url(../images/right_bg.png) no-repeat;
 }
 .time_slide_input{margin-left: 15px; display: block !important;}
 .time_slide_input input{
@@ -332,7 +331,7 @@
     height: 25px;
     text-align: center;
     border:none;
-    background:url(../../images/input_bg.png) no-repeat;
+    background:url(../images/input_bg.png) no-repeat;
     font-family: "Microsoft YaHei";
     font-size: 14px;
     color: #ffffff;
@@ -502,11 +501,11 @@
     font-size: 14px;
     color: #ffffff;
     display: block;
-    background:url(../../images/navbg2.png) no-repeat;
+    background:url(../images/navbg2.png) no-repeat;
     margin-left: -25px;
 }
 .time_menunav_my ul li.on a{
-    background:url(../../images/navbg2_on.png) no-repeat;
+    background:url(../images/navbg2_on.png) no-repeat;
 }
 
 .loadingDiv{
@@ -676,7 +675,7 @@
     color: rgb(255, 255, 255);
 }
 .changeDataView{
-    background: url(../../images/navbg2.png) no-repeat;
+    background: url(../images/navbg2.png) no-repeat;
     color: white;
     text-decoration: none;
     margin-left: 110px;
@@ -688,7 +687,7 @@
     display: block;
 }
 .changeDataView:hover{
-    background: url(../../images/navbg2_on.png) no-repeat;
+    background: url(../images/navbg2_on.png) no-repeat;
 }
 
 .nav_hd{
@@ -705,6 +704,7 @@
     margin: 0 3px;
     background: #0c7bda;
     border-radius: 14px;
+    cursor: pointer;
 }
 .nav_hd ul li.on{
     background:#58c9f3;
