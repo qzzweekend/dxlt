@@ -1350,7 +1350,6 @@
 }
 
 .grayLayer {
-    display: none;
     background-color: rgba(0, 0, 0, 0.7);
     position: fixed;
     z-index: 2000;
@@ -1358,7 +1357,6 @@
     height: 100%;
     left: 0px;
     top: 0px;
-    display: block;
 }
 
 .beforeClickPs {

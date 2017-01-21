@@ -1,20 +1,10 @@
 .Wdate{
-    border:#d8d8d8 1px solid;
-    height:25px;
-    background:#fff url(datePicker.gif) no-repeat right;
-    width:99%;
-    font-family:"Microsoft YaHei";
-    font-size:12px;
-    color:#666666;
-    padding-left:1%;
+	border:#999 1px solid;
+	height:20px;
+	background:#fff url(datePicker.gif) no-repeat right;
 }
-.inputbox{
-    padding-bottom:15px;
-}
-.MTitle{display:none;}
-.Wdate::-ms-clear{display:none;}
 
 .WdateFmtErr{
-    font-weight:bold;
-    color:red;
+	font-weight:bold;
+	color:red;
 }

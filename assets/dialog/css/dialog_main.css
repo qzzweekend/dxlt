@@ -1,18 +1,20 @@
 /*2017年1月11日 */
-html,body{
+html, body {
     background-color: transparent;
 }
-.box_show{
-    background:url(../images/bj16.png);
-    position:fixed;
-    z-index:2000;
-    width:100%;
-    height:100%;
-    left:0px;
-    top:0px;
+
+.box_show {
+    background: url(../images/bj16.png);
+    position: fixed;
+    z-index: 2000;
+    width: 100%;
+    height: 100%;
+    left: 0px;
+    top: 0px;
     display: block;
 }
-.show_main{
+
+.show_main {
     background: url(../../images/mk_bg/bg6.png) no-repeat;
     width: 921px;
     height: 604px;
@@ -25,24 +27,29 @@ html,body{
     padding-left: 33px;
     padding-right: 49px;
 }
-.showm_content{
-    padding-right:88px;
-    width:920px;
+
+.showm_content {
+    padding-right: 88px;
+    width: 920px;
     position: relative;
 }
-.showm_top{
-    height:83px;
-    padding-left:40px;
+
+.showm_top {
+    height: 83px;
+    padding-left: 40px;
     position: relative;
 }
-.showm_top_left{
-    padding-top:10px;
+
+.showm_top_left {
+    padding-top: 10px;
     position: relative;
-    z-index:99;
+    z-index: 99;
 }
-.showm_top_left ul li{
-    float:left;
+
+.showm_top_left ul li {
+    float: left;
 }
+
 .showm_top_left ul li a{
     float:left;
     display:block;
@@ -57,14 +64,16 @@ html,body{
     margin-left:-20px;
 }
 .showm_top_left ul li.on a{
-    background:url(../../images/navbg_on.png) no-repeat;
+    background:url(../images/navbg_on.png) no-repeat;
 }
-.showm_top_right{
-    width:35px;
+
+.showm_top_right {
+    width: 35px;
     position: relative;
-    z-index:99;
+    z-index: 99;
 }
-.close{
+
+.close {
     background: url(../../images/icon/close.png) no-repeat;
     width: 36px;
     height: 36px;
@@ -72,280 +81,310 @@ html,body{
     text-indent: -9999px;
     margin-top: 23px;
 }
-.showm_top_right ul{
-    display:block;
-    padding-top:15px;
+
+.showm_top_right ul {
+    display: block;
+    padding-top: 15px;
 }
-.showm_top_right ul li{
-    float:left;
+
+.showm_top_right ul li {
+    float: left;
 }
-.showm_top_right ul li a{
-    float:left;
-    display:block;
-    background:url(../../images/bj20.png) no-repeat;
-    width:57px;
-    height:57px;
-    line-height:57px;
-    text-align:center;
-    font-family:"Microsoft YaHei";
-    font-size:18px;
-    color:#ffffff;
-    font-weight:bold;
-    margin-right:23px;
-}
-.showm_top_right ul li.on a{
-    background:url(../../images/bj21.png) no-repeat;
-}
-.showm_bottom{
-    width:920px;
-    height:505px;
-    display:block;
-    margin:0 auto;
+
+.showm_bottom {
+    width: 920px;
+    height: 505px;
+    display: block;
+    margin: 0 auto;
     position: relative;
 }
-.index_center_con{
-    width:785px;
-    margin:0 auto;
-    min-height:870px;
-    padding-top:52px;
+
+.index_center_con {
+    width: 785px;
+    margin: 0 auto;
+    min-height: 870px;
+    padding-top: 52px;
 }
-.idnex_c_top{
-    width:450px;
-    margin:0 auto;
+
+.idnex_c_top {
+    width: 450px;
+    margin: 0 auto;
 }
-.idnex_c_top ul li{
-    float:left;
-    margin-right:47px;
+
+.idnex_c_top ul li {
+    float: left;
+    margin-right: 47px;
 }
-.indexc_ico1{
-    background:url(../../images/ico7.png) center left no-repeat;
-    padding-left:25px;
-    line-height:18px;
-    font-family:"Microsoft YaHei";
-    font-size:21px;
-    color:#ffffff;
-    font-weight:bold;
+
+.indexc_ico1 {
+    background: url(../../images/ico7.png) center left no-repeat;
+    padding-left: 25px;
+    line-height: 18px;
+    font-family: "Microsoft YaHei";
+    font-size: 21px;
+    color: #ffffff;
+    font-weight: bold;
 }
-.indexc_ico2{
-    background:url(../../images/ico8.png) center left no-repeat;
-    padding-left:25px;
-    line-height:18px;
-    font-family:"Microsoft YaHei";
-    font-size:21px;
-    color:#ffffff;
-    font-weight:bold;
+
+.indexc_ico2 {
+    background: url(../../images/ico8.png) center left no-repeat;
+    padding-left: 25px;
+    line-height: 18px;
+    font-family: "Microsoft YaHei";
+    font-size: 21px;
+    color: #ffffff;
+    font-weight: bold;
 }
-.indexc_ico3{
-    background:url(../../images/ico9.png) center left no-repeat;
-    padding-left:25px;
-    line-height:18px;
-    font-family:"Microsoft YaHei";
-    font-size:21px;
-    color:#ffffff;
-    font-weight:bold;
+
+.indexc_ico3 {
+    background: url(../../images/ico9.png) center left no-repeat;
+    padding-left: 25px;
+    line-height: 18px;
+    font-family: "Microsoft YaHei";
+    font-size: 21px;
+    color: #ffffff;
+    font-weight: bold;
 }
-.idnex_c_title{
-    padding-top:70px;
-    font-family:"Microsoft YaHei";
-    font-size:20px;
-    color:#ffffff;
-    text-align:left;
+
+.idnex_c_title {
+    padding-top: 70px;
+    font-family: "Microsoft YaHei";
+    font-size: 20px;
+    color: #ffffff;
+    text-align: left;
 }
-.indexc_slide{
-    padding-top:50px;
+
+.indexc_slide {
+    padding-top: 50px;
 }
-.indexc_slide .bd ul li{
-    display:block;
-    background:url(../../images/bj15.png) no-repeat;
-    width:230px;
-    height:159px;
-    margin-right:47px;
-    margin-bottom:45px;
+
+.indexc_slide .bd ul li {
+    display: block;
+    background: url(../../images/bj15.png) no-repeat;
+    width: 230px;
+    height: 159px;
+    margin-right: 47px;
+    margin-bottom: 45px;
 }
-.slide_title{
-    width:230px;
-    height:45px;
-    line-height:45px;
-    text-align:center;
-    font-family:"Microsoft YaHei";
-    font-size:22px;
-    color:#033763;
+
+.slide_title {
+    width: 230px;
+    height: 45px;
+    line-height: 45px;
+    text-align: center;
+    font-family: "Microsoft YaHei";
+    font-size: 22px;
+    color: #033763;
 }
-.slide_con{
-    padding-top:12px;
-    padding-left:35px;
+
+.slide_con {
+    padding-top: 12px;
+    padding-left: 35px;
 }
-.slide_ico1{
-    background:url(../../images/ico7.png) center left no-repeat;
-    padding-left:25px;
-    line-height:22px;
-    font-family:"Microsoft YaHei";
-    font-size:21px;
-    color:#ffffff;
-    text-align:left;
-    margin-bottom:12px;
+
+.slide_ico1 {
+    background: url(../../images/ico7.png) center left no-repeat;
+    padding-left: 25px;
+    line-height: 22px;
+    font-family: "Microsoft YaHei";
+    font-size: 21px;
+    color: #ffffff;
+    text-align: left;
+    margin-bottom: 12px;
 }
-.slide_ico2{
-    background:url(../../images/ico8.png) center left no-repeat;
-    padding-left:25px;
-    line-height:22px;
-    font-family:"Microsoft YaHei";
-    font-size:21px;
-    color:#ffffff;
-    text-align:left;
-    margin-bottom:12px;
+
+.slide_ico2 {
+    background: url(../../images/ico8.png) center left no-repeat;
+    padding-left: 25px;
+    line-height: 22px;
+    font-family: "Microsoft YaHei";
+    font-size: 21px;
+    color: #ffffff;
+    text-align: left;
+    margin-bottom: 12px;
 }
-.slide_ico3{
-    background:url(../../images/ico9.png) center left no-repeat;
-    padding-left:25px;
-    line-height:22px;
-    font-family:"Microsoft YaHei";
-    font-size:21px;
-    color:#ffffff;
-    text-align:left;
+
+.slide_ico3 {
+    background: url(../../images/ico9.png) center left no-repeat;
+    padding-left: 25px;
+    line-height: 22px;
+    font-family: "Microsoft YaHei";
+    font-size: 21px;
+    color: #ffffff;
+    text-align: left;
 }
-.indexc_slide .bd ul li{
-    margin-right:47px;
-    float:left;
-    box-shadow: 0 1px 9px rgba(0,0,0,.2);
+
+.indexc_slide .bd ul li {
+    margin-right: 47px;
+    float: left;
+    box-shadow: 0 1px 9px rgba(0, 0, 0, .2);
 }
-.indexc_slide .hd{
-    padding-top:35px;
-    text-align:center;
+
+.indexc_slide .hd {
+    padding-top: 35px;
+    text-align: center;
 }
-.indexc_slide .hd a.prev{
-    display:inline-block;
-    background:url(../../images/left.png) no-repeat;
-    width:29px;
-    height:28px;
+
+.indexc_slide .hd a.prev {
+    display: inline-block;
+    background: url(../../images/left.png) no-repeat;
+    width: 29px;
+    height: 28px;
 }
-.indexc_slide .hd a.next{
-    display:inline-block;
-    background:url(../../images/right.png) no-repeat;
-    width:29px;
-    height:28px;
+
+.indexc_slide .hd a.next {
+    display: inline-block;
+    background: url(../../images/right.png) no-repeat;
+    width: 29px;
+    height: 28px;
 }
-.indexc_slide .hd ul{
-    display:inline-block;
-    position:relative;
-    left:0px;
-    top:-11px;
+
+.indexc_slide .hd ul {
+    display: inline-block;
+    position: relative;
+    left: 0px;
+    top: -11px;
 }
-.indexc_slide .hd ul li{
-    display:inline-block;
-    width:25px;
-    height:25px;
-    background:#028BB0;
-    border-radius:100%;
-    margin-left:10px;
-    margin-right:10px;
-    cursor:pointer;
-    text-indent:-9999px;
-    box-shadow: 0 1px 19px rgba(0,0,0,.2);
+
+.indexc_slide .hd ul li {
+    display: inline-block;
+    width: 25px;
+    height: 25px;
+    background: #028BB0;
+    border-radius: 100%;
+    margin-left: 10px;
+    margin-right: 10px;
+    cursor: pointer;
+    text-indent: -9999px;
+    box-shadow: 0 1px 19px rgba(0, 0, 0, .2);
 }
-.indexc_slide .hd ul li.on{
-    background:#ffffff;
+
+.indexc_slide .hd ul li.on {
+    background: #ffffff;
 }
 
 .clearfix {
     zoom: 1;
 }
 
-.time_menunav{
+.time_menunav {
     position: absolute;
     left: 650px;
-    top:54px;
+    top: 54px;
     z-index: 98;
 }
-.time_menunav ul li{
+
+.time_menunav ul li {
     float: left;
     margin-right: 20px;
 }
-.time_menunav ul li a{
+
+.time_menunav ul li a {
     width: 72px;
-    height:24px;
+    height: 24px;
     line-height: 24px;
     text-align: center;
     font-family: "Microsoft YaHei";
     font-size: 14px;
     color: #ffffff;
     display: block;
-    background:url(../images/navbg2.png) no-repeat;
+    background: url(../images/navbg2.png) no-repeat;
     margin-left: -25px;
 }
-.time_menunav ul li.on a{
-    background:url(../images/navbg2_on.png) no-repeat;
+
+.time_menunav ul li.on a {
+    background: url(../images/navbg2_on.png) no-repeat;
 }
 
-.left_max_btn{
-    background:url(../images/left_max_btn.png) no-repeat;
+.left_max_btn {
+    background: url(../images/left_max_btn.png) no-repeat;
     width: 26px;
-    height:57px;
+    height: 57px;
     display: block;
     text-indent: -9999px;
     position: absolute;
     top: 41%;
     margin-top: -28px;
-    left:17px;
-    z-index:999;
+    left: 17px;
+    z-index: 999;
 }
-.right_max_btn{
-    background:url(../images/right_max_btn.png) no-repeat;
+
+.right_max_btn {
+    background: url(../images/right_max_btn.png) no-repeat;
     width: 26px;
-    height:57px;
+    height: 57px;
     display: block;
     text-indent: -9999px;
     position: absolute;
     top: 41%;
     margin-top: -28px;
-    right:25px;
-    z-index:999;
+    right: 25px;
+    z-index: 999;
+    opacity: .3;
 }
-.time_slide_box{
+
+.right_max_btn.active {
+    opacity: 1;
+}
+
+.time_slide_box {
     position: absolute;
-    left:368px;
-    top:-14px;
-    z-index:999;
+    left: 368px;
+    top: -14px;
+    z-index: 999;
     width: 162px;
     display: block !important;
 }
-.left_min_btn{
+
+.left_min_btn {
     width: 10px;
-    height:19px;
+    height: 19px;
     display: block;
     text-indent: -9999px;
     margin-top: 3px;
-    background:url(../images/left_bg.png) no-repeat;
+    background: url(../images/left_bg.png) no-repeat;
 }
-.right_min_btn{
+
+.right_min_btn {
     width: 10px;
-    height:19px;
+    height: 19px;
     display: block;
     text-indent: -9999px;
     margin-top: 3px;
-    background:url(../images/right_bg.png) no-repeat;
+    background: url(../images/right_bg.png) no-repeat;
+    opacity: .3;
 }
-.time_slide_input{margin-left: 15px; display: block !important;}
-.time_slide_input input{
+
+.right_min_btn.active {
+    opacity: 1;
+}
+
+.time_slide_input {
+    margin-left: 15px;
+    display: block !important;
+}
+
+.time_slide_input input {
     width: 113px;
     height: 25px;
     text-align: center;
-    border:none;
-    background:url(../images/input_bg.png) no-repeat;
+    border: none;
+    background: url(../images/input_bg.png) no-repeat;
     font-family: "Microsoft YaHei";
     font-size: 14px;
     color: #ffffff;
 }
 
-.center_tabbox{
-    position:fixed;
+.center_tabbox {
+    position: fixed;
     left: 50%;
     top: -3135px;
     width: 1021px !important;
     margin-left: -510px;
     z-index: 2000;
 }
-.center_tabbox_title{
+
+.center_tabbox_title {
     text-align: center;
     font-family: "Microsoft YaHei";
     font-size: 26px;
@@ -353,64 +392,76 @@ html,body{
     padding-top: 25px;
     padding-bottom: 25px;
 }
-.tablebox_close{
-    background:url(../../images/tablebox_close.png) no-repeat;
+
+.tablebox_close {
+    background: url(../../images/tablebox_close.png) no-repeat;
     width: 52px;
-    height:52px;
+    height: 52px;
     text-indent: -9999px;
     display: block;
     position: absolute;
     right: 25px;
-    top:25px;
+    top: 25px;
 }
-.tablebox_time{
+
+.tablebox_time {
     width: 100%;
-    height:32px;
+    height: 32px;
     position: relative;
 }
-.table_tabmenu{
+
+.table_tabmenu {
     position: absolute;
     left: 662px;
-    top:0px;
+    top: 0px;
 }
-.table_tabmenu ul li{
+
+.table_tabmenu ul li {
     float: left;
     margin-right: 20px;
 }
-.table_tabmenu ul li a{
+
+.table_tabmenu ul li a {
     width: 65px;
-    height:36px;
+    height: 36px;
     line-height: 36px;
     text-align: center;
     font-family: "Microsoft YaHei";
     font-size: 20px;
     color: #ffffff;
-    display: block;background:url(../../images/time_menubg.png) no-repeat;
+    display: block;
+    background: url(../../images/time_menubg.png) no-repeat;
 }
-.table_tabmenu ul li.on a{
-    background:url(../../images/time_menubg_on.png) no-repeat;
+
+.table_tabmenu ul li.on a {
+    background: url(../../images/time_menubg_on.png) no-repeat;
 }
-.center_tabbox_bg{
+
+.center_tabbox_bg {
     /*background:url(../../images/bj16.png);*/
-    position:fixed;
-    z-index:1999;
-    width:100%;
-    height:100%;
-    left:0px;
-    top:-4000px;
+    position: fixed;
+    z-index: 1999;
+    width: 100%;
+    height: 100%;
+    left: 0px;
+    top: -4000px;
 }
-.table_boxslide{
+
+.table_boxslide {
     width: 875px;
     margin: 0 auto;
 }
-.table_boxslide .hd{
-    height:50px;
+
+.table_boxslide .hd {
+    height: 50px;
     /*padding-left: 5px;*/
 }
-.table_boxslide .hd ul li{
+
+.table_boxslide .hd ul li {
     float: left;
 }
-.table_boxslide .hd ul li a{
+
+.table_boxslide .hd ul li a {
     height: 49px;
     padding-left: 12px;
     padding-right: 12px;
@@ -419,51 +470,69 @@ html,body{
     font-size: 20px;
     color: #ffffff;
     position: relative;
-    left:0px;
-    top:1px;
+    left: 0px;
+    top: 1px;
     display: block;
 }
-.table_boxslide .hd ul li.on a{
+
+.table_boxslide .hd ul li.on a {
     border: 1px solid #1CA0BF;
     border-bottom: none;
     background: #066487;
 }
-.table_boxslide .bd{
+
+.table_boxslide .bd {
     height: 742px;
     width: 873px;
     border: 1px solid #1CA0BF;
     box-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
-    background:url(../../images/tabbg.png);
+    background: url(../../images/tabbg.png);
 }
-.table_boxslide .bd ul{
+
+.table_boxslide .bd ul {
     height: 100%;
 }
-.table_boxslide .bd ul .table_max{
+
+.table_boxslide .bd ul .table_max {
     height: 100%;
 }
-.table_max_top{height:54px;background: #066487;}
-.table_max_bottom{
+
+.table_max_top {
+    height: 54px;
+    background: #066487;
+}
+
+.table_max_bottom {
     height: 680px;
     overflow-y: auto;
 }
-.table_max_top table{width: 100%;}
-.table_max_top table td{
+
+.table_max_top table {
+    width: 100%;
+}
+
+.table_max_top table td {
     text-align: center;
     height: 54px;
     font-family: "Microsoft YaHei";
     font-size: 15px;
     color: #94effa;
 }
-.table_max_bottom table{width: 100%;}
-.table_max_bottom table td{
+
+.table_max_bottom table {
+    width: 100%;
+}
+
+.table_max_bottom table td {
     text-align: center;
     height: 40px;
     font-family: "Microsoft YaHei";
     font-size: 14px;
     color: #ffffff;
 }
-.table_max_bottom table tr:nth-child(2n - 1) td{
-    background:url(../../images/tabbg_h.png);
+
+.table_max_bottom table tr:nth-child(2n - 1) td {
+    background: url(../../images/tabbg_h.png);
     background-color: #0181A8;
 }
 
@@ -473,7 +542,7 @@ html,body{
 
 /*2016年11月12日 */
 
-.dialogTile{
+.dialogTile {
     font-family: Microsoft YaHei;
     font-size: 20px;
     color: rgb(255, 255, 255);
@@ -482,46 +551,50 @@ html,body{
     padding-top: 4px;
 }
 
-.time_menunav_my{
+.time_menunav_my {
     position: absolute;
     left: 650px;
-    top:54px;
+    top: 54px;
     z-index: 98;
 }
-.time_menunav_my ul li{
+
+.time_menunav_my ul li {
     float: left;
     margin-right: 20px;
 }
-.time_menunav_my ul li a{
+
+.time_menunav_my ul li a {
     width: 72px;
-    height:24px;
+    height: 24px;
     line-height: 24px;
     text-align: center;
     font-family: "Microsoft YaHei";
     font-size: 14px;
     color: #ffffff;
     display: block;
-    background:url(../images/navbg2.png) no-repeat;
+    background: url(../images/navbg2.png) no-repeat;
     margin-left: -25px;
 }
-.time_menunav_my ul li.on a{
-    background:url(../images/navbg2_on.png) no-repeat;
+
+.time_menunav_my ul li.on a {
+    background: url(../images/navbg2_on.png) no-repeat;
 }
 
-.loadingDiv{
-    height: 100%;width: 100%;
+.loadingDiv {
+    height: 100%;
+    width: 100%;
     background-color: transparent;
     position: absolute
 }
 
-.loadingDiv img{
+.loadingDiv img {
     left: 50%;
     top: 40%;
     position: absolute;
     z-index: 9999;
 }
 
-#deviceUl li{
+#deviceUl li {
     color: white;
     float: left;
     display: block;
@@ -534,31 +607,33 @@ html,body{
     border-radius: 6px;
 }
 
-#deviceUl{
+#deviceUl {
     margin-left: 67px;
 }
 
-#deviceUl h3{
+#deviceUl h3 {
     margin-top: 22px;
     margin-bottom: 10px;
 }
 
-.top_device_status{
+.top_device_status {
     width: 100%;
     height: 45px;
 }
 
-.top_device_status ul{
+.top_device_status ul {
     width: 420px;
     margin: 0 auto;
 }
-.top_device_status li{
+
+.top_device_status li {
     font-family: "Microsoft YaHei";
     color: white;
     margin-right: 50px;
     float: left;
 }
-.top_device_status li div{
+
+.top_device_status li div {
     height: 20px;
     line-height: 20px;
     font-family: "Microsoft YaHei";
@@ -566,7 +641,7 @@ html,body{
     font-size: 12px;
 }
 
-.color_div{
+.color_div {
     margin-right: 4px;
     display: inline-block;
     height: 12px !important;
@@ -575,67 +650,77 @@ html,body{
     margin-top: 5px;
 }
 
-.deviceNice{
+.deviceNice {
     background-color: #009900;
-    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#019501),  to(#2af42a));
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#019501), to(#2af42a));
 }
-.deviceFine{
+
+.deviceFine {
     background-color: #2DF3FF;
-    background: -webkit-gradient(linear,0% 0%, 0% 100%, from(#35f2e3), to(#05aea0));
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#35f2e3), to(#05aea0));
 }
-.deviceCommon{
+
+.deviceCommon {
     background-color: #029EC0;
-    background: -webkit-gradient(linear,0% 0%, 0% 100%, from(#53bcfe), to(#1990e9));
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#53bcfe), to(#1990e9));
 }
-.deviceWorse{
+
+.deviceWorse {
     background-color: #FF6600;
-    background: -webkit-gradient(linear,0% 0%, 0% 100%, from(#fe804e), to(#e24608));
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#fe804e), to(#e24608));
 }
-.deviceBad{
+
+.deviceBad {
     background-color: #EE0000;
-    background: -webkit-gradient(linear,0% 0%, 0% 100%, from(#ca2626), to(#9c0808));
+    background: -webkit-gradient(linear, 0% 0%, 0% 100%, from(#ca2626), to(#9c0808));
 }
-.deviceNoState{
+
+.deviceNoState {
     background-color: #677777;
 }
 
-.plan_dxxsAll{
+.plan_dxxsAll {
     width: 880px;
     height: 470px;
     margin-left: 15px;
 }
 
-.zUIpanelScrollBox,.zUIpanelScrollBar{
-    width:3px;
-    top:0px;
-    right:0px;
+.zUIpanelScrollBox, .zUIpanelScrollBar {
+    width: 3px;
+    top: 0px;
+    right: 0px;
 
 }
-.zUIpanelScrollBox{
-    background:black;
+
+.zUIpanelScrollBox {
+    background: black;
     display: block !important;
-    background:url(../../images/icon/xian.png) center center no-repeat !important;
+    background: url(../images/xian.png) center center no-repeat !important;
 }
-.zUIpanelScrollBar{
-    background:#fff;
+
+.zUIpanelScrollBar {
+    background: #fff;
     display: block !important;
-    background:#95D9FF;
+    background: #95D9FF;
     width: 3px;
     border-radius: 3px;
 }
-.showm_table{
+
+.showm_table {
     width: 840px;
     height: 460px;
     overflow: hidden;
     margin: 0 auto;
 }
-.showm_table_header{
+
+.showm_table_header {
     width: 840px;
     margin: 0 auto;
     height: 24px;
     margin-top: -15px;
 }
-.showm_table_header ul li{
+
+.showm_table_header ul li {
     float: left;
     width: 20%;
     text-align: center;
@@ -643,10 +728,12 @@ html,body{
     font-size: 14px;
     color: #ffffff;
 }
-.showm_table table{
+
+.showm_table table {
     width: 100%;
 }
-.showm_table table td{
+
+.showm_table table td {
     font-family: "Microsoft YaHei";
     font-size: 14px;
     color: #ffffff;
@@ -654,15 +741,16 @@ html,body{
     text-align: center;
     width: 20%;
 }
-.showm_table table tr:nth-child(2n-1){
-    background: url("../../images/icon/table_bg.png") center center no-repeat;
+
+.showm_table table tr:nth-child(2n-1) {
+    background: url("../images/table_bg.png") center center no-repeat;
 }
 
-.width820{
+.width820 {
     width: 820px !important;
 }
 
-.tableView{
+.tableView {
     padding-top: 20px;
 }
 
@@ -674,7 +762,8 @@ html,body{
     font-size: 14px;
     color: rgb(255, 255, 255);
 }
-.changeDataView{
+
+.changeDataView {
     background: url(../images/navbg2.png) no-repeat;
     color: white;
     text-decoration: none;
@@ -686,19 +775,21 @@ html,body{
     font-size: 14px;
     display: block;
 }
-.changeDataView:hover{
+
+.changeDataView:hover {
     background: url(../images/navbg2_on.png) no-repeat;
 }
 
-.nav_hd{
+.nav_hd {
     position: absolute;
     left: 0px;
-    bottom:30px;
+    bottom: 30px;
     width: 920px;
     text-align: center;
 }
-.nav_hd ul li{
-    display:inline-block;
+
+.nav_hd ul li {
+    display: inline-block;
     width: 14px;
     height: 14px;
     margin: 0 3px;
@@ -706,15 +797,17 @@ html,body{
     border-radius: 14px;
     cursor: pointer;
 }
-.nav_hd ul li.on{
-    background:#58c9f3;
+
+.nav_hd ul li.on {
+    background: #58c9f3;
 }
 
-.list_top_icon{
+.list_top_icon {
     width: 350px;
     margin: 0 auto;
 }
-.list_icon1{
+
+.list_icon1 {
     background: url(../images/list_icon1.png) center left no-repeat;
     height: 27px;
     line-height: 27px;
@@ -723,8 +816,10 @@ html,body{
     font-size: 14px;
     color: #ffffff;
     float: left;
+    margin-left: 50px;
 }
-.list_icon2{
+
+.list_icon2 {
     background: url(../images/list_icon2.png) center left no-repeat;
     height: 27px;
     line-height: 27px;
@@ -735,20 +830,24 @@ html,body{
     float: left;
     margin-left: 20px;
 }
+
 .list_top_icon {
     margin-bottom: 14px;
 }
-.show_icon_list{
+
+.show_icon_list {
     padding-left: 40px;
 }
-.show_icon_list ul li{
+
+.show_icon_list ul li {
     width: 202px;
     height: 130px;
     float: left;
     margin: 0 30px 10px 40px;
     background: url("../../images/icon/list_bg.png") no-repeat;
 }
-.Sicon_1{
+
+.Sicon_1 {
     background: url("../../images/icon/list_icon1.png") center left no-repeat;
     height: 27px;
     line-height: 27px;
@@ -758,7 +857,8 @@ html,body{
     color: #ffffff;
     margin-bottom: 10px;
 }
-.Sicon_2{
+
+.Sicon_2 {
     background: url("../../images/icon/list_icon2.png") center left no-repeat;
     height: 27px;
     line-height: 27px;
@@ -767,11 +867,13 @@ html,body{
     font-size: 14px;
     color: #ffffff;
 }
-.show_icon_list_bottom{
+
+.show_icon_list_bottom {
     padding-left: 30px;
     padding-top: 20px;
 }
-.show_icon_list_title{
+
+.show_icon_list_title {
     height: 45px;
     line-height: 45px;
     text-align: center;
@@ -788,7 +890,7 @@ html,body{
     margin-left: 15px;
 }
 
-.showm_List{
+.showm_List {
     width: 916px;
     height: 780px;
     position: fixed;
@@ -797,14 +899,16 @@ html,body{
     margin-left: -428px;
     margin-top: -340px;
 }
-.showm_List_title{
+
+.showm_List_title {
     font-family: "Microsoft yahei";
     font-size: 30px;
     color: #ffffff;
     text-align: center;
     padding-bottom: 25px;
 }
-.Prev_btn{
+
+.Prev_btn {
     background: url("../images/Prev_btn.png") no-repeat;
     width: 71px;
     height: 71px;
@@ -814,7 +918,8 @@ html,body{
     top: 46%;
     left: -130px;
 }
-.Next_btn{
+
+.Next_btn {
     background: url("../images/Next_btn.png") no-repeat;
     width: 71px;
     height: 71px;
@@ -824,24 +929,27 @@ html,body{
     top: 46%;
     right: -130px;
 }
-.showm_List_main{
+
+.showm_List_main {
     padding-top: 40px;
 }
-.showm_List_main ul li{
+
+.showm_List_main ul li {
     width: 230px;
     height: 149px;
     float: left;
     margin: 0 35px 55px 35px;
     background: url("../images/List_dzbg.png") no-repeat;
 }
-.List_close{
+
+.List_close {
     background: url(../images/Close_btn.png) no-repeat !important;
     width: 71px !important;
     height: 71px !important;
     display: block;
     text-indent: -9999px;
-    margin-top:0px !important;
-    position:absolute;
+    margin-top: 0px !important;
+    position: absolute;
     right: -130px !important;
-    top:0px !important;
+    top: 0px !important;
 }

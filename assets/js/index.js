@@ -10,7 +10,7 @@ var screen3 = {
     preVersion: false,//之前的版本
     ps_target: 0, //电站指标(1：点击刷新)
     show_dinfo: 0, //是否显示‘电站详细信息’按钮（0：不显示）
-    psScheme: 2,//电站类型; (2:组串式,显示单元；其他 显示逆变器)
+    //psScheme: 2,//电站类型; (2:组串式,显示单元；其他 显示逆变器)
     showEarthOrChina: true//关闭弹出框时显示 true:3D地球，false;ChinaMap
 
 };
@@ -20,13 +20,23 @@ var psObj = {
     psSchemeArr: []
 };
 
+
 //dialog关闭弹窗*/
-var detailInfo = false;
 function closeEqualHourFm() {
     $("#equalHourFm").slideToggle();
     $("#equalHourFm").attr("src", "");
+    $("#grayLayer").removeClass("grayLayer");
 }
 
+function powerInfo_detail(e) {
+    var psId = $(e).parent().attr('id');
+    hideLoading();
+    var url = "dialog/dialog_powerDetail.html?ps_id=" + psId;
+    $("#equalHourFm").attr("src", url);
+    $("#equalHourFm").slideToggle();
+}
+
+//flat select电站
 function searchPS(psName) {
     $("#img_china em").each(function (i, obj) {
         $(obj).removeClass();
@@ -41,7 +51,6 @@ function searchPS(psName) {
         });
     }
 }
-
 
 //页面加载时vue
 new Vue({
@@ -92,15 +101,15 @@ new Vue({
         getDays: function () {
             var date = new Date();
             var year = date.getFullYear();
-            var mouth = date.getMonth() + 1;
+            var month = date.getMonth() + 1;
             var days;
 
             //当月份为二月时，根据闰年还是非闰年判断天数
-            if (mouth == 2) {
+            if (month == 2) {
                 days = year % 4 == 0 ? 29 : 28;
 
             }
-            else if (mouth == 1 || mouth == 3 || mouth == 5 || mouth == 7 || mouth == 8 || mouth == 10 || mouth == 12) {
+            else if (month == 1 || month == 3 || month == 5 || month == 7 || month == 8 || month == 10 || month == 12) {
                 //月份为：1,3,5,7,8,10,12 时，为大月.则天数为31；
                 days = 31;
             }
@@ -532,11 +541,9 @@ new Vue({
                 "foreEndType": 2,
                 "code": "20000002"
             };
-            //console.log(Parameters);
             vlm.loadJson("", JSON.stringify(Parameters), function (result) {
                 //console.log(result);
                 var listData = result.data;
-                //var listData = result.result_data.list;
                 if (listData == null || listData == "" || listData.length == 0) {
                     log("获取性能排名数据为空");
                     return;
@@ -550,23 +557,9 @@ new Vue({
                 }
                 listData = _this.sortCapacityArr(listData, sortType);
                 for (var i = 0; i < length; i++) {
-                    var ps_name = listData[i].fd_station_name;
-                    xdata.push(ps_name);
-                    //var ps_id = listData[i].ps_id;
-                    //psObj.psIdArr.push(ps_id);
-                    //psObj.psSchemeArr.push(listData[i].sys_scheme);
+                    xdata.push(listData[i].fd_station_name);
+                    psObj.psIdArr.push(listData[i].fd_station_id);
                     var cap_value = listData[i].pr;
-                    /*switch (ps_id){
-                     case 109189 :
-                     cap_value = "85";
-                     break;
-                     case 108816 :
-                     cap_value = "81";
-                     break;
-                     case 109192 :
-                     cap_value = "80";
-                     break;
-                     }*///演示写死
                     if (cap_value == null || cap_value == undefined || !$.isNumeric(cap_value)) {
                         ydata1.push(0);
                         ydata2.push(100);
@@ -777,28 +770,25 @@ new Vue({
                     //ptChart.on(ecConfig.EVENT.CLICK, function(params){
                     //
                     //});
-                    //ptChart.on('click', function (params) {
-                    //    var index = params.dataIndex;
-                    //    event.stopPropagation();
-                    //    screen3.ps_id = psObj.psIdArr[index];
-                    //    screen3.psScheme = psObj.psSchemeArr[index];
-                    //    $("#grayLayer").addClass("grayLayer");
-                    //    detailInfo = true;
-                    //    _this.psDetailInfo();
-                    //});
+                    ptChart.on('click', function (params) {
+                        var index = params.dataIndex;
+                        event.stopPropagation();
+                        screen3.ps_id = psObj.psIdArr[index];
+                        $("#grayLayer").addClass("grayLayer");
+                        _this.psDetailInfo();
+                    });
                 });
         },
 
         //性能排名点击后的电站详细信息
         psDetailInfo: function () {
-            //$("#showPsInfo").hide();
-            //alert(1);
-            //if (screen3.ps_id) {
-            //    hideLoading();
-            //    var url = bathPath + "/dialog/dialog_psDetailInfo.jsp?ps_id=" + screen3.ps_id + "&ps_scheme=" + screen3.psScheme + "&scrnvs=3";
-            //    $("#equalHourFm").attr("src", url);
-            //    $("#equalHourFm").slideToggle();
-            //}
+            $("#showPsInfo").hide();
+            if (screen3.ps_id) {
+                hideLoading();
+                var url = "dialog/dialog_powerDetail.html?ps_id=" + screen3.ps_id;
+                $("#equalHourFm").attr("src", url);
+                $("#equalHourFm").slideToggle();
+            }
         },
 
         //PR电站性能点击
@@ -839,7 +829,7 @@ new Vue({
                     var result = res.data;
                     var newActualData = [], planData = [], unit = result.fd_unit,
                         planArray = result.datas, actualArray = result.datayears;
-                    _this.fd_scheduledata = actualArray[0].fd_scheduledata+'%';
+                    _this.fd_scheduledata = actualArray[0].fd_scheduledata + '%';
                     for (var i = 0; i < planArray.length; i++) {
                         planData.push(planArray[i].fd_sched_power_mon);
                         newActualData.push(planArray[i].datapower);
@@ -1101,6 +1091,7 @@ new Vue({
 
         //发电趋势首次加载或者点击后发送请求
         getResultTrends: function (dateType) {
+            $(".Mc4_con .loadingDiv").show();
             var _this = this;
             var dateStr = '', sort = '', startDateStr;
             switch (dateType) {
@@ -1139,42 +1130,43 @@ new Vue({
             };
             //console.log(Parameters);
             vlm.loadJson("", JSON.stringify(Parameters), function (data) {
-                if (dateStr == 'month') {
-                    _this.dealPowerData_month(data);
-                } else if (dateStr == 'day') {
-                    _this.dealPowerData_day(data);
+                if (data.success) {
+                    if (dateStr == 'month') {
+                        _this.dealPowerData_month(data);
+                    } else if (dateStr == 'day') {
+                        _this.dealPowerData_day(data);
+                    } else {
+                        _this.dealPowerData_year(data);
+                    }
                 } else {
-                    _this.dealPowerData_year(data);
+                    alert(data.message);
                 }
             })
 
         },
         //解析发电趋势数据(月)
         dealPowerData_month: function (res) {
-            var result = res.data, _this = this;
-            var todayPower = parseFloat($("#currentPowerValue").val()).toFixed(2);
-            //if(ps_id){
-            //    todayPower = todayPsGenPower;
-            //}
-            //var todayPower_unit = $("#currentPowerUnit").val();
-            var unit = result.fd_unit;
-            var actualData = [];
-            for (var i = 0; i < result.fd_datas.length - 1; i++) {
-                actualData.push(result.fd_datas[i].fd_power_day);
-            }
-            var date = _this.myDate.getDate();
-            var dateCount = _this.getDays();
-            var dateDate = [];
-            if (!actualData || actualData.length == 0) {//每月1号的时候无数据
+            var result = res.data,
+                _this = this,
+                todayPower = '',
+                unit = result.fd_unit,
+                actualData = [];
+            if (result.fd_datas.length == 1) {  //当月第一天，只有实时数据
                 todayPower = result.fd_datas[0].fd_power_day;
-            }
-            var actualData_today = [];
-            for (var i = 0; i < dateCount; i++) {
-                if (i >= actualData.length) {
-                    actualData.push(0);
+            } else if (result.fd_datas.length > 1) {
+                todayPower = result.fd_datas[0].fd_power_day;
+                for (var i = 1; i < result.fd_datas.length; i++) {
+                    actualData.push(result.fd_datas[i].fd_power_day);
                 }
-
-                if (date - 1 == i) {//今日数据
+            }
+            var date = _this.myDate.getDate();  //当月几号
+            var dateCount = _this.getDays();   //当月天数
+            var dateDate = [], actualData_today = [];
+            for (var i = 1; i <= dateCount; i++) {
+                if (date <= i) {
+                    actualData.push(0);   //累计未来发电趋势初始为0
+                }
+                if (date == i) {//今日数据
                     var object = {
                         value: todayPower,
                         itemStyle: {
@@ -1194,7 +1186,7 @@ new Vue({
                 } else {
                     actualData_today.push(0);
                 }
-                dateDate.push(i + 1);
+                dateDate.push(i);
             }
             _this.drawPowerChart_month(actualData, actualData_today, dateDate, unit);
         },
@@ -1363,7 +1355,7 @@ new Vue({
 
                 var unit = result.fd_unit, glUnit = 'kW';//功率单位、发电量单位
 
-                console.log(actualData);
+                //console.log(actualData);
                 _this.drawDayChart(actualData, glData, dateDate, unit, glUnit);
             } else {
                 alert(res.message);
@@ -1542,7 +1534,7 @@ new Vue({
         //处理年发电趋势
         dealPowerData_year: function (res) {
             var _this = this;
-            console.log(res);
+            //console.log(res);
             if (res.success) {
                 var result = res.data, glData = [], actualData = [], dateDate = []; //功率、发电量、日期区间
                 var unit = 'MW', glUnit = result.fd_unit;//功率单位、发电量单位
@@ -1689,7 +1681,7 @@ new Vue({
 
 
         //点击各模块，相应dialog
-        showDialogIframe: function (url,event) {
+        showDialogIframe: function (url, event) {
             $(event.currentTarget).addClass($(event.currentTarget).attr('data-clicktip'));
             $(".main").hide();
             $("#equalHourFm").attr("src", url);

@@ -40,9 +40,9 @@
             <img id="pageLogImg" src="images/dx_logo.png"/>
         </div>
         <div class="Monitor_top_title css73aa30a52172ac" id="pageTitle">东旭蓝天光伏电站智能运维管理平台</div>
-        <div class="Monitor_top_copy_logo fr">
-            <img src="images/copy_logo.png"/>
-        </div>
+        <!--<div class="Monitor_top_copy_logo fr">-->
+            <!--<img src="images/copy_logo.png"/>-->
+        <!--</div>-->
     </div>
 
     <div class="Monitor_con clearfix">
@@ -71,7 +71,7 @@
                             id="total_gen_unit" v-text="fd_all_power_year_unit"></span></div>
                 </div>
             </div>
-            <div class="Monitor_left_c2" name="portal">
+            <div class="Monitor_left_c2" data-clicktip="Monitor_left_c2_highLt" name="portal" @click="showDialogIframe('dialog/dialog_prRank.html',$event)">
                 <div class="Monitor_left_c2_on"></div>
                 <div class="Mc2_title">性能排名<span style="font-size: 14px">(近30天)</span></div>
                 <div class="Mc5_nav fr clearfix" @click="PR_click($event)">
@@ -138,7 +138,7 @@
         <!--主页内容右侧-->
         <div class="Monitor_right fr">
             <div class="Monitor_right_c1 clearfix">
-                <div class="Mc4_bg fr" name="portal">
+                <div class="Mc4_bg fr" name="portal" data-clicktip="Mc4_bg_highLt" @click="showDialogIframe('dialog/dialog_powerTrend.html',$event)">
                     <div class="Mc4_bg_on"></div>
                     <div class="Mc4_top clearfix">
                         <div class="Mc4_title fl" id="powerTrendTitle">当月发电趋势</div>
@@ -151,8 +151,7 @@
                         </div>
                     </div>
                     <div class="Mc4_con" id="gen_trend">
-                        <div align="center"
-                             style="height: 100%;width: 100%;background-color: transparent; position: absolute; z-index: 9999"
+                        <div align="center" style="height: 100%;width: 100%;background-color: transparent; position: absolute; z-index: 9999"
                              class="loadingDiv">
                             <img style='left: 45%; top: 45%; position: absolute' src="images/loading.gif"/>
                         </div>
@@ -162,7 +161,7 @@
                 </div>
             </div>
             <div class="Monitor_right_c2 clearfix">
-                <div class="Mc5_bg fr" name="portal">
+                <div class="Mc5_bg fr" name="portal" data-clicktip="Mc5_bg_highLt" @click="showDialogIframe('dialog/dialog_save.html',$event)">
                     <div class="Mc5_bg_on"></div>
                     <div class="Mc5_top clearfix">
                         <div class="Mc5_title fl">节能减排</div>
@@ -202,7 +201,7 @@
                     </div>
                 </div>
             </div>
-            <div class="Monitor_right_c3 clearfix" name="portal">
+            <div class="Monitor_right_c3 clearfix" name="portal" data-clicktip="Monitor_right_c3_highLt" @click="showDialogIframe('dialog/dialog_building.html',$event)">
                 <div class="Mc6_bg_on"></div>
                 <div class="Mc6_top clearfix">
                     <div class="Mc5_title fl">电站建设</div>
@@ -256,8 +255,8 @@
 
     <div class="M_main_bottom">
         <div class="M_main_bottom_con clearfix">
-            <div class="M_bottom_b1 fl" style="cursor: pointer" id="just_capacity_span">
-                <div class="M_bottom_b1_con" data-clicktip="M_bottom_b1_clicked" @click="showDialogIframe('dialog/dialog_proceeding.html',$event)">
+            <div class="M_bottom_b1 fl" style="cursor: pointer" id="just_capacity_span" data-clicktip="M_bottom_b1_clicked" @click="showDialogIframe('dialog/dialog_proceeding.html',$event)">
+                <div class="M_bottom_b1_con">
                     <div class="M_bottom_t1">在建容量</div>
                     <div class="M_bottom_t2"><span id="just_capacity"></span><span id="just_capacity_unit" v-text="fd_intercon_cap_on"></span>
                     </div>
@@ -406,20 +405,17 @@
 
 <script type="text/template" id="tpl">
     <%for(var i=0;i< dataArr.length; i++){ %>
-        <% if(dataArr[i].fd_station_status == 1){ %>
-        <div id="<%=dataArr[i].fd_station_id %>" class="location" style="left:<%=dataArr[i].fd_left%>px;top:<%=dataArr[i].fd_top%>px">
-            <em title="<%=dataArr[i].fd_station_name%>" onclick="powerInfo_detail(108816,1,2)"><%=dataArr[i].fd_station_name%></em>
-            <div class="map_title" style="display: none;"><%=dataArr[i].fd_station_name%></div>
+        <% if(dataArr[i].fd_station_status == 2){ %>
+        <div id="<%=dataArr[i].fd_station_code %>" class="location" style="left:<%=dataArr[i].fd_left%>px;top:<%=dataArr[i].fd_top%>px">
+            <em title="<%=dataArr[i].fd_station_name%>" onclick="powerInfo_detail(this)"><%=dataArr[i].fd_station_name%></em>
+        </div>
+        <% }else if(dataArr[i].fd_station_status == 1){ %>
+        <div id="<%=dataArr[i].fd_station_code %>" class="location2" style="left:<%=dataArr[i].fd_left%>px;top:<%=dataArr[i].fd_top%>px">
+            <em title="<%=dataArr[i].fd_station_name%>" onclick="powerInfo_detail(this)"><%=dataArr[i].fd_station_name%></em>
         </div>
         <% }else if(dataArr[i].fd_station_status == 0){ %>
-        <div id="<%=dataArr[i].fd_station_id %>" class="location2" style="left:<%=dataArr[i].fd_left%>px;top:<%=dataArr[i].fd_top%>px">
-            <em title="<%=dataArr[i].fd_station_name%>" ><%=dataArr[i].fd_station_name%></em>
-            <div class="map_title" style="display: none;"><%=dataArr[i].fd_station_name%></div>
-        </div>
-        <% }else if(dataArr[i].fd_station_status == 2){ %>
-        <div id="<%=dataArr[i].fd_station_id %>" class="location3" style="left:<%=dataArr[i].fd_left%>px;top:<%=dataArr[i].fd_top%>px">
-            <em title="<%=dataArr[i].fd_station_name%>" ><%=dataArr[i].fd_station_name%></em>
-            <div class="map_title" style="display: none;"><%=dataArr[i].fd_station_name%></div>
+        <div id="<%=dataArr[i].fd_station_code %>" class="location3" style="left:<%=dataArr[i].fd_left%>px;top:<%=dataArr[i].fd_top%>px">
+            <em title="<%=dataArr[i].fd_station_name%>" onclick="powerInfo_detail(this)"><%=dataArr[i].fd_station_name%></em>
         </div>
         <% } %>
     <% } %>
@@ -427,10 +423,6 @@
 </script>
 
 <script src="js/lib/star.js"></script>
-<!--<script src="js/screen_new1.0/screen_1.0_common.js"></script>-->
-<!--<script src="js/screen_new1.0/screen_1.0_left.js"></script>-->
-<!--<script src="js/screen_new1.0/screen_1.0_right.js"></script>-->
-<!--<script src="js/screen_new1.0/screen_1.0.js"></script>-->
 <script src="js/index.js"></script>
 </body>
 </html>

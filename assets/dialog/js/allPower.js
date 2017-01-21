@@ -14,51 +14,49 @@ new Vue({
         //分页下方小图标根据数据初始化
         showPageantion: function () {
             for (var i = 0; i < this.curYearGen.pageCount; i++) {
-                if(i==0){
-                    this.items.push({'active':true});
-                }else{
-                    this.items.push({'active':false});
+                if (i == 0) {
+                    this.items.push({'active': true});
+                } else {
+                    this.items.push({'active': false});
                 }
             }
         },
         //点击小图标tab
         changePage: function (e, index) {
-            if( ! $(e.target).hasClass('on')){
-                this.curYearGen.currentPage = index+1;
+            if (!$(e.target).hasClass('on')) {
+                this.curYearGen.currentPage = index + 1;
                 this.currentYearGenCurPage();
                 this.showCurPage();
             }
         },
         currentYearGenAll: function () {
-            var _this = this;
+            var _this = this, startDateStr = vlm.Utils.currentYear();
             var Parameters = {
-                //"parameters": {
-                //
-                //},
-                //"foreEndType": 2,
-                //"code": "20000003"
+                "parameters": {
+                    "sorttype": "1",
+                    "sort": 1,
+                    "starttime": startDateStr,
+                    "topn": "7",
+                    "stationid": "ALL"
+                },
+                "foreEndType": 2,
+                "code": "20000008"
             };
-            //console.log(Parameters);
-            vlm.loadJson("../data/dia_allPower.json", JSON.stringify(Parameters), function (res) {
+            console.log(Parameters);
+            vlm.loadJson("", JSON.stringify(Parameters), function (res) {
                 //console.log(res);
-                var powerList = res.result_data.powerList;
-                if (powerList != null && powerList != undefined) {
-                    for (var i = 0; i < powerList.length; i++) {
-                        var obj = powerList[i];
-                        if (obj.build_status == 2) {//仅显示并网电站
-                            _this.curYearGen.dataArr.push(powerList[i]);
-                        }
-                    }
-                    var length = _this.curYearGen.dataArr.length;
-                    _this.curYearGen.rowCount = length;
-                    _this.curYearGen.pageCount = _this.curYearGen.rowCount / _this.curYearGen.pageSize;
-                    var remainder = _this.curYearGen.rowCount % _this.curYearGen.pageSize;
-                    if (remainder != 0) {
-                        _this.curYearGen.pageCount = parseInt(_this.curYearGen.pageCount) + 1;
-                    }
-                    _this.showPageantion();
-                    _this.currentYearGenCurPage();
+                _this.curYearGen.dataArr = res.data;
+                var length = _this.curYearGen.dataArr.length;
+                _this.curYearGen.rowCount = length;
+                _this.curYearGen.pageCount = _this.curYearGen.rowCount / _this.curYearGen.pageSize;
+                var remainder = _this.curYearGen.rowCount % _this.curYearGen.pageSize;
+                if (remainder != 0) {
+                    _this.curYearGen.pageCount = parseInt(_this.curYearGen.pageCount) + 1;
                 }
+                if (_this.curYearGen.pageCount > 1) {
+                    _this.showPageantion();
+                }
+                _this.currentYearGenCurPage();
             });
         },
         //渲染当前页内容
@@ -67,9 +65,9 @@ new Vue({
             $(".loadingDiv").show();
             var startIndex = this.curYearGen.pageSize * (this.curYearGen.currentPage - 1);
             var endIndex = this.curYearGen.currentPage * this.curYearGen.pageSize;
-            var trHtml = "",listArr=this.curYearGen.dataArr;
-            var listStr=$('#allPowerList').html();
-            trHtml=ejs.render(listStr,{listArr:listArr,startIndex:startIndex,endIndex:endIndex});
+            var trHtml = "", listArr = this.curYearGen.dataArr;
+            var listStr = $('#allPowerList').html();
+            trHtml = ejs.render(listStr, {listArr: listArr, startIndex: startIndex, endIndex: endIndex});
             $("#iconsUl").html(trHtml);
             $(".loadingDiv").hide();
         },

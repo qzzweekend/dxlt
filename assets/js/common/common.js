@@ -105,10 +105,6 @@ function hideLoading(){
     }
 }
 
-function log(msg){
-
-}
-
 function toFix(num,n){
     if(num==0||num=="0"){
         return 0;
@@ -200,100 +196,6 @@ function addUpArr(arr){
         }
     }
     return restArr;
-}
-
-/**
- * 获取用户的组织信息;
- * 大屏logo，
- * 大屏标题，
- * 右下角图片滚动，
- * 累计发电滚动刷新，
- * 星空背景，
- * 点击电站图标刷新两侧数据
- * 电站详细信息按钮
- */
-var autoSlideEnergy = false;
-function initLogo(){
-    $.ajax({
-        type: "post",
-        data: '',
-        url: '/dxltvue/assets/data/powerAction_loadOrgPro.json',
-        async: false,
-        dataType: "json",
-        beforeSend: function () {
-        },
-        success: function (data, s) {
-            if (data) {
-                //var object = JSON.parse(data);
-                var object = data;
-                console.log(data);
-                var li_html = "";
-                var first = true;
-                var result = object.result_data;
-                var orgProList = result.orgProList;
-                $(".slideBox ul").empty();
-                for (var i = 0; i < orgProList.length; i++) {
-                    var obj = orgProList[i];
-                    if (obj.pro_key == 'logo_name') {//智能运维平台头部标题
-                        if(obj.pro_value){
-                            $("#pageTitle").html(obj.pro_value);
-                            $("title").text(obj.pro_value);
-                        }
-                    }
-                    if (obj.pro_key == 'logo_img') {//智能运维平台头部左上角logo
-                        if(obj.pro_value){
-                            $("#pageLogImg").attr("src", obj.pro_value);
-                        }
-                    }
-                    if (obj.pro_key == 'image') {
-                        if(obj.pro_value){
-                            if(first){
-                                li_html = "";
-                                $("#slideBox ul").empty();
-                                first = false;
-                            }
-                            li_html = "<li><img style='width: 100%; height: 205px' src='" + obj.pro_value + "' /></li>"
-                            $("#slideBox ul").append(li_html);
-                        }
-                    }
-                    if (obj.pro_key == 'fp_tile') {
-                        if(obj.pro_value && $(".dzsyb_fp")){
-                            $(".dzsyb_fp").show();
-                            $(".fp_title").text(obj.pro_value);
-                            $("#fp_unit").text("户");
-                        }
-                    }
-                    if (obj.pro_key == 'slide_flag') {
-                        if(obj.pro_value && obj.pro_value == "1"){
-                            autoSlideEnergy = true;
-                        }
-                    }
-                    if (obj.pro_key == 'bk_style') {//星空背景
-                        if(obj.pro_value && obj.pro_value == "0" && typeof startBackGroud != 'undefined'){
-                            startBackGroud();
-                        }
-                    }
-                    if (obj.pro_key == 'ps_target') {//点击电站图标刷新两侧数据
-                        if(obj.pro_value && obj.pro_value == "1" && typeof setPsTarget != 'undefined'){
-                            setPsTarget();
-                        }
-                    }
-                    if (obj.pro_key == 'show_dinfo') {//电站详细信息按钮
-                        if(obj.pro_value && obj.pro_value == "1" && typeof setShowDetailinfo != 'undefined'){
-                            setShowDetailinfo();
-                        }
-                    }
-                    if (obj.pro_key == 'nyj_left3') {//页面左下角
-                        if(obj.pro_value && obj.pro_value == "1" && typeof setLeft3 != 'undefined'){
-                            setLeft3();
-                        }
-                    }
-                }
-            } else {
-                console.log("获取组织属性失败");
-            }
-        }
-    });
 }
 
 /*
@@ -424,4 +326,10 @@ function updateEarthTime(earth){
             }
         );
     }
+}
+
+//补零
+function dealDate(val) {
+    var resVal = val >= 10 ? val : ("0" + val);
+    return resVal;
 }

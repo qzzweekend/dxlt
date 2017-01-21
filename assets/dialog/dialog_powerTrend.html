@@ -1,36 +1,18 @@
 <html>
 <head>
     <title>发电量排名</title>
-    <link rel="stylesheet" type="text/css" href="css/basic.css"/>
+    <link rel="stylesheet" type="text/css" href="../style/reset.css"/>
     <link rel="stylesheet" type="text/css" href="css/dialog_main.css"/>
-    <!--<link rel="stylesheet" type="text/css" href="/css/basic.css?vs=2.1221"/>-->
-
-
-    <!--<script type="text/javascript" src="js/lib/DatePicker.js"></script>-->
-    <!--<script type="text/javascript" src="/js/DateUtil.js?vs=2.1221"></script>-->
-    <!--<script type="text/javascript" src="/js/common/esmpbase.js?vs=2.1221"></script>-->
-    <!--<script type="text/javascript" src="/js/common/common.js?vs=2.1221"></script>-->
-    <!--<script type="text/javascript" src="/js/plugin/echart/echarts.js"></script>-->
-
-    <!--<script type="text/javascript" src="/js/i18n/common_zh_CN.js?vs=2.1221"></script>-->
-
-
-    <script>
-        var ctx = '';
-    </script>
-
 </head>
 <body>
-<input id="orgId" type="hidden" value="3040"/>
-<div class="box_show clearfix">
+<div class="box_show clearfix" id="powerTrend">
     <div class="show_main clearfix">
         <div class="showm_content clearfix">
             <div class="showm_top clearfix">
                 <div class="showm_top_left fl clearfix">
-                    <ul>
-                        <li class="on" id="fdl_li" onclick="loadDXXOrFDL(1);"><a href="javascript:;">发电量排名</a></li>
-                        <li id="dxxs_li" onclick="loadDXXOrFDL(0);"><a href="javascript:;">等效小时排名</a></li>
-                        <li id="psName" style="display: none;"><a style="background-image: none; width: 255px;" id="psNameA"></a></li>
+                    <ul @click="power_hourTab($event)">
+                        <li class="on" id="fdl_li"><a href="javascript:;" data-powerType="power">发电量排名</a></li>
+                        <li id="dxxs_li" ><a href="javascript:;" data-powerType="hour">等效小时排名</a></li>
 
                     </ul>
                 </div>
@@ -41,29 +23,21 @@
                         <li><a onclick="showEqHourData(3)" href="javascript:;">年</a></li>
                     </ul>
                 </div>
-                <script>
-                    $(function () {
-                        $(".time_menunav ul li").click(function () {
-                            $(this).addClass("on");
-                            $(this).siblings("li").removeClass("on");
-                        })
-                    })
-                </script>
                 <div class="showm_top_right fr clearfix">
-                    <a href="javascript:;" class="close fr">关闭</a>
+                    <a href="javascript:;" class="close fr" @click="closeWindow">关闭</a>
                 </div>
             </div>
             <div class="showm_bottom clearfix">
                 <div class="time_slide_box clearfix">
-                    <a href="javascript:;" class="left_min_btn fl" id="left_min_btn"></a>
+                    <a href="javascript:;" class="left_min_btn fl" id="left_min_btn" @click="arrowChangeDate"></a>
 
                     <div class="time_slide_input fl"><input id="dateInput" type="text" readonly="readonly"/></div>
-                    <a href="javascript:;" class="right_min_btn fr" id="right_min_btn"></a>
+                    <a href="javascript:;" class="right_min_btn fr" id="right_min_btn" @click="arrowChangeDate"></a>
                 </div>
-                <a href="javascript:;" class="max_btn left_max_btn" id="left_max_btn"></a>
-                <a href="javascript:;" class="max_btn right_max_btn" id="right_max_btn"></a>
+                <a href="javascript:;" class="max_btn left_max_btn" id="left_max_btn" @click="arrowChangeDate"></a>
+                <a href="javascript:;" class="max_btn right_max_btn" id="right_max_btn" @click="arrowChangeDate"></a>
                 <div align="center" class="loadingDiv">
-                    <img src="/nyj/images/loading.gif"/>
+                    <img src="images/loading.gif"/>
                 </div>
                 <div id="dxxsAll" style="display: none" class="plan_dxxsAll"></div>
                 <div id="fdlAllChart" class="plan_dxxsAll"></div>
@@ -72,7 +46,6 @@
         </div>
     </div>
 </div>
-
 
 
 <script type="text/javascript" src="../js/lib/jquery-1.10.2.min.js"></script>
@@ -85,7 +58,7 @@
 <script type="text/javascript" src="../js/plugin/echarts-x/build/dist/echarts-x.js"></script>
 <script type="text/javascript" src="js/lib/DateUtil.js"></script>
 <script type="text/javascript" src="js/lib/TouchSlide.js"></script>
-<script type="text/javascript" src="js/My97DatePicker/DatePicker.js"></script>
+<script type="text/javascript" src="My97DatePicker/WdatePicker.js"></script>
 <script type="text/javascript" src="js/powerTrend.js"></script>
 
 </body>

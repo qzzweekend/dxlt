@@ -1,18 +1,61 @@
+//2016-11-12 ChuD; 等效小时、发电量排名弹出框
 var dialog = {
-    dateType: '3', //pr  1:日  2:月  3:年
-    curtOrgId_refresh: "" //当前组织id，用于 定时刷新
+    dateType: 2, //pr  1:日  2:月  3:年
+    pageSize: 10,//每页显示条目数
+    currentPage: 1, //当前页
+    rowCount: 0,//总条目数
+    pageCount: 0,//总页数
 };
 
 new Vue({
-    el: '#powerPlan',
-    data: {
-        myDate: new Date(),
-        showIncreaseDate: false
-    },
+    el: '#getPr',
+    data: {},
     methods: {
-        //当年发电计划发送请求
-        loadPlanChart: function () {
+        initTime: function () {
+            var daybegin = new Date();
+            var year = daybegin.getFullYear();
+            var month = daybegin.getMonth() + 1;
+            var date = daybegin.getDate();
+            var hour = daybegin.getHours();
+            var min = daybegin.getMinutes();
+            var month1 = month >= 10 ? month : ("0" + month);
+            var date1 = date >= 10 ? date : ("0" + date);
+            var thisDate = year + "/" + month1; //+"/"+date1;
+            if (dialog.dateType == "2") {
+                thisDate = year + "/" + month1;
+            } else if (dialog.dateType == "3") {
+                thisDate = year;
+            }
+            $("#dateInput").val(thisDate);
+        },
+
+        addActive: function () {
+            $('#right_min_btn').removeClass('active');
+            $('#right_max_btn').removeClass('active');
+        },
+
+        showEqHourData: function (e) {
+            var type = '';
+            $('.time_menunav_my ul li').removeClass("on");
+            if ($(e.target).attr('dateTabType') == 2 || $(e.target).attr('dateTabType') == undefined) {
+                $('.time_menunav_my ul li').eq(0).addClass("on");
+                type = '2';
+            } else {
+                $('.time_menunav_my ul li').eq(1).addClass("on");
+                type = $(e.target).attr('dateTabType');
+
+            }
+            dialog.dateType = type;
+            this.initTime();
+            this.setDateInputFormat();  //时间input绑定WdatePicker
+            this.loadPrChart();
+            this.addActive();
+        },
+
+        loadPrChart: function () {
             var dateType = dialog.dateType;
+            $(".showm_bottom .loadingDiv").show();
+            dialog.genOrEqHr = 1;
             var _this = this,
                 dateStr = '',
                 startDateStr = '',
@@ -53,93 +96,51 @@ new Vue({
 
             var Parameters = {
                 "parameters": {
-                    "datatype": dateStr,
+                    "ctype": "1",
                     "sorttype": "1",
-                    "sort": '1',
+                    "sort": "1",
                     "starttime": startDateStr,
                     "endtime": endDateStr,
                     "topn": "7",
                     "stationid": ""
                 },
                 "foreEndType": 2,
-                "code": "20000004"
+                "code": "20000002"
             };
+
             vlm.loadJson("", JSON.stringify(Parameters), function (res) {
                 //console.log(res);
                 if (res.success) {
-                    var result = res.data;
-                    if (result.datas.length) {
-                        var actualData = planArray = result.datas,
-                            planData = [],
-                            newActualData = [],   //实际
-                            xData = [],  //x轴数据
-                            completionRt = [],  //完成率
-                            unit = result.fd_unit;
-                        for (var i = 0; i < planArray.length; i++) {
-                            planData.push(planArray[i].fd_sched_power_mon); //每个月发电计划
-                            newActualData.push(planArray[i].datapower);    //当月实际发电
-                        }
-
-                        if (dialog.dateType == 2) {//日发电计划数组赋值
-                            var selectDate = $("#dateInput").val();
-                            var date = new Date();
-                            var year = date.getFullYear();
-                            var month = date.getMonth() + 1;
-                            if (month >= 1 && month <= 9) {
-                                month = "0" + month;
-                            }
-
-                            if ((year + "/" + month) == selectDate) {//选择的时间是当前月份，截取数据到前一天
-                                var strDate = date.getDate();
-                                var today_power = $("#currentPowerValue_virgin", parent.document).val();//今日发电
-                                actualData[strDate - 1] = today_power;//补当前实际发电量
-                                actualData = actualData.slice(0, strDate);
-                                planData = planData.slice(0, strDate);
-                            }
-
-                            //actualData = addUpArr(actualData);
-                            planData = addUpArr(planData);
-                        }
-                        //完成率
-                        if (dialog.dateType == 2) {//月完成率
-                            for (var i = 0; i < planData.length; i++) {
-                                xData.push(i + 1);
-                                completionRt.push(CalculatedCompletionRate(newActualData[i], planData[i]));
-                            }
-                        } else {
-                            var temAddedArr = addUpArr(newActualData);
-                            var temSum = addUpArr(planData);
-                            for (var i = 0; i < planData.length; i++) {
-                                xData.push(i + 1);
-                                completionRt.push(CalculatedCompletionRate(temAddedArr[i], temSum[i]));
-                            }
-                        }
-                        _this.drawPowerPlanChart(dealEchartBarArr(newActualData), dealEchartBarArr(planData), unit, xData, dealEchartLineArr(completionRt));
-
+                    var dxxsData = [];//等效小时
+                    var psPrData = [];//PR
+                    var areaData = [];//地区
+                    var unit = "小时";
+                    var resultArray = res.data;
+                    for (var i = 0; i < resultArray.length; i++) {
+                        var obj = resultArray[i];
+                        dxxsData.push(obj.equivalenthour);
+                        psPrData.push(obj.pr);
+                        areaData.push(obj.fd_station_name);
                     }
+                    _this.showDXXSTable(dxxsData, psPrData, areaData, unit);
+                    _this.showPrChart(dealEchartBarArr(dxxsData), dealEchartBarArr(psPrData), areaData, unit);
+
                 } else {
                     alert(res.message);
                 }
             });
         },
-        //绘制发电计划chart
-        drawPowerPlanChart: function (actualData, planData, unit, xData, completionRt) {
 
-            var lengendName1 = LANG["1_1_planned_genarate"];
-            var lengendName2 = LANG["1_1_actual_genarate"];
-            if (dialog.dateType == 2) {
-                lengendName1 = LANG["1_1_total_planned_genarate"];
-                lengendName2 = LANG["1_1_total_actual_genarate"];
-            }
-            var myDate = new Date();
+        //等效小时弹出chart
+        showPrChart: function (valueAxis, psPrData, areaData, unit) {
             var option = {
                 tooltip: {
                     trigger: 'axis',
                     formatter: function (data) {
-                        var str = "<p align='left'>" + LANG["TIME"] + "：" + myDate.getFullYear() + "/" + (dialog.dateType == 3 ? "" : ($("#dateInput").val().substring(5, 7) + "/")) + dealDate(data[0].name) + "</p>";
+                        var str = "<p align='left'>" + LANG["powerStation"] + "：" + data[0].name + "</p>";
                         for (var i = 0; i < data.length; i++) {
-                            if (lengendName1 == data[i].seriesName || lengendName2 == data[i].seriesName) {
-                                str += "<p align='left'>" + data[i].seriesName + "：" + dealEchartToolTip(data[i].value) + unit;
+                            if (LANG["1_1_equalHour"] == data[i].seriesName) {
+                                str += "<p align='left'>" + data[i].seriesName + "：" + dealEchartToolTip(data[i].value) + "h";
                             } else {
                                 str += "<p align='left'>" + data[i].seriesName + "：" + dealEchartToolTip(data[i].value) + "%";
                             }
@@ -160,15 +161,21 @@ new Vue({
                         color: '#FFFFFF',
                         fontFamily: 'Microsoft YaHei'
                     },
-                    data: [lengendName1, lengendName2, LANG["1_1_planned_completion_rate"]]
+                    data: [LANG["1_1_equalHour"], 'PR']
                 },
                 // 网格
                 grid: {
-                    y: '65',
+                    //x: 30,
+                    y: 65,
+                    //x2: 0,
+                    //y2: 0,
+                    //width: 320,
+                    //height: 160,
                     backgroundColor: 'rgba(0,0,0,0)',
                     borderWidth: 0,
                     borderColor: '#ccc'
                 },
+
                 calculable: true,
                 xAxis: [
                     {
@@ -176,51 +183,55 @@ new Vue({
                         axisLine: {
                             show: true,
                             lineStyle: { // 属性lineStyle控制线条样式
-                                color: '#FFFFFF'
+                                color: '#ffffff'
                             }
                         },
                         axisLabel: {
                             show: true,
-                            rotate: 0,//逆时针显示标签，不让文字叠加
+                            interval: 0,// 是否显示全部标签，0显示
+                            rotate: 25,//逆时针显示标签，不让文字叠加
                             textStyle: {
-                                color: '#FFFFFF'
+                                color: '#ffffff'
                             }
+                        },
+                        nameTextStyle: {
+                            fontFamily: 'Microsoft YaHei'
                         },
                         splitLine: {
                             show: false
                         },
-                        boundaryGap: [0, 0.01],
-                        data: xData
+
+                        data: areaData
                     }
                 ],
                 yAxis: [
                     {
                         type: 'value',
-                        name: unit,
-                        axisLine: {
-                            show: true,
-                            lineStyle: { // 属性lineStyle控制线条样式
-                                color: '#FFFFFF'
-                            }
+                        name: (LANG["1_1_equalHour"] + "（" + LANG["unit"] + " ：h）"),
+                        splitLine: {
+                            show: false
                         },
                         axisLabel: {
                             show: true,
                             textStyle: {
-                                color: '#FFFFFF'
+                                color: '#ffffff'
                             }
-                        },
-                        splitLine: {
-                            show: false
                         },
                         nameTextStyle: {
                             fontFamily: 'Microsoft YaHei'
                         },
-                        min: 0,
+                        axisLine: {
+                            show: true,
+                            lineStyle: { // 属性lineStyle控制线条样式
+                                color: '#ffffff'
+                            }
+                        },
                         axisTick: axisTickObj
+
                     },
                     {
                         type: 'value',
-                        name: "（%）",
+                        name: "PR（" + LANG["unit"] + " ：%）",
                         splitLine: {
                             show: false
                         },
@@ -230,47 +241,35 @@ new Vue({
                                 color: '#ffffff'
                             }
                         },
+                        nameTextStyle: {
+                            fontFamily: 'Microsoft YaHei'
+                        },
                         axisLine: {
                             show: true,
                             lineStyle: { // 属性lineStyle控制线条样式
                                 color: '#ffffff'
                             }
                         },
-                        nameTextStyle: {
-                            fontFamily: 'Microsoft YaHei'
-                        },
                         min: 0,
-                        splitNumber: 6,
+                        max: 100,
                         axisTick: axisTickObj
                     }
                 ],
                 series: [
                     {
-                        name: lengendName1,
+                        name: LANG["1_1_equalHour"],
                         type: 'bar',
                         yAxisIndex: 0,
-                        barMaxWidth: 20,
+                        barMaxWidth: 50,
                         itemStyle: {
                             normal: {
-                                color: '#0096ff',
+                                color: '#3EB5FF'
                             }
                         },
-                        data: planData
+                        data: valueAxis
                     },
                     {
-                        name: lengendName2,
-                        type: 'bar',
-                        yAxisIndex: 0,
-                        barMaxWidth: 20,
-                        itemStyle: {
-                            normal: {
-                                color: '#00f4fe',
-                            }
-                        },
-                        data: actualData
-                    },
-                    {
-                        name: LANG["1_1_planned_completion_rate"],
+                        name: 'PR',
                         type: 'line',
                         yAxisIndex: 1,
                         itemStyle: {
@@ -278,10 +277,9 @@ new Vue({
                                 color: '#fdd600'
                             }
                         },
-                        data: completionRt
+                        data: psPrData
                     }
                 ]
-
             };
 
             require.config({
@@ -296,53 +294,11 @@ new Vue({
                 ],
                 function (ec) {
                     $('.loadingDiv').hide();
-                    var ptChart = ec.init(document.getElementById('powerPlanAll'));
+                    var ptChart = ec.init(document.getElementById('dxxsAll'));
                     ptChart.setOption(option);
                     $(".showm_bottom .loadingDiv").hide();
                     $("#dxxsAll div").show();
                 });
-        },
-        //初始化input时间
-        initTime: function () {
-            var daybegin = new Date();
-            var year = daybegin.getFullYear();
-            var month = daybegin.getMonth() + 1;
-            var date = daybegin.getDate();
-            var hour = daybegin.getHours();
-            var min = daybegin.getMinutes();
-            var month1 = month >= 10 ? month : ("0" + month);
-            var date1 = date >= 10 ? date : ("0" + date);
-            var thisDate = year + "/" + month1; //+"/"+date1;
-            if (dialog.dateType == "2") {
-                thisDate = year + "/" + month1;
-            } else if (dialog.dateType == "3") {
-                thisDate = year;
-            }
-            $("#dateInput").val(thisDate);
-        },
-
-        addActive:function(){
-            $('#right_min_btn').removeClass('active');
-            $('#right_max_btn').removeClass('active');
-        },
-
-        //根据时间类型type 刷新等效小时数据 1:日  2:月  3:年
-        showEqHourData: function (e) {
-            var type = '';
-            $('.time_menunav_my ul li').removeClass("on");
-            if ($(e.target).attr('dateTabType') == 3 || $(e.target).attr('dateTabType') == undefined) {
-                $('.time_menunav_my ul li').eq(1).addClass("on");
-                type = '3';
-            } else {
-                $('.time_menunav_my ul li').eq(0).addClass("on");
-                type = $(e.target).attr('dateTabType');
-
-            }
-            dialog.dateType = type;
-            this.initTime();
-            this.setDateInputFormat();  //时间input绑定WdatePicker
-            this.loadPlanChart();
-            this.addActive();
         },
 
         //判断能否增长日期 val(eg:2016-01-01)
@@ -370,7 +326,7 @@ new Vue({
                     $('#right_max_btn').addClass('active');
                 }
                 $("#dateInput").val(val);
-                this.loadPlanChart();
+                this.loadPrChart();
             } else {
                 this.addActive();
             }
@@ -386,13 +342,6 @@ new Vue({
                 val = 1;
             }
             var date = $("#dateInput").val();
-            date = date.substring(0, 10);
-            //if (dialog.dateType == "1") {
-            //    var d1 = new Date(date.replace(/\-/g, "\/"));
-            //    d1.addDays(val);//加、减日 操作
-            //    temdate = d1.Format("yyyy/MM/dd");
-            //    this.isIncreaseDateAvailable(1, temdate, false);
-            //} else
             if (dialog.dateType == "2") {
                 var d1 = new Date(date.replace(/\-/g, "\/"));
                 d1.addMonths(val);
@@ -406,6 +355,39 @@ new Vue({
             }
         },
 
+        //箭头分页
+        arrowChangePage: function () {
+            if (event.target == document.getElementById("left_max_btn") && dialog.currentPage > 1) {
+                dialog.currentPage--;
+            } else if (event.target == document.getElementById("right_max_btn")) {
+                dialog.currentPage++;
+            }
+            loadPrChart();
+            isPageArrowAvilable();
+        },
+
+        //判断分页箭头可用
+        isPageArrowAvilable: function () {
+            if (dialog.pageCount > dialog.currentPage) {
+                $("#right_max_btn").unbind().bind('click', arrowChangePage);
+                $("#right_max_btn").css("opacity", 1);
+                $("#right_max_btn").css("cursor", 'pointer');
+            } else {
+                $("#right_max_btn").unbind('click', arrowChangePage);
+                $("#right_max_btn").css("opacity", 0.3);
+                $("#right_max_btn").css("cursor", 'default');
+            }
+            if (1 < dialog.currentPage) {
+                $("#left_max_btn").unbind().bind('click', arrowChangePage);
+                $("#left_max_btn").css("opacity", 1);
+                $("#left_max_btn").css("cursor", 'pointer');
+            } else {
+                $("#left_max_btn").unbind('click', arrowChangePage);
+                $("#left_max_btn").css("opacity", 0.3);
+                $("#left_max_btn").css("cursor", 'default');
+            }
+        },
+
         getInputDate: function () {
             var date = $("#dateInput").val();
             date = date.replace(/\//g, "");
@@ -413,8 +395,21 @@ new Vue({
         },
 
         setDateInputFormat: function () {
-            var _this = this;
-            if (dialog.dateType == "2") {
+            var _this=this;
+            if (dialog.dateType == "1" || !dialog.dateType) {
+                $("#dateInput").unbind();
+                $("#dateInput").click(function () {
+                    WdatePicker({
+                        dateFmt: 'yyyy/MM/dd',
+                        maxDate: '%y/%M/%d',
+                        isShowClear: false,
+                        readOnly: true,
+                        onpicking: function (dp) {
+                            _thisdateChanged(dp.cal.getDateStr(), dp.cal.getNewDateStr());
+                        }
+                    });
+                });
+            } else if (dialog.dateType == "2") {
                 $("#dateInput").unbind();
                 $("#dateInput").click(function () {
                     WdatePicker({
@@ -431,8 +426,12 @@ new Vue({
                 $("#dateInput").unbind();
                 $("#dateInput").click(function () {
                     WdatePicker({
-                        dateFmt: 'yyyy', maxDate: '%y', isShowClear: false, readOnly: true, onpicking: function (dp) {
-                            _this.dateChanged(dp.cal.getDateStr(), dp.cal.getNewDateStr());
+                        dateFmt: 'yyyy',
+                        maxDate: '%y',
+                        isShowClear: false,
+                        readOnly: true,
+                        onpicking: function (dp) {
+                            _thisdateChanged(dp.cal.getDateStr(), dp.cal.getNewDateStr());
                         }
                     });
                 });
@@ -441,17 +440,55 @@ new Vue({
 
         dateChanged: function (dStrOld, dStrNew) {
             if (true) {
-                this.isIncreaseDateAvailable(dialog.dateType, dStrNew, false);
+                isIncreaseDateAvailable(dialog.dateType, dStrNew, false);
+                this.loadPrChart();
             }
         },
 
+        showDXXSTable: function (dxxsData, psPrData, areaData, unit) {
+            var htmlStr = "<tr>";
+            for (var i = 0; i < dxxsData.length; i++) {
+                htmlStr += "<td>" + areaData[i] + "</td>";
+                htmlStr += "<td>" + dxxsData[i] + unit + "</td>";
+                htmlStr += "<td>" + psPrData[i] + "%" + "</td>";
+                htmlStr += "</tr>";
+            }
+            $("#tbody_id").html(htmlStr);
+            $(".showm_table").mCustomScrollbar({});
+        },
+
+        toggleShow: function () {
+            $(".plan_dxxsAll").toggle();
+            $(".plan_dxxsAll_table").toggle();
+            $(".cgDataview").toggle();
+        },
+
+        showSortData: function (val) {
+            if (dialog.prSort) {
+                dialog.prSort = 0;
+            } else {
+                dialog.prSort = 1;
+            }
+            if (val == 0) {
+                dialog.sortColumn = "p83025";
+            } else if (val == 1) {
+                dialog.sortColumn = "p83023";
+            }
+            loadPrChart();
+        },
+
         closeWindow: function () {
-            $(".Monitor_left_c3_highLt", parent.document).removeClass("Monitor_left_c3_highLt");
+            $(".Monitor_left_c2_highLt", parent.document).removeClass("Monitor_left_c2_highLt");
             window.parent.closeEqualHourFm();
         }
     },
     mounted: function () {
-        this.showEqHourData(3);
-
+        this.showEqHourData(2);
     }
 });
+
+
+
+
+
+
