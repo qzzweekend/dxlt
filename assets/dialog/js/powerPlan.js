@@ -108,9 +108,15 @@ new Vue({
                         } else {
                             var temAddedArr = addUpArr(newActualData);
                             var temSum = addUpArr(planData);
+                            var now = new Date();
+                            var month = now.getMonth() + 1;
                             for (var i = 0; i < planData.length; i++) {
                                 xData.push(i + 1);
-                                completionRt.push(CalculatedCompletionRate(temAddedArr[i], temSum[i]));
+                                if(i<month){
+                                    completionRt.push(CalculatedCompletionRate(temAddedArr[i], temSum[i]));
+                                }else{
+                                    completionRt.push('--');
+                                }
                             }
                         }
                         _this.drawPowerPlanChart(dealEchartBarArr(newActualData), dealEchartBarArr(planData), unit, xData, dealEchartLineArr(completionRt));

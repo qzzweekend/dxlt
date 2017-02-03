@@ -157,42 +157,6 @@ new Vue({
         },
 
         loadDataForRealTimePower: function () {
-            //var param = {};
-            //param["service"] = "psHourPointsValue";
-            //param["ps_id"] = dialog.ps_id;
-            //param["req"] = "app";
-            //$.ajax({
-            //    url: "powerAction_loaddata.action",
-            //    type: "post",
-            //    data: param,
-            //    dataType: "json",
-            //    timeout: 1000 * 10,
-            //    beforeSend: function () {
-            //
-            //    },
-            //    success: function (data) {
-            //        var data = parseJson(data);
-            //        if (data && data.result_data) {
-            //            var date = new Date();
-            //            var hours = date.getHours();
-            //            var min = date.getMinutes();
-            //            if (min < 5) {
-            //                hours = hours - 1;
-            //            }
-            //            var result = data.result_data;
-            //            var powerArr = result.p83033List.slice(0, hours);
-            //            var radiaArr = result.p83012List.slice(0, hours);
-            //            var dclist = result.p83039List.slice(0, hours);
-            //            var aclist = result.p83002List.slice(0, hours);
-            //            var powerUnit = result.p83033_unit;
-            //            var radiaUnit = result.p83012_unit;
-            //            var dc_unit = result.p83039_unit;
-            //            var ac_unit = result.p83002_unit;
-            //            this.drawRealTimeEchart(dealEchartLineArr(powerArr), dealEchartLineArr(radiaArr), dealEchartLineArr(dclist), dealEchartLineArr(aclist), powerUnit, radiaUnit, dc_unit, ac_unit);
-            //        }
-            //    }
-            //});
-
             var dates = new Date(),
                 endDate = dates.getFullYear() + '-' + (dates.getMonth() + 1) + '-' + dates.getDate() + 'T' + dates.getHours() + ':' + dates.getMinutes() + ':' + dates.getSeconds(),
                 endDateStr = vlm.Utils.format_date(endDate, 'YmdHis'),
@@ -208,24 +172,24 @@ new Vue({
                 ac_unit = 'kW';
 
             powerArr=[
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "479.52",
-                "1800.86",
-                "1491.84",
-                "2600.06",
-                "2568.1",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "0",
+                "723.83",
+                "5755.3",
+                "3689.75",
+                "4095.8",
+                "5278.64",
+                "10627.89",
+                "18766.52",
+                "5596.41",
+                "8226.9",
+                "1094.57",
+                "0",
                 "--",
                 "--",
                 "--",
@@ -328,7 +292,7 @@ new Vue({
                 "code": "20000005"
             }
             //console.log(Parameters);
-            vlm.loadJson("../data/detail.json", JSON.stringify(Parameters), function (res) {
+            vlm.loadJson("", JSON.stringify(Parameters), function (res) {
                 console.log(res);
                 //if (res.success) {
                 //    var result = res.data.fd_datas;
@@ -348,7 +312,6 @@ new Vue({
                     if(min<5){
                         hours = hours-1;
                     }
-                alert(hours);
                     var result = res.result_data;
                     var powerArr = result.p83033List.slice(0,hours);
                     var radiaArr = result.p83012List.slice(0,hours);

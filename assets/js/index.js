@@ -822,13 +822,18 @@ new Vue({
             var temSum = addUpArr(planData);
             var allActual = sumArrayData(actualData);
             var allPlan = 0;
+            var now = new Date();
+            var month = now.getMonth() + 1;
             for (var i = 0; i < planData.length; i++) {
                 var plan = isNotNull(planData[i]) ? planData[i] : 0;
                 allPlan = allPlan + parseFloat(plan);
-                completionRt.push(CalculatedCompletionRate(temArr[i], temSum[i]));
-            }
-            completionRt = dealEchartLineArr(completionRt);
+                if(i<month){
+                    completionRt.push(CalculatedCompletionRate(temArr[i], temSum[i]));
+                }else{
+                    completionRt.push('--');
+                }
 
+            }
             var yearRat = isNotNull(allPlan) ? (toFix(allActual * 100 / allPlan, 2) + "%") : "--";//年完成率
             $("#yearCompleteRate").html(yearRat);
             var option = {
@@ -849,9 +854,19 @@ new Vue({
                 tooltip: {
                     trigger: 'axis',
                     formatter: function (data) {
-                        var year = _this.myDate.getFullYear();
-                        var str = year + "/" + data[1].name;
-                        for (var i = 0; i < data.length; i++) {
+                        var year=_this.myDate.getFullYear();
+                        var dataName = data[0].name;
+                        if(typeof dataName == 'undefined' || dataName == null || dataName == ""){
+                            for(var i = 0; i < data.length; i ++) {
+                                var temDname = data[i].name;
+                                if(typeof temDname !== 'undefined' && temDname !== null && temDname !== ""){
+                                    dataName = temDname;
+                                    break;
+                                }
+                            }
+                        }
+                        var str = year+"/"+ dataName;
+                        for(var i = 0; i < data.length; i ++) {
                             if (LANG["actualGeneration"] == data[i].seriesName || LANG["planGeneration"] == data[i].seriesName) {
                                 str += "<p align='left'>" + data[i].seriesName + "：" + dealEchartToolTip(data[i].value) + unit;
                             } else {
@@ -867,19 +882,19 @@ new Vue({
                     x: 'right',               // 水平安放位置，默认为全图居中，可选为：
                     // 'center' ¦ 'left' ¦ 'right'
                     // ¦ {number}（x坐标，单位px）
-                    y: '0',                  // 垂直安放位置，默认为全图顶端，可选为：
+                    y: '-3',                  // 垂直安放位置，默认为全图顶端，可选为：
                     // 'top' ¦ 'bottom' ¦ 'center'
                     // ¦ {number}（y坐标，单位px）
                     textStyle: {
-                        color: '#fff',
-                        fontFamily: 'Microsoft YaHei'
+                        color: '#FFFFFF',
+                        fontFamily : 'Microsoft YaHei'
                     },
-                    data: [LANG["planGeneration"], LANG["actualGeneration"], LANG["1_1_planned_completion_rate"]]
+                    data: [LANG["planGeneration"], LANG["actualGeneration"],LANG["1_1_planned_completion_rate"]]
                 },
                 // 网格
                 grid: {
                     x: 40,
-                    y: 35,
+                    y: 45,
                     x2: 35,
                     y2: 30,
                     backgroundColor: 'rgba(0,0,0,0)',
@@ -893,20 +908,20 @@ new Vue({
                         axisLine: {
                             show: true,
                             lineStyle: { // 属性lineStyle控制线条样式
-                                color: '#fff'
+                                color: '#FFFFFF'
                             }
                         },
                         axisLabel: {
                             show: true,
                             rotate: 0,//逆时针显示标签，不让文字叠加
                             textStyle: {
-                                color: '#fff'
+                                color: '#FFFFFF'
                             }
                         },
                         splitLine: {
                             show: false
                         },
-                        boundaryGap: [0, 0.01],
+                        boundaryGap: [0,0.01],
                         data: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
                     }
                 ],
@@ -917,20 +932,20 @@ new Vue({
                         axisLine: {
                             show: true,
                             lineStyle: { // 属性lineStyle控制线条样式
-                                color: '#fff'
+                                color: '#FFFFFF'
                             }
                         },
                         axisLabel: {
                             show: true,
                             textStyle: {
-                                color: '#fff'
+                                color: '#FFFFFF'
                             }
                         },
                         splitLine: {
                             show: false
                         },
-                        nameTextStyle: {
-                            fontFamily: 'Microsoft YaHei'
+                        nameTextStyle:{
+                            fontFamily : 'Microsoft YaHei'
                         },
                         axisTick: axisTickObj
                     },
@@ -943,20 +958,20 @@ new Vue({
                         axisLabel: {
                             show: true,
                             textStyle: {
-                                color: '#fff'
+                                color: '#ffffff'
                             }
                         },
                         axisLine: {
                             show: true,
                             lineStyle: { // 属性lineStyle控制线条样式
-                                color: '#fff'
+                                color: '#ffffff'
                             }
                         },
                         min: 0,
                         max: 120,
                         splitNumber: 6,
-                        nameTextStyle: {
-                            fontFamily: 'Microsoft YaHei'
+                        nameTextStyle:{
+                            fontFamily : 'Microsoft YaHei'
                         },
                         axisTick: axisTickObj
                     }
@@ -967,11 +982,9 @@ new Vue({
                         type: 'bar',
                         barMaxWidth: 6,
                         smooth: true,
-                        itemStyle: {
-                            normal: {
-                                color: '#0096ff',
-                            }
-                        },
+                        itemStyle: { normal: {
+                            color: '#0096ff',
+                        }},
                         data: planData
                     },
                     {
@@ -992,14 +1005,12 @@ new Vue({
                         type: 'line',
                         yAxisIndex: 1,
                         smooth: true,
-                        itemStyle: {
-                            normal: {
-                                color: '#fdd600',
-                                lineStyle: {        // 系列级个性化折线样式
-                                    width: 2
-                                }
+                        itemStyle: { normal: {
+                            color: '#fdd600',
+                            lineStyle: {        // 系列级个性化折线样式
+                                width: 2
                             }
-                        },
+                        }},
                         data: completionRt
                     }
                 ]
