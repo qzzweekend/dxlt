@@ -17,10 +17,10 @@
                     </ul>
                 </div>
                 <div class="time_menunav clearfix">
-                    <ul>
-                        <li class="on"><a  onclick="showEqHourData(1)" href="javascript:;">日</a></li>
-                        <li><a onclick="showEqHourData(2)" href="javascript:;">月</a></li>
-                        <li><a onclick="showEqHourData(3)" href="javascript:;">年</a></li>
+                    <ul @click="showEqHourData($event)">
+                        <li class="on"><a dateTabType="1" href="javascript:;">日</a></li>
+                        <li><a dateTabType="2" href="javascript:;">月</a></li>
+                        <li><a dateTabType="3" href="javascript:;">年</a></li>
                     </ul>
                 </div>
                 <div class="showm_top_right fr clearfix">
@@ -34,8 +34,8 @@
                     <div class="time_slide_input fl"><input id="dateInput" type="text" readonly="readonly"/></div>
                     <a href="javascript:;" class="right_min_btn fr" id="right_min_btn" @click="arrowChangeDate"></a>
                 </div>
-                <a href="javascript:;" class="max_btn left_max_btn" id="left_max_btn" @click="arrowChangeDate"></a>
-                <a href="javascript:;" class="max_btn right_max_btn" id="right_max_btn" @click="arrowChangeDate"></a>
+                <a href="javascript:;" class="max_btn left_max_btn" id="left_max_btn"></a>
+                <a href="javascript:;" class="max_btn right_max_btn" id="right_max_btn"></a>
                 <div align="center" class="loadingDiv">
                     <img src="images/loading.gif"/>
                 </div>
@@ -54,8 +54,7 @@
 <script type="text/javascript" src="../js/common/common.js"></script>
 <script type="text/javascript" src="../js/common/esmpbase.js"></script>
 <script type="text/javascript" src="../js/lib/lang.js"></script>
-<script type="text/javascript" src="../js/plugin/echarts/build/dist/echarts.js"></script>
-<script type="text/javascript" src="../js/plugin/echarts-x/build/dist/echarts-x.js"></script>
+<script type="text/javascript" src="../js/plugin/echarts_new/echarts.min.js"></script>
 <script type="text/javascript" src="js/lib/DateUtil.js"></script>
 <script type="text/javascript" src="js/lib/TouchSlide.js"></script>
 <script type="text/javascript" src="My97DatePicker/WdatePicker.js"></script>

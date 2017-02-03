@@ -29,11 +29,6 @@ new Vue({
             $("#dateInput").val(thisDate);
         },
 
-        addActive: function () {
-            $('#right_min_btn').removeClass('active');
-            $('#right_max_btn').removeClass('active');
-        },
-
         showEqHourData: function (e) {
             var type = '';
             $('.time_menunav_my ul li').removeClass("on");
@@ -49,7 +44,7 @@ new Vue({
             this.initTime();
             this.setDateInputFormat();  //时间input绑定WdatePicker
             this.loadPrChart();
-            this.addActive();
+            $('#right_min_btn').removeClass('active');
         },
 
         loadPrChart: function () {
@@ -116,15 +111,19 @@ new Vue({
                     var areaData = [];//地区
                     var unit = "小时";
                     var resultArray = res.data;
-                    for (var i = 0; i < resultArray.length; i++) {
-                        var obj = resultArray[i];
-                        dxxsData.push(obj.equivalenthour);
-                        psPrData.push(obj.pr);
-                        areaData.push(obj.fd_station_name);
+                    if(resultArray.length){
+                        for (var i = 0; i < resultArray.length; i++) {
+                            var obj = resultArray[i];
+                            dxxsData.push(obj.equivalenthour);
+                            psPrData.push(obj.pr);
+                            areaData.push(obj.fd_station_name);
+                        }
+                        _this.showDXXSTable(dxxsData, psPrData, areaData, unit);
+                        _this.showPrChart(dealEchartBarArr(dxxsData), dealEchartBarArr(psPrData), areaData, unit);
+                    }else{
+                        $(".showm_bottom .loadingDiv").hide();
+                        $("#dxxsAll").css('visibility','hidden');
                     }
-                    _this.showDXXSTable(dxxsData, psPrData, areaData, unit);
-                    _this.showPrChart(dealEchartBarArr(dxxsData), dealEchartBarArr(psPrData), areaData, unit);
-
                 } else {
                     alert(res.message);
                 }
@@ -133,6 +132,7 @@ new Vue({
 
         //等效小时弹出chart
         showPrChart: function (valueAxis, psPrData, areaData, unit) {
+            $("#dxxsAll").css('visibility','visible');
             var option = {
                 tooltip: {
                     trigger: 'axis',
@@ -281,24 +281,11 @@ new Vue({
                     }
                 ]
             };
-
-            require.config({
-                paths: {
-                    'echarts': '../js/plugin/echarts/build/dist'
-                }
-            });
-            require([
-                    'echarts',
-                    'echarts/chart/line',
-                    'echarts/chart/bar'
-                ],
-                function (ec) {
-                    $('.loadingDiv').hide();
-                    var ptChart = ec.init(document.getElementById('dxxsAll'));
-                    ptChart.setOption(option);
-                    $(".showm_bottom .loadingDiv").hide();
-                    $("#dxxsAll div").show();
-                });
+            $('.loadingDiv').hide();
+            var ptChart = echarts.init(document.getElementById('dxxsAll'));
+            ptChart.setOption(option);
+            $(".showm_bottom .loadingDiv").hide();
+            $("#dxxsAll div").show();
         },
 
         //判断能否增长日期 val(eg:2016-01-01)
@@ -320,15 +307,14 @@ new Vue({
 
             if (this.showIncreaseDate) {  //可以增加
                 if (now.Format("yyyy") == val.substring(0, 4).replace(/\//g, "")) {
-                    this.addActive();
-                }else{
+                    $('#right_min_btn').removeClass('active');
+                } else {
                     $('#right_min_btn').addClass('active');
-                    $('#right_max_btn').addClass('active');
                 }
                 $("#dateInput").val(val);
                 this.loadPrChart();
             } else {
-                this.addActive();
+                $('#right_min_btn').removeClass('active');
             }
         },
 
@@ -336,9 +322,9 @@ new Vue({
         arrowChangeDate: function () {
             var temdate = "";
             var val = 0;
-            if (event.target == document.getElementById("left_min_btn") || event.target == document.getElementById("left_max_btn")) {//判断事件对象，左键头时间向前
+            if (event.target == document.getElementById("left_min_btn")) {//判断事件对象，左键头时间向前
                 val = -1;
-            } else if (event.target == document.getElementById("right_min_btn") || event.target == document.getElementById("right_max_btn")) {
+            } else if (event.target == document.getElementById("right_min_btn")) {
                 val = 1;
             }
             var date = $("#dateInput").val();
@@ -362,8 +348,8 @@ new Vue({
             } else if (event.target == document.getElementById("right_max_btn")) {
                 dialog.currentPage++;
             }
-            loadPrChart();
-            isPageArrowAvilable();
+            this.loadPrChart();
+            this.isPageArrowAvilable();
         },
 
         //判断分页箭头可用
@@ -395,7 +381,7 @@ new Vue({
         },
 
         setDateInputFormat: function () {
-            var _this=this;
+            var _this = this;
             if (dialog.dateType == "1" || !dialog.dateType) {
                 $("#dateInput").unbind();
                 $("#dateInput").click(function () {
@@ -405,7 +391,7 @@ new Vue({
                         isShowClear: false,
                         readOnly: true,
                         onpicking: function (dp) {
-                            _thisdateChanged(dp.cal.getDateStr(), dp.cal.getNewDateStr());
+                            _this.dateChanged(dp.cal.getDateStr(), dp.cal.getNewDateStr());
                         }
                     });
                 });
@@ -431,7 +417,7 @@ new Vue({
                         isShowClear: false,
                         readOnly: true,
                         onpicking: function (dp) {
-                            _thisdateChanged(dp.cal.getDateStr(), dp.cal.getNewDateStr());
+                            _this.dateChanged(dp.cal.getDateStr(), dp.cal.getNewDateStr());
                         }
                     });
                 });
@@ -440,7 +426,7 @@ new Vue({
 
         dateChanged: function (dStrOld, dStrNew) {
             if (true) {
-                isIncreaseDateAvailable(dialog.dateType, dStrNew, false);
+                this.isIncreaseDateAvailable(dialog.dateType, dStrNew, false);
                 this.loadPrChart();
             }
         },

@@ -2,25 +2,6 @@ new Vue({
     el: '#stationBulding',
     data: {},
     methods: {
-        //根据电站建设状态排序
-        sortPsBuildArr: function (arr) {
-            for (var i = 0; i < arr.length - 1; i++) {
-                var maxIndex = i;
-                for (var j = i + 1; j < arr.length; j++) {
-                    var maxVal = arr[maxIndex].fd_station_status;
-                    var curVal = arr[j].fd_station_status;
-                    if ($.isNumeric(maxVal) && $.isNumeric(curVal) && maxVal < curVal) {
-                        maxIndex = j;
-                    }
-                }
-                if (maxIndex != i) {
-                    var tem = arr[maxIndex];
-                    arr[maxIndex] = arr[i];
-                    arr[i] = tem;
-                }
-            }
-            return arr;
-        },
         //电站建设
         stationBuild: function () {
             var _this = this;
@@ -32,9 +13,7 @@ new Vue({
             vlm.loadJson("", JSON.stringify(Parameters), function (res) {
                 if (res.success) {
                     var newArr = res.data;
-                    console.log(newArr[0]);
-                    newArr = _this.sortPsBuildArr(newArr);
-                    console.log(newArr[0]);
+                    newArr = vlm.Utils.sortArr(newArr,'fd_station_status');
                     var stationStr = $('#stationTpl').html();
                     var trHtml = ejs.render(stationStr, {newArr: newArr});
                     $("#tbody_id").html(trHtml);

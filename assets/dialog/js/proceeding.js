@@ -269,23 +269,11 @@ new Vue({
                 ]
 
             };
-            require.config({
-                paths: {
-                    'echarts': '../js/plugin/echarts/build/dist'
-                }
-            });
-            require([
-                    'echarts',
-                    'echarts/chart/line',
-                    'echarts/chart/bar'
-                ],
-                function (ec) {
-                    $('.loadingDiv').hide();
-                    var ptChart = ec.init(document.getElementById('dxxsAll'));
-                    ptChart.setOption(option);
-                    $(".showm_bottom .loadingDiv").hide();
-                    $("#dxxsAll div").show();
-                });
+            $('.loadingDiv').hide();
+            var ptChart = echarts.init(document.getElementById('dxxsAll'));
+            ptChart.setOption(option);
+            $(".showm_bottom .loadingDiv").hide();
+            $("#dxxsAll div").show();
         },
         //关闭弹窗
         closeWindow: function () {

@@ -50,21 +50,22 @@ html, body {
     float: left;
 }
 
-.showm_top_left ul li a{
-    float:left;
-    display:block;
-    background:url(../images/navbg.png) no-repeat;
-    width:170px;
-    height:33px;
-    line-height:33px;
-    text-align:center;
-    font-family:"Microsoft YaHei";
-    font-size:14px;
-    color:#ffffff;
-    margin-left:-20px;
+.showm_top_left ul li a {
+    float: left;
+    display: block;
+    background: url(../images/navbg.png) no-repeat;
+    width: 170px;
+    height: 33px;
+    line-height: 33px;
+    text-align: center;
+    font-family: "Microsoft YaHei";
+    font-size: 14px;
+    color: #ffffff;
+    margin-left: -20px;
 }
-.showm_top_left ul li.on a{
-    background:url(../images/navbg_on.png) no-repeat;
+
+.showm_top_left ul li.on a {
+    background: url(../images/navbg_on.png) no-repeat;
 }
 
 .showm_top_right {
@@ -307,6 +308,7 @@ html, body {
     margin-top: -28px;
     left: 17px;
     z-index: 999;
+    opacity: .3;
 }
 
 .right_max_btn {
@@ -614,6 +616,14 @@ html, body {
 #deviceUl h3 {
     margin-top: 22px;
     margin-bottom: 10px;
+    font-weight: bold;
+}
+#deviceUl >li{
+    cursor: pointer;
+}
+
+#deviceUl h5 {
+    font-weight: bold;
 }
 
 .top_device_status {

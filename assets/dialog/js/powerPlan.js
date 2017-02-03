@@ -34,7 +34,6 @@ new Vue({
                     date.setFullYear(year, month, 0);
                     var day = date.getDate();
                     startDateStr = dateNum + '01000000';
-
                     endDateStr = dateNum.substring(0, 6) + day + '000000';
                     break;
                 //case '2':
@@ -116,6 +115,9 @@ new Vue({
                         }
                         _this.drawPowerPlanChart(dealEchartBarArr(newActualData), dealEchartBarArr(planData), unit, xData, dealEchartLineArr(completionRt));
 
+                    }else{
+                        $(".showm_bottom .loadingDiv").hide();
+                        $("#powerPlanAll").hide();
                     }
                 } else {
                     alert(res.message);
@@ -124,7 +126,7 @@ new Vue({
         },
         //绘制发电计划chart
         drawPowerPlanChart: function (actualData, planData, unit, xData, completionRt) {
-
+            $("#powerPlanAll").show();
             var lengendName1 = LANG["1_1_planned_genarate"];
             var lengendName2 = LANG["1_1_actual_genarate"];
             if (dialog.dateType == 2) {
@@ -283,24 +285,11 @@ new Vue({
                 ]
 
             };
-
-            require.config({
-                paths: {
-                    'echarts': '../js/plugin/echarts/build/dist'
-                }
-            });
-            require([
-                    'echarts',
-                    'echarts/chart/line',
-                    'echarts/chart/bar'
-                ],
-                function (ec) {
-                    $('.loadingDiv').hide();
-                    var ptChart = ec.init(document.getElementById('powerPlanAll'));
-                    ptChart.setOption(option);
-                    $(".showm_bottom .loadingDiv").hide();
-                    $("#dxxsAll div").show();
-                });
+            $('.loadingDiv').hide();
+            var ptChart = echarts.init(document.getElementById('powerPlanAll'));
+            ptChart.setOption(option);
+            $(".showm_bottom .loadingDiv").hide();
+            $("#dxxsAll div").show();
         },
         //初始化input时间
         initTime: function () {
@@ -451,6 +440,7 @@ new Vue({
         }
     },
     mounted: function () {
+        $('#left_max_btn').css('opacity',1);
         this.showEqHourData(3);
 
     }

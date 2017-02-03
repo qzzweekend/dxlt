@@ -1,7 +1,7 @@
 //2016-11-12 ChuD; 等效小时、发电量排名弹出框
 var dialog = {
     genOrEqHr: 2, //1:等效小时; 2.发电量; 3:发电趋势
-    dateType: 1, //等效小时、发电量 排名  1:日  2:月  3:年
+    dateType: '1', //等效小时、发电量 排名  1:日  2:月  3:年
     curtOrgId_refresh: "", //当前组织id，用于 定时刷新
     dxxChart: "",
     fdlChart: "",
@@ -18,6 +18,19 @@ var dialog = {
     psIdArr: []
 };
 
+function getFmTime(time) {
+    var resTime = "";
+    //var temVal = dealTimeNum(time);
+    var temVal = time;
+    var date = $("#dateInput").val();
+    if (dialog.dateType == 1) {
+        resTime = date + " " + temVal + ":00";
+    } else {
+        resTime = date + "/" + temVal;
+    }
+    return resTime;
+}
+
 new Vue({
     el: '#powerTrend',
     data: {
@@ -27,23 +40,30 @@ new Vue({
     methods: {
         power_hourTab: function (e) {
             var tabType = $(e.target).attr('data-powerType');
+            $('.showm_top_left ul li').removeClass('on');
             $(".showm_bottom .loadingDiv").show();
             if (tabType == 'power') {
                 //点击发电量btn
-                $("#dxxs_li").show();
-                $(".max_btn").show();
-                $("#fdlAllChart").show();
+                $('.showm_top_left ul li').eq(0).addClass('on');
+                $("#dxxs_li").show();  //等效小时btn显示
+                $(".max_btn").show();  //左右切换大btn显示
+                $("#fdlAllChart").show();  //发电量chart
                 $("#dxxsAll").hide();
                 $("#genTrends").hide();
                 $("#psName").hide();
-            } else {
+                this.loadDXXOrFDL(1);
+            } else if (tabType == 'hour') {
                 //点击等效小时btn
+                $('.showm_top_left ul li').eq(1).addClass('on');
                 $("#dxxsAll").show();
                 $("#fdlAllChart").hide();
+                dialog.dateType = '1';
+                this.loadDXXOrFDL();
+
             }
 
-            //this.loadDXXOrFDL();
         },
+
         initTime: function () {
             var daybegin = new Date();
             var year = daybegin.getFullYear();
@@ -62,25 +82,33 @@ new Vue({
             $("#dateInput").val(thisDate);
         },
 
-        addActive: function () {
-            $('#right_min_btn').removeClass('active');
-            $('#right_max_btn').removeClass('active');
-        },
-
         //根据时间类型type 刷新等效小时数据 1:日  2:月  3:年
-        showEqHourData: function (type) {
-            dialog.currentPage = 1;
-            dialog.dateType = type;
-            this.setDateInputFormat();
-            this.initTime();
-            if (dialog.genOrEqHr == 2) {
-                this.loadFDLAll();
-            } else if (dialog.genOrEqHr == 3) {
-                this.loadGenTrendsData();
-            } else {
-                loadDXXSAll();
+        showEqHourData: function (e) {
+            var type = '';
+            $('.time_menunav ul li').removeClass("on");
+            if ($(e.target).attr('dateTabType') == 1 || $(e.target).attr('dateTabType') == undefined) {
+                $('.time_menunav ul li').eq(0).addClass("on");
+                type = '1';
+            } else if ($(e.target).attr('dateTabType') == 2) {
+                $('.time_menunav ul li').eq(1).addClass("on");
+                type = '2';
+            } else if ($(e.target).attr('dateTabType') == 3) {
+                $('.time_menunav ul li').eq(2).addClass("on");
+                type = '3';
             }
-            this.isIncreaseDateAvailable(type, $("#dateInput").val(), false);
+            dialog.dateType = type;
+            this.initTime();
+            this.setDateInputFormat();  //时间input绑定WdatePicker
+            $('#right_min_btn').removeClass('active');
+
+            if (dialog.genOrEqHr == 1) {  //等效小时
+                this.loadDXXSAll();
+            } else if (dialog.genOrEqHr == 2) { //发电量排名
+                this.loadFDLAll();
+
+            } else if (dialog.genOrEqHr == 3) { //发电趋势
+                this.loadGenTrendsData();
+            }
         },
 
         loadDXXOrFDL: function (val) {
@@ -90,78 +118,89 @@ new Vue({
             } else if (val == 3) {
                 this.loadGenTrendsData();
             } else {
-                loadDXXSAll();
+                this.loadDXXSAll();
             }
         },
 
         //加载所有县区的等效小时排名;
         loadDXXSAll: function () {
             dialog.genOrEqHr = 1;
-            var url = 'powerAction_loaddata.action';
-            var param = {};
-            param["service"] = "stationsPointReport";
-            param["type"] = dialog.dateType;
-            param["req"] = "app";
-            param["date_id"] = getDate();
-            param["org_id"] = dialog.curtOrgId_refresh;
-            param["curPage"] = dialog.currentPage;
-            param["size"] = dialog.pageSize;
-            param["sort_column"] = "p83025";
-            param["sort_type"] = "0";
-            $.ajax({
-                type: "post",
-                data: param,
-                url: url,
-                dataType: "json",
-                beforeSend: function () {
-                    dialog.dxxChart = echarts.init(document.getElementById('dxxsAll'));
-                    $(".showm_bottom .loadingDiv").show();
-                },
-                success: function (data, s) {
-                    if (isNotNull(data)) {
-                        var dxxsData = [];//等效小时
-                        var areaData = [];//地区
-                        var unit = "小时";
-                        var obj = parseJson(data);
-                        //var maxData ;
-                        if (obj != null && obj.result_code != -1) {
-                            var result_data = obj.result_data;
-                            dialog.rowCount = result_data.rowCount;
-                            dialog.pageCount = dialog.rowCount / dialog.pageSize;
-                            isPageArrowAvilable();
-                            var resultArray = result_data.list;
-                            //maxData = resultArray[0].p83025;
-                            for (var i = 0; i < resultArray.length; i++) {
-                                var obj = resultArray[i];
-                                dxxsData.push(toFix(obj.p83025, 2));
-                                areaData.push(obj.ps_name);
-                            }
-                            var maxPower = dxxsData.max();
-                            if (isNotNull(maxPower)) {
+            dialog.dxxChart = echarts.init(document.getElementById('dxxsAll'));
+            var _this = this,
+                dateType = dialog.dateType,
+                dateStr = '',
+                startDateStr = '',
+                dates = new Date(),
+                endDate = dates.getFullYear() + '-' + (dates.getMonth() + 1) + '-' + dates.getDate() + 'T' + dates.getHours() + ':' + dates.getMinutes() + ':' + dates.getSeconds(),
+                endDateStr = vlm.Utils.format_date(endDate, 'YmdHis');
 
-                                if (parseInt(maxPower / 10000) > 0) {
-                                    for (var i = 0; i < dxxsData.length; i++) {
-                                        if ($.isNumeric(dxxsData[i])) {
-                                            dxxsData[i] = parseFloat(dxxsData[i] / 10000).toFixed(2);
-                                        }
-                                    }
-                                    unit = "万小时"
-                                }
-                                else if (parseInt(maxPower / 1000) > 0) {
-                                    for (var i = 0; i < dxxsData.length; i++) {
-                                        if ($.isNumeric(dxxsData[i])) {
-                                            dxxsData[i] = parseFloat(dxxsData[i] / 1000).toFixed(2);
-                                        }
-                                    }
-                                    unit = "千小时"
-                                }
-                            }
-                        }
-                        showDXXSAll(dxxsData, areaData, unit);
+            switch (dateType) {
+                case '1':
+                    dateStr = '2';
+                    var dateNum = this.getInputDate($('#dateInput').val());
+                    startDateStr = this.getInputDate(dateNum) + '000000';
+                    var date = new Date();
+                    date.setDate(date.getDate() + 1);
+                    var day = date.getDate();
+                    var month = date.getMonth() + 1;
+                    endDateStr = date.getFullYear() + '' + dealDate(month) + '' + dealDate(day) + '000000';
+                    break;
+                case '2':
+                    dateStr = '6';
+                    var dateNum = this.getInputDate($('#dateInput').val());
+                    var date = new Date();
+                    var year = dateNum.substring(0, 4);
+                    var month = dateNum.substring(4);
+                    if (month < 10) {
+                        month = month.substring(1);
                     }
-                },
-                error: function () {
+                    ;
+                    date.setFullYear(year, month, 0);
+                    var day = date.getDate();
+                    startDateStr = dateNum + '01000000';
 
+                    endDateStr = dateNum.substring(0, 6) + day + '000000';
+                    break;
+                case '3':
+                    dateStr = '6';
+                    startDateStr = $('#dateInput').val() + '0101000000';
+                    endDateStr = (Number($('#dateInput').val()) + 1) + '0101000000';
+                    break;
+                default :
+                    ;
+            }
+
+            var Parameters = {
+                "parameters": {
+                    "stationtype": "allstation",
+                    "timetype": dateStr,
+                    "sorttype": "1",
+                    "sort": "1",
+                    "starttime": startDateStr,
+                    "endtime": endDateStr,
+                    "topn": "300",
+                    "stationid": ""
+                },
+                "foreEndType": 2,
+                "code": "20000005"
+            };
+            //console.log(Parameters);
+            vlm.loadJson("", JSON.stringify(Parameters), function (res) {
+                //console.log(res);
+                if (res.success) {
+                    var result_data = res.data,
+                        dxxsData = [],
+                        areaData = [],
+                        unit = '小时';
+                    var resultArray = result_data.fd_datas;
+                    if (resultArray.length) {
+                        resultArray = vlm.Utils.sortArr(resultArray, 'equivalenthour');
+                        for (var i = 0; i < resultArray.length; i++) {
+                            dxxsData.push(resultArray[i].equivalenthour);
+                            areaData.push(resultArray[i].fd_station_name);
+                        }
+                        _this.showDXXSAll(dxxsData, areaData, unit);
+                    }
                 }
             });
         },
@@ -274,106 +313,101 @@ new Vue({
             };
             dialog.dxxChart.setOption(option);
             $(".showm_bottom .loadingDiv").hide();
-            $("#dxxsAll div").show();
+            $("#dxxsAll").show();
         },
-
-        //日发电量83022  月发电量83037  年发电量83038
-        getSortColumn: function () {
-
-            switch (dialog.dateType) {
-                case 1:
-                    return 'p83022';
-                    break;
-                case 2:
-                    return 'p83037';
-                    break;
-                default:
-                    return 'p83038';
-            }
-        },
-        //加载所有县区的发电量排名
+        //加载发电量排名
         loadFDLAll: function () {
             dialog.genOrEqHr = 2;
-            var url = 'powerAction_loaddata.action';
-            var param = {};
-            param["service"] = "stationsPointReport";
-            //param["limit"] = 31;
-            param["req"] = "app";
-            param["curPage"] = dialog.currentPage;
-            param["size"] = dialog.pageSize;
-            param["sort_column"] = this.getSortColumn();
-            param["sort_type"] = "0";
-            param["type"] = dialog.dateType;
-            param["date_id"] = this.getInputDate();
-            param["org_id"] = dialog.curtOrgId_refresh;
+            dialog.fdlChart = echarts.init(document.getElementById('fdlAllChart'));
 
-            $.ajax({
-                type: "post",
-                data: param,
-                url: url,
-                dataType: "json",
-                beforeSend: function () {
-                    dialog.psIdArr = [];
-                    require.config({
-                        paths: {
-                            'echarts': '../js/plugin/echarts/build/dist'
-                        }
-                    });
-                    require([
-                            'echarts',
-                            'echarts/chart/line',
-                            'echarts/chart/bar'
-                        ],
-                        function (ec) {
-                            $('.loadingDiv').hide();
-                            dialog.fdlChart = ec.init(document.getElementById('fdlAllChart'));
-                        });
-                    $(".showm_bottom .loadingDiv").show();
-                },
-                success: function (data, s) {
-                    if (isNotNull(data)) {
-                        var generationData = [];//发电量
-                        var areaData = [];//地区
-                        var unit = "度";
-                        var obj = parseJson(data);
-                        //var maxData ;
-                        if (obj != null && obj.result_code != -1) {
-                            var result_data = obj.result_data;
-                            dialog.rowCount = result_data.rowCount;
-                            dialog.pageCount = dialog.rowCount / dialog.pageSize;
-                            isPageArrowAvilable();
-                            var resultArray = result_data.list;
-                            //maxData = resultArray[0].p83025;
-                            for (var i = 0; i < resultArray.length; i++) {
-                                var obj = resultArray[i];
-                                generationData.push(toFix(obj.p83022, 2));
-                                areaData.push(obj.ps_name);
-                                dialog.psIdArr.push(obj.ps_id);
-                            }
-                            var maxPower = generationData.max();
-                            if (isNotNull(maxPower)) {
-                                if (parseInt(maxPower / 10000) > 0) {
-                                    for (var i = 0; i < generationData.length; i++) {
-                                        if ($.isNumeric(generationData[i])) {
-                                            generationData[i] = parseFloat(generationData[i] / 10000).toFixed(2);
-                                        }
-                                    }
-                                    unit = "万度"
-                                }
-                            }
-                            unit = replaceUnit_scrn4Dialog(unit);
-                        }
-                        showFDLAll(generationData, areaData, unit);
+            var _this = this,
+                dateType = dialog.dateType,
+                dateStr = '',
+                startDateStr = '',
+                dates = new Date(),
+                endDate = dates.getFullYear() + '-' + (dates.getMonth() + 1) + '-' + dates.getDate() + 'T' + dates.getHours() + ':' + dates.getMinutes() + ':' + dates.getSeconds(),
+                endDateStr = vlm.Utils.format_date(endDate, 'YmdHis');
+
+            switch (dateType) {
+                case '1':   //所有电站按天
+                    dateStr = '2';
+                    var dateNum = this.getInputDate($('#dateInput').val());
+                    startDateStr = this.getInputDate(dateNum) + '000000';
+                    var year = dateNum.substring(0, 4);
+                    var month = dateNum.substring(4, 6);
+                    var day = dateNum.substring(6);
+                    if (month < 10) {
+                        month = month.substring(1);
                     }
-                },
-                error: function () {
+                    var date = new Date();
+                    date.setFullYear(year, month - 1, day);
+                    date.setDate(date.getDate() + 1);
+                    day = date.getDate();
+                    var Month = date.getMonth() + 1;
+                    endDateStr = date.getFullYear() + '' + dealDate(Month) + '' + dealDate(day) + '000000';
+                    break;
+                case '2': //所有电站按月
+                    dateStr = '6';
+                    var dateNum = this.getInputDate($('#dateInput').val());
+                    var date = new Date();
+                    var year = dateNum.substring(0, 4);
+                    var month = dateNum.substring(4);
+                    if (month < 10) {
+                        month = month.substring(1);
+                    }
+                    ;
+                    date.setFullYear(year, month, 0);
+                    var day = date.getDate();
+                    startDateStr = dateNum + '01000000';
 
+                    endDateStr = dateNum.substring(0, 6) + day + '000000';
+                    break;
+                case '3': //所有电站按年
+                    dateStr = '6';
+                    startDateStr = $('#dateInput').val() + '0101000000';
+                    endDateStr = (Number($('#dateInput').val()) + 1) + '0101000000';
+                    break;
+                default :
+                    ;
+            }
+
+            var Parameters = {
+                "parameters": {
+                    "stationtype": "allstation",
+                    "timetype": dateStr,
+                    "sorttype": "1",
+                    "sort": "1",
+                    "starttime": startDateStr,
+                    "endtime": endDateStr,
+                    "topn": "100",
+                    "stationid": ""
+                },
+                "foreEndType": 2,
+                "code": "20000005"
+            };
+            vlm.loadJson("", JSON.stringify(Parameters), function (res) {
+                if (res.success) {
+                    var result_data = res.data,
+                        generationData = [],
+                        areaData = [],
+                        unit = result_data.fd_unit;
+                    var resultArray = result_data.fd_datas;
+                    if (resultArray.length) {
+                        resultArray = vlm.Utils.sortArr(resultArray, 'fd_power_day');  //sort
+                        for (var i = 0; i < resultArray.length; i++) {
+                            generationData.push(resultArray[i].fd_power_day);
+                            areaData.push(resultArray[i].fd_station_name);
+                            dialog.psIdArr.push(resultArray[i].fd_station_id);
+                        }
+                        _this.showFDLAll(generationData, areaData, unit);
+                    }
                 }
             });
         },
 
         //发电量弹出chart
         showFDLAll: function (valueAxis, areaData, unit) {
+            var _this = this;
             $("#fdlAllChart div").show();
             var option = {
                 tooltip: {
@@ -482,28 +516,25 @@ new Vue({
             $(".showm_bottom .loadingDiv").hide();
             dialog.fdlChart.setOption(option);
 
-
             dialog.fdlChart.on('click', function (params) {
                 var index = params.dataIndex;
                 event.stopPropagation();
                 if (dialog.scrnvs == 3) {
                     dialog.psName = params.name;
                     dialog.psId = dialog.psIdArr[index];
-                    showPsGenTrends();
+                    _this.showPsGenTrends();
                 }
             });
-
         },
 
-
         //判断能否增长日期 val(eg:2016-01-01)
-        isIncreaseDateAvailable: function (type, val, isInner) {
+        isIncreaseDateAvailable: function (type, val) {
             var now = new Date();
             if (type == 1) {//日
-                if (now.Format("yyyyMMdd") > val.substring(0, 10).replace(/\//g, "")) {
-                    showIncreaseDate = true;
+                if (now.Format("yyyyMMdd") >= val.substring(0).replace(/\//g, "")) {
+                    this.showIncreaseDate = true;
                 } else {
-                    showIncreaseDate = false;
+                    this.showIncreaseDate = false;
                 }
             } else if (type == 2) {//月
                 if (now.Format("yyyyMM") >= val.substring(0, 7).replace(/\//g, "")) {
@@ -518,28 +549,39 @@ new Vue({
                     this.showIncreaseDate = false;
                 }
             }
-
             if (this.showIncreaseDate) {  //可以增加
-                if (now.Format("yyyy") == val.substring(0, 4).replace(/\//g, "")) {
-                    this.addActive();
-                } else {
-                    $('#right_min_btn').addClass('active');
-                    $('#right_max_btn').addClass('active');
-                }
                 $("#dateInput").val(val);
-                this.loadDXXOrFDL();
+                if (type == 1) {
+                    if (now.Format("yyyyMMdd") == val.replace(/\//g, "")) {
+                        $('#right_min_btn').removeClass('active');
+                    } else {
+                        $('#right_min_btn').addClass('active');
+                    }
+                } else if (type == 2) {
+                    if (now.Format("yyyyMM") == val.replace(/\//g, "")) {
+                        $('#right_min_btn').removeClass('active');
+                    } else {
+                        $('#right_min_btn').addClass('active');
+                    }
+                } else if (type == 3) {
+                    if (now.Format("yyyy") == val.replace(/\//g, "")) {
+                        $('#right_min_btn').removeClass('active');
+                    } else {
+                        $('#right_min_btn').addClass('active');
+                    }
+                }
+                this.loadDXXOrFDL('1');
             } else {
-                this.addActive();
+                $('#right_min_btn').removeClass('active');
             }
         },
 
         //点击日期 箭头
-        arrowChangeDate: function () {
-            var temdate = "";
-            var val = 0;
-            if (event.target == document.getElementById("left_min_btn")) {//判断事件对象，左键头时间向前
+        arrowChangeDate: function (e) {
+            var temdate = "", val = 0;
+            if ($(e.target).attr('id') == 'left_min_btn') {
                 val = -1;
-            } else if (event.target == document.getElementById("right_min_btn")) {
+            } else if ($(e.target).attr('id') == 'right_min_btn') {
                 val = 1;
             }
             var date = $("#dateInput").val();
@@ -548,26 +590,19 @@ new Vue({
                 var d1 = new Date(date.replace(/\-/g, "\/"));
                 d1.addDays(val);//加、减日 操作
                 temdate = d1.Format("yyyy/MM/dd");
-                this.isIncreaseDateAvailable(1, temdate, false);
+                this.isIncreaseDateAvailable(1, temdate);
             } else if (dialog.dateType == 2) {
                 var d1 = new Date(date.replace(/\-/g, "\/"));
                 d1.addMonths(val);
                 temdate = d1.Format("yyyy/MM");
-                this.isIncreaseDateAvailable(2, temdate, false);
+                this.isIncreaseDateAvailable(2, temdate);
             } else if (dialog.dateType == 3) {
                 var d1 = new Date(date.replace(/\-/g, "\/"));
                 d1.addYears(val);
                 temdate = d1.Format("yyyy");
-                this.isIncreaseDateAvailable(3, temdate, false);
+                this.isIncreaseDateAvailable(3, temdate);
             }
-            $("#dateInput").val(temdate);
-            if (dialog.genOrEqHr == 2) {
-                this.loadFDLAll();
-            } else if (dialog.genOrEqHr == 3) {
-                this.loadGenTrendsData();
-            } else {
-                loadDXXSAll();
-            }
+
         },
 
         getInputDate: function () {
@@ -577,6 +612,7 @@ new Vue({
         },
 
         setDateInputFormat: function () {
+            var _this = this;
             if (dialog.dateType == 1 || !dialog.dateType) {
                 $("#dateInput").unbind();
                 $("#dateInput").click(function () {
@@ -586,7 +622,7 @@ new Vue({
                         isShowClear: false,
                         readOnly: true,
                         onpicking: function (dp) {
-                            dateChanged(dp.cal.getDateStr(), dp.cal.getNewDateStr());
+                            _this.dateChanged(dp.cal.getDateStr(), dp.cal.getNewDateStr());
                         }
                     });
                 });
@@ -599,7 +635,7 @@ new Vue({
                         isShowClear: false,
                         readOnly: true,
                         onpicking: function (dp) {
-                            dateChanged(dp.cal.getDateStr(), dp.cal.getNewDateStr());
+                            _this.dateChanged(dp.cal.getDateStr(), dp.cal.getNewDateStr());
                         }
                     });
                 });
@@ -612,7 +648,7 @@ new Vue({
                         isShowClear: false,
                         readOnly: true,
                         onpicking: function (dp) {
-                            dateChanged(dp.cal.getDateStr(), dp.cal.getNewDateStr());
+                            _this.dateChanged(dp.cal.getDateStr(), dp.cal.getNewDateStr());
                         }
                     });
                 });
@@ -620,15 +656,13 @@ new Vue({
         },
 
         dateChanged: function (dStrOld, dStrNew) {
-            if (true) {
-                this.isIncreaseDateAvailable(dialog.dateType, dStrNew, false);
-                if (dialog.genOrEqHr == 2) {
-                    loadFDLAll();
-                } else if (dialog.genOrEqHr == 3) {
-                    loadGenTrendsData();
-                } else {
-                    loadDXXSAll();
-                }
+            this.isIncreaseDateAvailable(dialog.dateType, dStrNew, false);
+            if (dialog.genOrEqHr == 2) {
+                this.loadFDLAll();
+            } else if (dialog.genOrEqHr == 3) {
+                this.loadGenTrendsData();
+            } else {
+                this.loadDXXSAll();
             }
         },
 
@@ -642,9 +676,9 @@ new Vue({
             if (dialog.genOrEqHr == 2) {
                 this.loadFDLAll();
             } else {
-                loadDXXSAll();
+                this.loadDXXSAll();
             }
-            isPageArrowAvilable();
+            this.isPageArrowAvilable();
         },
 
         //判断分页箭头可用
@@ -677,63 +711,91 @@ new Vue({
             $("#psName").show();
             $("#psNameA").text(dialog.psName + "-" + LANG["generationTrend"]);
             dialog.genOrEqHr = 3;
-            loadGenTrendsData();
+            this.loadGenTrendsData();
         },
 
         loadGenTrendsData: function () {
-            var param = {};
-            param["date"] = getDate();
-            param["ps_id"] = dialog.psId;
-            param["date_type"] = (4 - dialog.dateType);//1 -> 3; 2 -> 2; 3 -> 1
-            $.ajax({
-                type: "post",
-                data: param,
-                url: 'powerAction_getPowerPlan.action',
-                async: true,
+            var _this = this,
+                dateType = dialog.dateType,
+                startDateStr = '',
+                endDateStr = '';
+            dialog.trendsChart = echarts.init(document.getElementById('genTrends'));
+            $(".showm_bottom .loadingDiv").show();
 
-                dataType: "json",
-                beforeSend: function () {
-                    dialog.trendsChart = echarts.init(document.getElementById('genTrends'));
-                    $(".showm_bottom .loadingDiv").show();
-                },
-                success: function (data) {
-                    var object = parseJson(data);
-                    if (data != null && object.result_code == 1) {
-                        var result = object.result_data;
-                        var unit = result.actual_energy_unit;
-                        var actualData = result.actual_energy;
-                        var dateDate = [];
-                        var maxPower = actualData.max();
-                        for (var i = 0; i < actualData.length; i++) {
-                            dateDate.push(i + 1);
-                        }
-                        if (isNotNull(maxPower)) {
-                            if (parseInt(maxPower / 10000) > 0) {
-                                for (var i = 0; i < actualData.length; i++) {
-                                    if ($.isNumeric(actualData[i])) {
-                                        actualData[i] = parseFloat(actualData[i] / 10000).toFixed(2);
-                                    }
-                                }
-                                unit = "万度"
-                            }
-                        }
-                        unit = replaceUnit_scrn4Dialog(unit);
-                        drawTrendsChart(actualData, unit, dateDate);
+            switch (dateType) {
+                case '1':
+                    dateStr = '1';
+                    var dateNum = this.getInputDate($('#dateInput').val());
+                    startDateStr = this.getInputDate(dateNum) + '000000';
+                    var year = dateNum.substring(0, 4);
+                    var month = dateNum.substring(4, 6);
+                    var day = dateNum.substring(6);
+                    if (month < 10) {
+                        month = month.substring(1);
                     }
+                    var date = new Date();
+                    date.setFullYear(year, month - 1, day);
+                    date.setDate(date.getDate() + 1);
+                    day = date.getDate();
+                    var Month = date.getMonth() + 1;
+                    endDateStr = date.getFullYear() + '' + dealDate(Month) + '' + dealDate(day) + '000000';
+                    break;
+                case '2':
+                    dateStr = '6';
+                    var dateNum = this.getInputDate($('#dateInput').val());
+                    var date = new Date();
+                    var year = dateNum.substring(0, 4);
+                    var month = dateNum.substring(4);
+                    if (month < 10) {
+                        month = month.substring(1);
+                    }
+                    ;
+                    date.setFullYear(year, month, 0);
+                    var day = date.getDate();
+                    startDateStr = dateNum + '01000000';
+
+                    endDateStr = dateNum.substring(0, 6) + day + '000000';
+                    break;
+                case '3':
+                    dateStr = '6';
+                    startDateStr = $('#dateInput').val() + '0101000000';
+                    endDateStr = (Number($('#dateInput').val()) + 1) + '0101000000';
+                    break;
+                default :
+                    ;
+            }
+
+            var Parameters = {
+                "parameters": {
+                    "stationtype": "all",
+                    "timetype": dateStr,
+                    "sorttype": "1",
+                    "sort": "1",
+                    "starttime": startDateStr,
+                    "endtime": endDateStr,
+                    "topn": "300",
+                    "stationid": "LW"
+                },
+                "foreEndType": 2,
+                "code": "30000003"
+            };
+
+
+            vlm.loadJson("", JSON.stringify(Parameters), function (res) {
+                console.log(res);
+                if (res.success) {
+                    var result = res.data,
+                        unit = result.fd_unit,
+                        actualData = [],
+                        dateDate = [];
+                    for (var i = 0; i < result.fd_datas.length; i++) {
+                        actualData.push(result.fd_datas[i].fd_power_day);
+                        dateDate.push(i + 1);
+                    }
+                    _this.drawTrendsChart(actualData, unit, dateDate);
                 }
             })
-        },
 
-        getFmTime: function (time) {
-            var resTime = "";
-            var temVal = dealTimeNum(time);
-            var date = $("#dateInput").val();
-            if (dialog.dateType == 1) {
-                resTime = date + " " + temVal + ":00";
-            } else {
-                resTime = date + "/" + temVal;
-            }
-            return resTime;
         },
 
         drawTrendsChart: function (actualData, actualData_unit, dateDate) {
@@ -842,6 +904,7 @@ new Vue({
             $(".showm_bottom .loadingDiv").hide();
             dialog.trendsChart.setOption(option);
         },
+
         closeWindow: function () {
             $(".Mc4_bg_highLt", parent.document).removeClass("Mc4_bg_highLt");
             window.parent.closeEqualHourFm();
@@ -850,7 +913,8 @@ new Vue({
     mounted: function () {
         this.showEqHourData(1);
     }
-});
+})
+;
 
 
 

@@ -91,9 +91,7 @@ new Vue({
         fd_unit: '',   //总MW单位
         fd_safety_daycount: '--',   //安全天数
 
-
         options: []
-
 
     },
     methods: {
@@ -144,8 +142,8 @@ new Vue({
             var _this = this;
             require.config({
                 paths: {
-                    'echarts': 'js/plugin/echarts/build/dist',
-                    'echarts-x': 'js/plugin/echarts-x/build/dist'
+                    'echarts': 'js/plugin/echart',
+                    'echarts-x': 'js/3d'
                 }
             });
 
@@ -347,22 +345,7 @@ new Vue({
         },
         //电站建设情况图表
         loadPowerNumChart: function (dz_data, pieName, lengendData, title) {
-            var _this = this;
-            //$("#pieName").html(pieName);
-            require.config({
-                paths: {
-                    'echarts': 'js/plugin/echarts/build/dist'
-                }
-            });
-            require([
-                    'echarts',
-                    'echarts/chart/pie',
-                    'echarts/chart/funnel'
-                ],
-                function (ec) {
-                    _this.drawPowerNumChart(ec, dz_data, pieName, lengendData, title);
-                }
-            );
+            this.drawPowerNumChart(echarts, dz_data, pieName, lengendData, title);
         },
 
         drawPowerNumChart: function (ec, dz_data, pieName, lengendData, title) {
@@ -485,16 +468,16 @@ new Vue({
                     var colorArray = ["#0CCA26", "#FDD600", "#2E7FF9"];
 
                     for (var i = 0; i < data.tbpowertypes.length - 1; i++) {
-                        if (data.tbpowertypes[i].fd_station_status == 1) { //并网
+                        if (data.tbpowertypes[i].fd_station_status == 2) { //并网
                             _this.fd_intercon_cap_finish = data.tbpowertypes[i].fd_intercon_cap + data.tbpowertypes[i].fd_unit;
                             ps_exist_capacity = data.tbpowertypes[i].fd_intercon_cap;
                             _this.fd_station_count_finish = data.tbpowertypes[i].fd_station_count + LANG["psUnit_zuo"];
-                        } else if (data.tbpowertypes[i].fd_station_status == 0) { //在建
+                        } else if (data.tbpowertypes[i].fd_station_status == 1) { //在建
                             _this.fd_intercon_cap_on = data.tbpowertypes[i].fd_intercon_cap + data.tbpowertypes[i].fd_unit;
                             ps_just_capacity = data.tbpowertypes[i].fd_intercon_cap;
                             _this.fd_station_count_on = data.tbpowertypes[i].fd_station_count + LANG["psUnit_zuo"];
 
-                        } else if (data.tbpowertypes[i].fd_station_status == 2) { //未建
+                        } else if (data.tbpowertypes[i].fd_station_status == 0) { //未建
                             _this.fd_intercon_cap_undo = data.tbpowertypes[i].fd_intercon_cap + data.tbpowertypes[i].fd_unit;
                             no_just_capacity = data.tbpowertypes[i].fd_intercon_cap;
                             _this.fd_station_count_undo = data.tbpowertypes[i].fd_station_count + LANG["psUnit_zuo"];
@@ -527,7 +510,7 @@ new Vue({
             var dates = new Date();
             var endDate = dates.getFullYear() + '-' + (dates.getMonth() + 1) + '-' + dates.getDate() + 'T' + dates.getHours() + ':' + dates.getMinutes() + ':' + dates.getSeconds();
             var endDateStr = vlm.Utils.format_date(endDate, 'YmdHis');
-            var startDateStr = vlm.Utils.lastMonth(dates, -3);
+            var startDateStr = vlm.Utils.currentMonth();
             var Parameters = {
                 "parameters": {
                     "ctype": "1",
@@ -569,7 +552,6 @@ new Vue({
                         ydata2.push(100 - cap_value);
                     }
                 }
-                //var planData = result.plan_energy;
                 _this.drawCapacityChart(xdata, ydata1, ydata2);
             })
         },
@@ -631,7 +613,7 @@ new Vue({
                 tooltip: {
                     trigger: 'axis',
                     formatter: function (param) {
-                        return param[1].name + ":" + param[1].value + "%";
+                        return param[0].name + ":" + param[0].value + "%";
                     }
                 },
                 legend: {
@@ -645,7 +627,7 @@ new Vue({
                     // 'top' ¦ 'bottom' ¦ 'center'
                     // ¦ {number}（y坐标，单位px）
                     textStyle: {
-                        color: '#fff',
+                        color: '#FFFFFF',
                         fontFamily: 'Microsoft YaHei'
                     },
                     data: ['PR']
@@ -653,11 +635,11 @@ new Vue({
                 // 网格
                 grid: {
                     x: 30,
-                    y: 40,
+                    y: 10,
                     x2: 0,
-                    y2: 0,
+                    y2: 40,
                     width: 340,
-                    height: 140,
+                    height: 170,
                     backgroundColor: 'rgba(0,0,0,0)',
                     borderWidth: 0,
                     borderColor: '#ccc'
@@ -670,7 +652,7 @@ new Vue({
                         axisLine: {
                             show: false,
                             lineStyle: { // 属性lineStyle控制线条样式
-                                color: '#fff'
+                                color: '#ffffff'
                             }
                         },
                         axisLabel: {
@@ -678,7 +660,7 @@ new Vue({
                             rotate: 0,//逆时针显示标签，不让文字叠加
                             interval: 0,
                             textStyle: {
-                                color: '#fff',
+                                color: '#ffffff',
                                 fontFamily: 'Microsoft YaHei'
                             }
                         },
@@ -690,7 +672,7 @@ new Vue({
                         },
                         boundaryGap: [0, 0.01],
 
-                        data: xdata
+                        data: xdata//['荣威\n地面', '大众\n一厂', '大众\n总办', '荣威\n屋顶', '大众\n三厂', '荣威\n车棚', '设计\n中心']
                     }
                 ],
                 yAxis: [
@@ -699,14 +681,17 @@ new Vue({
                         axisLine: {
                             show: false,
                             lineStyle: { // 属性lineStyle控制线条样式
-                                color: '#fff'
+                                color: '#ffffff'
                             }
                         },
                         axisLabel: {
                             show: false,
                             textStyle: {
-                                color: '#fff'
+                                color: '#ffffff'
                             }
+                        },
+                        axisTick: {
+                            show: false
                         },
                         splitLine: {
                             show: false
@@ -719,7 +704,6 @@ new Vue({
                         name: 'PR',
                         type: 'bar',
                         stack: 'a',
-                        barMinHeight: 100,
                         itemStyle: {
                             normal: {
                                 color: "#139FF6"
@@ -753,31 +737,19 @@ new Vue({
                     }
                 ]
             };
-            require.config({
-                paths: {
-                    'echarts': 'js/plugin/echarts/build/dist'
-                }
+            var ptChart = echarts.init(document.getElementById('capacity'));
+            ptChart.setOption(option);
+            //var ecConfig = require('echart/config');
+            //ptChart.on(ecConfig.EVENT.CLICK, function(params){
+            //
+            //});
+            ptChart.on('click', function (params) {
+                var index = params.dataIndex;
+                event.stopPropagation();
+                screen3.ps_id = psObj.psIdArr[index];
+                $("#grayLayer").addClass("grayLayer");
+                _this.psDetailInfo();
             });
-            require([
-                    'echarts',
-                    'echarts/chart/line',
-                    'echarts/chart/bar'
-                ],
-                function (ec) {
-                    ptChart = ec.init(document.getElementById('capacity'));
-                    ptChart.setOption(option);
-                    //var ecConfig = require('echarts/config');
-                    //ptChart.on(ecConfig.EVENT.CLICK, function(params){
-                    //
-                    //});
-                    ptChart.on('click', function (params) {
-                        var index = params.dataIndex;
-                        event.stopPropagation();
-                        screen3.ps_id = psObj.psIdArr[index];
-                        $("#grayLayer").addClass("grayLayer");
-                        _this.psDetailInfo();
-                    });
-                });
         },
 
         //性能排名点击后的电站详细信息
@@ -1033,20 +1005,8 @@ new Vue({
                 ]
 
             };
-            require.config({
-                paths: {
-                    'echarts': 'js/plugin/echarts/build/dist'
-                }
-            });
-            require([
-                    'echarts',
-                    'echarts/chart/line',
-                    'echarts/chart/bar'
-                ],
-                function (ec) {
-                    ptChart = ec.init(document.getElementById('plan'));
-                    ptChart.setOption(option);
-                });
+            var ptChart = echarts.init(document.getElementById('plan'));
+            ptChart.setOption(option);
         },
 
         //右上角发电趋势tab切换
@@ -1063,17 +1023,9 @@ new Vue({
         showGenTrends: function (genTrendsDateType) {
             var _this = this;
             $(".Mc4_con .loadingDiv").show();
-            require.config({
-                paths: {
-                    'echarts': 'js/plugin/echarts/build/dist'
-                }
-            });
-            require(['echarts'],
-                function (ec) {
-                    var temChart = ec.init(document.getElementById('power'));
-                    temChart.clear();
-                }
-            );
+            var temChart = echarts.init(document.getElementById('power'));
+            temChart.clear();
+
             $(".trends_btn").removeClass("on");
             if (genTrendsDateType == 3) {//year
                 $("#powerTrendTitle").text(LANG["generationTrend_year"]);
@@ -1095,19 +1047,20 @@ new Vue({
             var _this = this;
             var dateStr = '', sort = '', startDateStr;
             switch (dateType) {
-                case '1':
-                    dateStr = 'day';
+                case '0':
+                    dateStr = '0';
                     sort = '2';
                     startDateStr = vlm.Utils.currentDay();
                     break;
                 case '2':
-                    dateStr = 'month';
+                    dateStr = '2';
                     sort = '1';
                     startDateStr = vlm.Utils.currentMonth();
                     break;
                 case '3':
-                    dateStr = 'year';
+                    dateStr = '3';
                     sort = '2';
+                    startDateStr = vlm.Utils.currentYear();
                     break;
                 default :
                     ;
@@ -1115,9 +1068,11 @@ new Vue({
             var dates = new Date();
             var endDate = dates.getFullYear() + '-' + (dates.getMonth() + 1) + '-' + dates.getDate() + 'T' + dates.getHours() + ':' + dates.getMinutes() + ':' + dates.getSeconds();
             var endDateStr = vlm.Utils.format_date(endDate, 'YmdHis');
+
             var Parameters = {
                 "parameters": {
-                    "datatype": dateStr,
+                    "stationtype": "all",
+                    "timetype": dateStr,
                     "sorttype": "1",
                     "sort": sort,
                     "starttime": startDateStr,
@@ -1127,13 +1082,13 @@ new Vue({
                 },
                 "foreEndType": 2,
                 "code": "20000005"
-            };
+            }
             //console.log(Parameters);
             vlm.loadJson("", JSON.stringify(Parameters), function (data) {
                 if (data.success) {
-                    if (dateStr == 'month') {
+                    if (dateStr == '2') {
                         _this.dealPowerData_month(data);
-                    } else if (dateStr == 'day') {
+                    } else if (dateStr == '0') {
                         _this.dealPowerData_day(data);
                     } else {
                         _this.dealPowerData_year(data);
@@ -1215,10 +1170,10 @@ new Vue({
                         var month = _this.myDate.getMonth() + 1;
                         var date = parseInt(_this.myDate.getDate());
                         if (date == data[0].name) {//今日
-                            return year + "/" + month + "/" + data[1].name + "<br>" + data[0].seriesName + "：" + data[0].value + unit;
+                            return year + "/" + month + "/" + data[1].name + "<br>" + data[1].seriesName + "：" + data[1].value + unit;
+                        } else {
+                            return year + "/" + month + "/" + data[0].name + "<br>" + data[0].seriesName + "：" + data[0].value + unit;
                         }
-
-                        return year + "/" + month + "/" + data[1].name + "<br>" + data[1].seriesName + "：" + data[1].value + unit;
                     }
                 },
                 legend: {
@@ -1323,21 +1278,9 @@ new Vue({
                 ]
             };
 
-            require.config({
-                paths: {
-                    'echarts': 'js/plugin/echarts/build/dist'
-                }
-            });
-            require([
-                    'echarts',
-                    'echarts/chart/line',
-                    'echarts/chart/bar'
-                ],
-                function (ec) {
-                    ptChart = ec.init(document.getElementById('power'));
-                    ptChart.setOption(option);
-                    $(".Mc4_con .loadingDiv").hide();
-                });
+            var ptChart = echarts.init(document.getElementById('power'));
+            ptChart.setOption(option);
+            $(".Mc4_con .loadingDiv").hide();
         },
 
         //处理日发电数据
@@ -1348,7 +1291,7 @@ new Vue({
                 var result = res.data;
                 var glData = [], actualData = [], dateDate = []; //功率、发电量、日期区间
                 for (var i = 0; i < result.fd_datas.length; i++) {
-                    glData.push(result.fd_datas[i].fd_pw_curr);
+                    glData.push(result.fd_datas[i].fd_pw_curr.toFixed(2));
                     actualData.push(result.fd_datas[i].fd_power_day);
                     dateDate.push(result.fd_datas[i].fd_datetime);
                 }
@@ -1375,7 +1318,7 @@ new Vue({
                             if (i == 0) {
                                 restStr += obj.name + "<br>";
                             }
-                            restStr += obj[0] + ":" + obj.data + (LANG["yy1.PowerGeneration"] == obj[0] ? punit : glUnit) + "<br>";
+                            restStr += obj.seriesName + ":" + dealEchartToolTip(obj.data) + (LANG["yy1.PowerGeneration"] == obj.seriesName ? punit : glUnit) + "<br>";
                         }
                         return restStr;
                     }
@@ -1513,22 +1456,9 @@ new Vue({
                 ]
 
             };
-            require.config({
-                paths: {
-                    'echarts': 'js/plugin/echarts/build/dist'
-                }
-            });
-            require([
-                    'echarts',
-                    'echarts/chart/line',
-                    'echarts/chart/bar'
-                ],
-                function (ec) {
-                    var ptChartDay = ec.init(document.getElementById('power'));
-                    //var ptChartDay = ec.init(document.getElementById('dayChart'));
-                    ptChartDay.setOption(option);
-                    $(".Mc4_con .loadingDiv").hide();
-                });
+            var ptChartDay = echarts.init(document.getElementById('power'));
+            ptChartDay.setOption(option);
+            $(".Mc4_con .loadingDiv").hide();
         },
 
         //处理年发电趋势
@@ -1536,24 +1466,24 @@ new Vue({
             var _this = this;
             //console.log(res);
             if (res.success) {
-                var result = res.data, glData = [], actualData = [], dateDate = []; //功率、发电量、日期区间
-                var unit = 'MW', glUnit = result.fd_unit;//功率单位、发电量单位
+                var result = res.data, actualData = [], dateDate = []; //功率、发电量、日期区间
+                var glUnit = result.fd_unit;//发电量单位
                 for (var i = 0; i < result.fd_datas.length; i++) {
-                    glData.push(result.fd_datas[i].fd_pw_curr);
+                    //glData.push(result.fd_datas[i].fd_pw_curr);
                     actualData.push(result.fd_datas[i].fd_power_day);
                     dateDate.push(result.fd_datas[i].fd_datetime);
                 }
-                for (var i = 0; i < dateDate.length; i++) {
-                    dateDate[i] = dateDate[i].replace("-", "/")
-                }
-                _this.drawYearChart(actualData, glData, dateDate, unit, glUnit);
+                //for (var i = 0; i < dateDate.length; i++) {
+                //    dateDate[i] = dateDate[i].replace("-", "/")
+                //}
+                _this.drawYearChart(actualData, dateDate, glUnit);
             } else {
                 alert(data.message);
             }
         },
 
         //绘制年发电趋势
-        drawYearChart: function (actualDataDay, glData, dateDate, punit, glUnit) {
+        drawYearChart: function (actualDataDay, dateDate, glUnit) {
             var option = {
                 tooltip: {
                     trigger: 'axis',
@@ -1562,7 +1492,7 @@ new Vue({
                         for (var i = 0; i < data.length; i++) {
                             var obj = data[i];
                             restStr += obj.name + "<br>";
-                            restStr += LANG["yy1.PowerGeneration"] + ":" + obj.data + punit + "<br>";
+                            restStr += LANG["yy1.PowerGeneration"] + ":" + obj.data + glUnit + "<br>";
                         }
                         return restStr;
                     }
@@ -1618,7 +1548,7 @@ new Vue({
                 yAxis: [
                     {
                         type: 'value',
-                        name: punit,
+                        name: glUnit,
                         axisLine: {
                             show: true,
                             lineStyle: { // 属性lineStyle控制线条样式
@@ -1661,24 +1591,11 @@ new Vue({
                 ]
 
             };
-            require.config({
-                paths: {
-                    'echarts': 'js/plugin/echarts/build/dist'
-                }
-            });
-            require([
-                    'echarts',
-                    'echarts/chart/line',
-                    'echarts/chart/bar'
-                ],
-                function (ec) {
-                    var ptChartDay = ec.init(document.getElementById('power'));
-                    //var ptChartDay = ec.init(document.getElementById('dayChart'));
-                    ptChartDay.setOption(option);
-                    $(".Mc4_con .loadingDiv").hide();
-                });
+            var ptChartDay = echarts.init(document.getElementById('power'));
+            //var ptChartDay = ec.init(document.getElementById('dayChart'));
+            ptChartDay.setOption(option);
+            $(".Mc4_con .loadingDiv").hide();
         },
-
 
         //点击各模块，相应dialog
         showDialogIframe: function (url, event) {
@@ -1710,10 +1627,7 @@ new Vue({
         this.topTimer = setInterval(function () {
             _this.getAllPower(); //获取总电量(1min)
         }, 60000);
-
-
     }
-
 })
 
 

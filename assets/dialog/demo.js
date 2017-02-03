@@ -1,820 +1,446 @@
-//2016-11-12 ChuD; 等效小时、发电量排名弹出框
-var dialog = {
-    genOrEqHr : 2, //1:等效小时; 2.发电量; 3:发电趋势
-    dateType : 1, //等效小时、发电量 排名  1:日  2:月  3:年
-    curtOrgId_refresh : "", //当前组织id，用于 定时刷新
-    dxxChart : "",
-    fdlChart : "",
-    trendsChart : "",
-    pageSize : 10,//每页显示条目数
-    currentPage : 1, //当前页
-    rowCount : 0,//总条目数
-    pageCount : 0,//总页数
 
-    scrnvs: scrnvs,
-    psName: "",
-    psId: "",
-    psIdArr: []
+var dialog = {
+    ps_id : "",
+    screenVersion : "",
+    ps_scheme : "",
+    ps_type : "",
+    daysArr : [LANG["common_date_day1"], LANG["common_date_day2"], LANG["common_date_day3"], LANG["common_date_day4"], LANG["common_date_day5"], LANG["common_date_day6"], LANG["common_date_day7"]]
 };
 
 $(function(){
-    $("#left_max_btn").css("opacity", 0.3);
-    $("#right_max_btn").css("opacity", 0.3);
-
-    dialog.curtOrgId_refresh = $("#orgId").val();
-    $(".close").click(function(){
-        $(".Mc4_bg_highLt", parent.document).removeClass("Mc4_bg_highLt");
+    dialog.ps_id = $("#psId").val();
+    dialog.ps_scheme = $("#psScheme").val();
+    dialog.screenVersion = $("#screenVersion").val() ? $("#screenVersion").val(): "";
+    $(".closeBtn").click(function(){
+        $("#showPsInfo", parent.document).show();
         window.parent.closeEqualHourFm();
     });
-    $("#left_min_btn").unbind().bind('click', arrowChangeDate);
-    //弹出页面中的点击
-    $(".showm_top_left ul li").click(function(){
-        if(this.id=='psName'){
-            return;
-        }
-        $(this).addClass("on");
-        $(this).siblings().removeClass("on");
-
-        if(this.id=='dxxs_li'){
-            $(".showm_bottom .loadingDiv").show();
-            $("#dxxsAll").show();
-            $("#fdlAllChart").hide();
-        }
-        if(this.id=='fdl_li'){
-            $(".showm_bottom .loadingDiv").show();
-            $("#dxxs_li").show();
-            $(".max_btn").show();
-            $("#fdlAllChart").show();
-            $("#dxxsAll").hide();
-            $("#genTrends").hide();
-            $("#psName").hide();
-        }
-    });
-
-    initTime();
-    showEqHourData(1);
+    getPsDetailInfo1();
+    loadDataForRealTimePower();
+    loadWeather();
 });
 
-function initTime(){
-    var daybegin=new Date();
-    var year=daybegin.getFullYear();
-    var month=daybegin.getMonth()+1;
-    var date = daybegin.getDate();
-    var hour = daybegin.getHours();
-    var min = daybegin.getMinutes();
-    var month1 = month >= 10?month:("0"+month);
-    var date1 = date >= 10?date:("0"+date);
-    var thisDate = year+"/"+month1+"/"+date1;
-    if(dialog.dateType == "2"){
-        thisDate = year+"/"+month1;
-    }else if(dialog.dateType == "3"){
-        thisDate = year;
-    }
-    $("#dateInput").val(thisDate);
-}
-
-//根据时间类型type 刷新等效小时数据 1:日  2:月  3:年
-function showEqHourData(type){
-    dialog.currentPage = 1;
-    dialog.dateType = type;
-    setDateInputFormat();
-    initTime();
-    if(dialog.genOrEqHr == 2){
-        loadFDLAll();
-    }else if(dialog.genOrEqHr == 3){
-        loadGenTrendsData();
-    }else {
-        loadDXXSAll();
-    }
-    isIncreaseDateAvailable(type, $("#dateInput").val(), false);
-}
-
-function loadDXXOrFDL(val){
-    dialog.currentPage = 1;
-    if(val == 1){
-        loadFDLAll();
-    }else if(val == 3){
-        loadGenTrendsData();
-    }else{
-        loadDXXSAll();
-    }
-}
-
-//加载所有县区的等效小时排名;
-function loadDXXSAll(){
-    dialog.genOrEqHr = 1;
-    var url = 'powerAction_loaddata.action';
+function getPsDetailInfo1(){
     var param = {};
-    param["service"] = "stationsPointReport";
-    param["type"] = dialog.dateType;
+    param["service"] = "getPsDetail";
+    param["ps_id"] = dialog.ps_id;
     param["req"] = "app";
-    param["date_id"] = getDate();
-    param["org_id"] = dialog.curtOrgId_refresh;
-    param["curPage"] = dialog.currentPage;
-    param["size"] = dialog.pageSize;
-    param["sort_column"] = "p83025";
-    param["sort_type"] = "0";
     $.ajax({
+        url: "powerAction_loaddata.action",
         type: "post",
         data: param,
-        url: url,
         dataType: "json",
-        beforeSend: function () {
-            dialog.dxxChart = echarts.init(document.getElementById('dxxsAll'));
-            $(".showm_bottom .loadingDiv").show();
-        },
-        success: function (data, s) {
-            if (isNotNull(data)) {
-                var dxxsData = [];//等效小时
-                var areaData = [];//地区
-                var unit = "小时";
-                var obj = parseJson(data);
-                //var maxData ;
-                if (obj != null && obj.result_code != -1){
-                    var result_data = obj.result_data;
-                    dialog.rowCount = result_data.rowCount;
-                    dialog.pageCount = dialog.rowCount / dialog.pageSize;
-                    isPageArrowAvilable();
-                    var resultArray = result_data.list;
-                    //maxData = resultArray[0].p83025;
-                    for(var i =0 ;i<resultArray.length;i++){
-                        var obj = resultArray[i];
-                        dxxsData.push(toFix(obj.p83025,2));
-                        areaData.push(obj.ps_name);
-                    }
-                    var maxPower = dxxsData.max();
-                    if(isNotNull(maxPower)){
+        timeout: 1000 * 10,
+        beforeSend: function(){
 
-                        if(parseInt(maxPower / 10000) > 0){
-                            for (var i = 0; i < dxxsData.length; i++) {
-                                if($.isNumeric(dxxsData[i])){
-                                    dxxsData[i] = parseFloat(dxxsData[i] / 10000).toFixed(2);
-                                }
-                            }
-                            unit = "万小时"
-                        }
-                        else if(parseInt(maxPower / 1000) > 0){
-                            for (var i = 0; i < dxxsData.length; i++) {
-                                if($.isNumeric(dxxsData[i])){
-                                    dxxsData[i] = parseFloat(dxxsData[i] / 1000).toFixed(2);
-                                }
-                            }
-                            unit = "千小时"
-                        }
-                    }
-                }
-                showDXXSAll(dxxsData,areaData,unit);
-            }
-        },
-        error: function () {
-
-        }
-    });
-}
-
-
-//等效小时弹出chart
-function showDXXSAll(valueAxis, areaData, unit) {
-    var option = {
-        tooltip: {
-            trigger: 'axis',
-            formatter: function (data) {
-                //"<p align='left' >排名：" + (data[0].dataIndex + 1) + "</p>" +
-                return  "<p align='left'>" + LANG["powerStation"] + "：" + data[0].name + "</p>" +
-                    "<p align='left'>" + data[0].seriesName + "：" + data[0].value + unit;
-            }
-        },
-        legend: {
-            orient: 'horizontal',      // 布局方式，默认为水平布局，可选为：
-            // 'horizontal' ¦ 'vertical'
-            x: 'right',               // 水平安放位置，默认为全图居中，可选为：
-            // 'center' ¦ 'left' ¦ 'right'
-            // ¦ {number}（x坐标，单位px）
-            y: '10',                  // 垂直安放位置，默认为全图顶端，可选为：
-            // 'top' ¦ 'bottom' ¦ 'center'
-            // ¦ {number}（y坐标，单位px）
-            textStyle: {
-                color: '#FFFFFF',
-                fontFamily : 'Microsoft YaHei'
-            },
-            data: [LANG["1_1_equalHour"]]
-        },
-        // 网格
-        grid: {
-            //x: 30,
-            //y: 35,
-            //x2: 0,
-            //y2: 0,
-            //width: 320,
-            //height: 160,
-            backgroundColor: 'rgba(0,0,0,0)',
-            borderWidth: 0,
-            borderColor: '#ccc'
-        },
-
-        calculable: true,
-        xAxis: [
-            {
-                type: 'category',
-                axisLine: {
-                    show: true,
-                    lineStyle: { // 属性lineStyle控制线条样式
-                        color: '#ffffff'
-                    }
-                },
-                axisLabel: {
-                    show: true,
-                    interval:0,// 是否显示全部标签，0显示
-                    rotate: 25,//逆时针显示标签，不让文字叠加
-                    textStyle: {
-                        color: '#ffffff'
-                    }
-                },
-                splitLine: {
-                    show: false
-                },
-
-                data: areaData
-            }
-        ],
-        yAxis: [
-            {
-                type: 'value',
-                name: unit,
-                splitLine: {
-                    show: false
-                },
-                axisLabel: {
-                    show: true,
-                    textStyle: {
-                        color: '#ffffff'
-                    }
-                },
-                axisLine: {
-                    show: true,
-                    lineStyle: { // 属性lineStyle控制线条样式
-                        color: '#ffffff'
-                    }
-                },
-                nameTextStyle:{
-                    fontSize: 15,
-                    fontFamily : 'Microsoft YaHei'
-                },
-                axisTick: axisTickObj
-            }
-        ],
-        series: [
-            {
-                name: LANG["1_1_equalHour"],
-                type: 'bar',
-                barMaxWidth:50,
-                stack: 'sum',
-                itemStyle: {
-                    normal: {
-                        color: '#3EB5FF'
-                    }
-                },
-                data: valueAxis
-            }
-        ]
-    };
-    dialog.dxxChart.setOption(option);
-    $(".showm_bottom .loadingDiv").hide();
-    $("#dxxsAll div").show();
-}
-
-
-//加载所有县区的发电量排名
-function loadFDLAll(){
-    dialog.genOrEqHr = 2;
-    var url = 'powerAction_loaddata.action';
-    var param = {};
-    param["service"] = "stationsPointReport";
-    //param["limit"] = 31;
-    param["req"] = "app";
-    param["curPage"] = dialog.currentPage;
-    param["size"] = dialog.pageSize;
-    param["sort_column"] = getSortColumn();
-    param["sort_type"] = "0";
-    param["type"] = dialog.dateType;
-    param["date_id"] = getDate();
-    param["org_id"] = dialog.curtOrgId_refresh;
-    $.ajax({
-        type: "post",
-        data: param,
-        url: url,
-        dataType: "json",
-        beforeSend: function () {
-            dialog.psIdArr = [];
-            dialog.fdlChart = echarts.init(document.getElementById('fdlAllChart'));
-            $(".showm_bottom .loadingDiv").show();
-        },
-        success: function (data, s) {
-            if (isNotNull(data)) {
-                var generationData = [];//发电量
-                var areaData = [];//地区
-                var unit = "度";
-                var obj = parseJson(data);
-                //var maxData ;
-                if (obj != null && obj.result_code != -1) {
-                    var result_data = obj.result_data;
-                    dialog.rowCount = result_data.rowCount;
-                    dialog.pageCount = dialog.rowCount / dialog.pageSize;
-                    isPageArrowAvilable();
-                    var resultArray = result_data.list;
-                    //maxData = resultArray[0].p83025;
-                    for(var i =0 ;i<resultArray.length;i++){
-                        var obj = resultArray[i];
-                        generationData.push(toFix(obj.p83022,2));
-                        areaData.push(obj.ps_name);
-                        dialog.psIdArr.push(obj.ps_id);
-                    }
-                    var maxPower = generationData.max();
-                    if(isNotNull(maxPower)){
-                        if(parseInt(maxPower / 10000) > 0){
-                            for (var i = 0; i < generationData.length; i++) {
-                                if($.isNumeric(generationData[i])){
-                                    generationData[i] = parseFloat(generationData[i] / 10000).toFixed(2);
-                                }
-                            }
-                            unit = "万度"
-                        }
-                    }
-                    unit = replaceUnit_scrn4Dialog(unit);
-                }
-                showFDLAll(generationData,areaData,unit);
-            }
-        },
-        error: function () {
-
-        }
-    });
-}
-
-function getSortColumn(){
-    //日发电量83022  月发电量83037  年发电量83038
-    switch (dialog.dateType){
-        case 1:
-            return 'p83022';
-            break;
-        case 2:
-            return 'p83037';
-            break;
-        default:
-            return 'p83038';
-    }
-}
-
-//发电量弹出chart
-function showFDLAll(valueAxis, areaData, unit) {
-    $("#fdlAllChart div").show();
-    var option = {
-        tooltip: {
-            trigger: 'axis',
-            formatter: function (data) {
-                //return data[0].name + "<br>" + data[0].seriesName + "：" + data[0].value + unit;
-                return "<p align='left'>" + LANG["powerStation"] + "：" + data[0].name + "</p>" +
-                    "<p align='left'>" + data[0].seriesName + "：" + data[0].value + unit;
-            }
-        },
-        legend: {
-            orient: 'horizontal',      // 布局方式，默认为水平布局，可选为：
-            // 'horizontal' ¦ 'vertical'
-            x: 'right',               // 水平安放位置，默认为全图居中，可选为：
-            // 'center' ¦ 'left' ¦ 'right'
-            // ¦ {number}（x坐标，单位px）
-            y: '10',                  // 垂直安放位置，默认为全图顶端，可选为：
-            // 'top' ¦ 'bottom' ¦ 'center'
-            // ¦ {number}（y坐标，单位px）
-            textStyle: {
-                color: '#FFFFFF',
-                fontFamily : 'Microsoft YaHei'
-            },
-            data: [LANG["yy1.PowerGeneration"]]
-        },
-        // 网格
-        grid: {
-            //x: 30,
-            //y: 35,
-            //x2: 0,
-            //y2: 0,
-            //width: 320,
-            //height: 160,
-            backgroundColor: 'rgba(0,0,0,0)',
-            borderWidth: 0,
-            borderColor: '#ccc'
-        },
-
-        calculable: false,
-        xAxis: [
-            {
-                type: 'category',
-                axisLine: {
-                    show: true,
-                    lineStyle: { // 属性lineStyle控制线条样式
-                        color: '#ffffff'
-                    }
-                },
-                axisLabel: {
-                    show: true,
-                    interval:0,// 是否显示全部标签，0显示
-                    rotate: 25,//逆时针显示标签，不让文字叠加
-                    textStyle: {
-                        color: '#ffffff'
-                    }
-                },
-                splitLine: {
-                    show: false
-                },
-
-                data: areaData
-            }
-        ],
-        yAxis: [
-            {
-                type: 'value',
-                name: unit,
-                splitLine: {
-                    show: false
-                },
-                axisLabel: {
-                    show: true,
-                    textStyle: {
-                        color: '#ffffff'
-                    }
-                },
-                axisLine: {
-                    show: true,
-                    lineStyle: { // 属性lineStyle控制线条样式
-                        color: '#ffffff'
-                    }
-                },
-                nameTextStyle:{
-                    fontSize: 15,
-                    fontFamily : 'Microsoft YaHei'
-                },
-                axisTick: axisTickObj
-            }
-        ],
-        series: [
-            {
-                name: LANG["yy1.PowerGeneration"],
-                type: 'bar',
-                barMaxWidth:50,
-                stack: 'sum',
-                itemStyle: {
-                    normal: {
-                        color: '#3EB5FF'
-                    }
-                },
-                data: valueAxis
-            }
-        ]
-    };
-
-    $(".showm_bottom .loadingDiv").hide();
-    dialog.fdlChart.setOption(option);
-
-
-    dialog.fdlChart.on('click', function(params){
-        var index = params.dataIndex;
-        event.stopPropagation();
-        if(dialog.scrnvs == 3){
-            dialog.psName = params.name;
-            dialog.psId = dialog.psIdArr[index];
-            showPsGenTrends();
-        }
-    });
-
-}
-
-
-//判断能否增长日期 val(eg:2016-01-01)
-function isIncreaseDateAvailable(type, val, isInner){
-    var showIncreaseDate = false;
-    var now = new Date();
-    var nowYear = now.getFullYear();
-    var nowMonth = now.getMonth() + 1;
-    var nowDay = now.getDate();
-    var temYear = val.substring(0,4);
-    if(type == 1){//日
-        if(now.Format("yyyyMMdd") > val.substring(0,10).replace(/\//g, "")){
-            showIncreaseDate = true;
-        }else{
-            showIncreaseDate = false;
-        }
-    }else if(type == 2){//月
-        if(now.Format("yyyyMM") > val.substring(0,7).replace(/\//g, "")){
-            showIncreaseDate = true;
-        }else{
-            showIncreaseDate = false;
-        }
-    }else if(type == 3){//年
-        if(now.Format("yyyy") > val.substring(0,4).replace(/\//g, "")){
-            showIncreaseDate = true;
-        }else{
-            showIncreaseDate = false;
-        }
-    }
-    if(showIncreaseDate){
-        if(isInner){
-            $("#inner_right_min_btn").unbind().bind('click', innerArrowChangeDate);
-            $("#inner_right_min_btn").css("opacity", 1);
-        }
-        $("#right_min_btn").unbind().bind('click', arrowChangeDate);
-        $("#right_min_btn").css("opacity", 1);
-    }else{
-        if(isInner) {
-            $("#inner_right_min_btn").unbind('click', innerArrowChangeDate);
-            $("#inner_right_min_btn").css("opacity", 0.3);
-        }
-        $("#right_min_btn").unbind('click', arrowChangeDate);
-        $("#right_min_btn").css("opacity", 0.3);
-    }
-}
-
-//点击日期 箭头
-function arrowChangeDate(){
-    var temdate = "";
-    var val = 0;
-    if(event.target == document.getElementById("left_min_btn")){//判断事件对象，左键头时间向前
-        val = -1;
-    }else if(event.target == document.getElementById("right_min_btn")){
-        val = 1;
-    }
-    var date = $("#dateInput").val();
-    date = date.substring(0, 10);
-    if (dialog.dateType == 1) {
-        var d1 = new Date(date.replace(/\-/g, "\/"));
-        d1.addDays(val);//加、减日 操作
-        temdate = d1.Format("yyyy/MM/dd");
-        isIncreaseDateAvailable(1, temdate, false);
-    } else if (dialog.dateType == 2) {
-        var d1 = new Date(date.replace(/\-/g, "\/"));
-        d1.addMonths(val);
-        temdate = d1.Format("yyyy/MM");
-        isIncreaseDateAvailable(2, temdate, false);
-    } else if (dialog.dateType == 3) {
-        var d1 = new Date(date.replace(/\-/g, "\/"));
-        d1.addYears(val);
-        temdate = d1.Format("yyyy");
-        isIncreaseDateAvailable(3, temdate, false);
-    }
-    $("#dateInput").val(temdate);
-    if(dialog.genOrEqHr == 2){
-        loadFDLAll();
-    }else if(dialog.genOrEqHr == 3){
-        loadGenTrendsData();
-    }else {
-        loadDXXSAll();
-    }
-}
-
-function getDate(){
-    var date = $("#dateInput").val();
-    date = date.replace(/\//g,"");
-    return date;
-}
-
-function setDateInputFormat(){
-    if(dialog.dateType == 1 || !dialog.dateType){
-        $("#dateInput").unbind();
-        $("#dateInput").click(function(){
-            WdatePicker({dateFmt:'yyyy/MM/dd',maxDate:'%y/%M/%d',isShowClear:false,readOnly:true,onpicking:function(dp){dateChanged(dp.cal.getDateStr(), dp.cal.getNewDateStr());}});
-        });
-    }else if(dialog.dateType == 2){
-        $("#dateInput").unbind();
-        $("#dateInput").click(function(){
-            WdatePicker({dateFmt:'yyyy/MM',maxDate:'%y/%M',isShowClear:false,readOnly:true,onpicking:function(dp){dateChanged(dp.cal.getDateStr(), dp.cal.getNewDateStr());}});
-        });
-    }else{
-        $("#dateInput").unbind();
-        $("#dateInput").click(function(){
-            WdatePicker({dateFmt:'yyyy',maxDate:'%y',isShowClear:false,readOnly:true,onpicking:function(dp){dateChanged(dp.cal.getDateStr(), dp.cal.getNewDateStr());}});
-        });
-    }
-}
-
-function dateChanged(dStrOld, dStrNew){
-    if(true){
-        isIncreaseDateAvailable(dialog.dateType, dStrNew, false);
-        if(dialog.genOrEqHr == 2){
-            loadFDLAll();
-        }else if(dialog.genOrEqHr == 3){
-            loadGenTrendsData();
-        }else {
-            loadDXXSAll();
-        }
-    }
-}
-
-//箭头分页
-function arrowChangePage(){
-    if(event.target == document.getElementById("left_max_btn") && dialog.currentPage > 1){
-        dialog.currentPage --;
-    }else if(event.target == document.getElementById("right_max_btn")){
-        dialog.currentPage ++;
-    }
-    if(dialog.genOrEqHr == 2){
-        loadFDLAll();
-    }else {
-        loadDXXSAll();
-    }
-    isPageArrowAvilable();
-}
-
-//判断分页箭头可用
-function isPageArrowAvilable(){
-    if(dialog.pageCount > dialog.currentPage){
-        $("#right_max_btn").unbind().bind('click', arrowChangePage);
-        $("#right_max_btn").css("opacity", 1);
-        $("#right_max_btn").css("cursor", 'pointer');
-    }else{
-        $("#right_max_btn").unbind('click', arrowChangePage);
-        $("#right_max_btn").css("opacity", 0.3);
-        $("#right_max_btn").css("cursor", 'default');
-    }
-    if(1 < dialog.currentPage){
-        $("#left_max_btn").unbind().bind('click', arrowChangePage);
-        $("#left_max_btn").css("opacity", 1);
-        $("#left_max_btn").css("cursor", 'pointer');
-    }else{
-        $("#left_max_btn").unbind('click', arrowChangePage);
-        $("#left_max_btn").css("opacity", 0.3);
-        $("#left_max_btn").css("cursor", 'default');
-    }
-}
-
-function showPsGenTrends(){
-    $("#fdlAllChart").hide();
-    $("#genTrends").show();
-    $("#dxxs_li").hide();
-    $(".max_btn").hide();
-    $("#psName").show();
-    $("#psNameA").text(dialog.psName + "-" + LANG["generationTrend"]);
-    dialog.genOrEqHr = 3;
-    loadGenTrendsData();
-}
-
-function loadGenTrendsData(){
-    var param = {};
-    param["date"] = getDate();
-    param["ps_id"] = dialog.psId;
-    param["date_type"] = (4 - dialog.dateType);//1 -> 3; 2 -> 2; 3 -> 1
-    $.ajax({
-        type: "post",
-        data: param,
-        url: 'powerAction_getPowerPlan.action',
-        async: true,
-
-        dataType: "json",
-        beforeSend: function () {
-            dialog.trendsChart = echarts.init(document.getElementById('genTrends'));
-            $(".showm_bottom .loadingDiv").show();
         },
         success: function (data) {
-            var object = parseJson(data);
-            if (data != null && object.result_code == 1) {
-                var result = object.result_data;
-                var unit = result.actual_energy_unit;
-                var actualData = result.actual_energy;
-                var dateDate = [];
-                var maxPower = actualData.max();
-                for (var i = 0; i < actualData.length; i++) {
-                    dateDate.push(i + 1);
+            var data = parseJson(data);
+            if(data && data.result_data){
+                var result = data.result_data;
+                $(".psName").text(result.ps_name);
+                $("#curPower_value").text(result.curr_power.value + result.curr_power.unit);
+                $("#todayGeneration_value").text(result.today_energy.value + result.today_energy.unit);
+                $("#totalGen_value").text(result.total_energy.value + result.total_energy.unit);
+                $("#reduceCo2_value").text(result.co2_reduce.value + result.co2_reduce.unit);
+                var lastMonthPr = result.p83023y;
+                //var totalPr = result.p83023year;
+                var totalPr = result.monthPr;
+                dialog.ps_type = result.ps_type;
+                //if($.isNumeric(lastMonthPr)){
+                //    $("#title_a").text(lastMonthPr);
+                //    drawLastMonthPR(lastMonthPr);//上月PR
+                //}else{
+                //    drawLastMonthPR(0);//上月PR
+                //}
+                /* switch (parseInt(dialog.ps_id)){
+                 case 109189 :
+                 totalPr = 85;
+                 break;
+                 case 108816 :
+                 totalPr = 81;
+                 break;
+                 case 109192 :
+                 totalPr = 80;
+                 break;
+                 }*///演示写死
+
+                if($.isNumeric(totalPr)){
+                    $("#title_a1").text(totalPr);
+                    drawTotalPR(totalPr);//当月pr
+                }else{
+                    drawTotalPR(0);//当月pr
                 }
-                if(isNotNull(maxPower)){
-                    if(parseInt(maxPower / 10000) > 0){
-                        for (var i = 0; i < actualData.length; i++) {
-                            if($.isNumeric(actualData[i])){
-                                actualData[i] = parseFloat(actualData[i] / 10000).toFixed(2);
+                $("#psRoughInfo").append(result.description);
+                /* if(result.diagram_url){
+                 if(dialog.ps_id==108816){//广水
+                 $("#psDiagram").attr("src", "http://file.isolarcloud.com/station/108816/file120161205120924582.jpg");//电站示意图
+                 } else {
+                 $("#psDiagram").attr("src", result.diagram_url);//电站示意图
+                 }
+
+                 }*/
+                //superSlide
+                if(result.images && result.images.length){
+                    var images = result.images;
+                    var htmlStr = "";
+                    for(var i = 0; i < images.length; i ++){
+                        if(images[i].pic_type==0){//电站图片
+                            htmlStr += '<li><a><img src="' + images[i].picture_url + '" alt=""></a></li>'
+                        } else {
+                            $("#psDiagram").attr("src", images[i].picture_url);//电站示意图
+                        }
+                    }
+                    $("#smPicture").html(htmlStr);
+                    $("#bigPicture").html(htmlStr);
+                }
+                jQuery(".siteMore_con_ri_tog").slide({mainCell:".bd ul",titCell:".hd li",effect:"topLoop",autoPlay:true});
+                jQuery(".siteMore_con_ri_tog .hd").slide({mainCell:"ul",prevCell:".siteMore_con_ri_togprev",nextCell:".siteMore_con_ri_tognext",vis:3,effect:"topLoop",scroll:1});
+                jQuery(".siteMore_con_ri").slide({titCell:".siteMore_con_ri_tit li",mainCell:".siteMore_con_ri_wrap",effect:"fold",trigger:"click"})
+            }
+        },
+        error: function () {
+        }
+    });
+}
+
+function drawLastMonthPR(pr){
+    option = {
+        color: ['#0086DB','#FC8A44'],
+        series : [
+            {
+                hoverAnimation: false,
+                type:'pie',
+                radius : ['50%', '80%'],
+                itemStyle : {
+                    normal : {
+                        label : {
+                            show : false
+                        },
+                        labelLine : {
+                            show : false
+                        }
+                    }
+                },
+                data:[
+                    {value:pr,
+                        itemStyle: {
+                            normal: {
+                                color:"#0086DB"
                             }
                         }
-                        unit = "万度"
+                    },
+                    {value:100 - pr,
+                        itemStyle: {
+                            normal: {
+                                color:"#FC8A44"
+                            }
+                        }
                     }
-                }
-                unit = replaceUnit_scrn4Dialog(unit);
-                drawTrendsChart(actualData, unit, dateDate);
+                ]
             }
+        ]
+    };
+    var prChart = echarts.init(document.getElementById('lastMonthPr'));
+    prChart.setOption(option);
+}
+
+function drawTotalPR(pr){
+    option = {
+        color: ['#0086DB','#62C5FC'],
+        series : [
+            {
+                hoverAnimation: false,
+                type:'pie',
+                radius : ['50%', '80%'],
+                itemStyle : {
+                    normal : {
+                        label : {
+                            show : false
+                        },
+                        labelLine : {
+                            show : false
+                        }
+                    }
+                },
+                data:[
+                    {value:pr,
+                        itemStyle: {
+                            normal: {
+                                color:"#0086DB"
+                            }
+                        }
+                    },
+                    {value:100 - pr,
+                        itemStyle: {
+                            normal: {
+                                color:"#62C5FC"
+                            }
+                        }
+                    }
+                ]
+            }
+        ]
+    };
+
+    var prChart = echarts.init(document.getElementById('totalPr'));
+    prChart.setOption(option);
+
+}
+
+function loadDataForRealTimePower(){var param = {};
+    param["service"] = "psHourPointsValue";
+    param["ps_id"] = dialog.ps_id;
+    param["req"] = "app";
+    $.ajax({
+        url: "powerAction_loaddata.action",
+        type: "post",
+        data: param,
+        dataType: "json",
+        timeout: 1000 * 10,
+        beforeSend: function(){
+
+        },
+        success: function (data) {
+            var data = parseJson(data);
+            if(data && data.result_data){
+                var date = new Date();
+                var hours = date.getHours();
+                var min = date.getMinutes();
+                if(min<5){
+                    hours = hours-1;
+                }
+                var result = data.result_data;
+                var powerArr = result.p83033List.slice(0,hours);
+                var radiaArr = result.p83012List.slice(0,hours);
+                var dclist = result.p83039List.slice(0,hours);
+                var aclist = result.p83002List.slice(0,hours);
+                var powerUnit = result.p83033_unit;
+                var radiaUnit = result.p83012_unit;
+                var dc_unit = result.p83039_unit;
+                var ac_unit = result.p83002_unit;
+
+
+                drawRealTimeEchart(dealEchartLineArr(powerArr), dealEchartLineArr(radiaArr),dealEchartLineArr(dclist), dealEchartLineArr(aclist), powerUnit, radiaUnit, dc_unit, ac_unit);
+            }
+        },
+        error: function () {
         }
-    })
+    });
 }
 
-function getFmTime(time){
-    var resTime = "";
-    var temVal = dealTimeNum(time);
-    var date = $("#dateInput").val();
-    if(dialog.dateType == 1){
-        resTime = date + " " + temVal + ":00";
-    }else{
-        resTime = date + "/" + temVal;
+function dealTimeNum(val){
+    var rest = "--";
+    if($.isNumeric(val)){
+        rest = val > 9? val:("0"+val);
     }
-    return resTime;
+    return rest;
 }
 
-function drawTrendsChart(actualData, actualData_unit, dateDate) {
+//实时功率曲线
+function drawRealTimeEchart(powerArr, radiaArr, dcArr, acArr, powerUnit, radiaUnit, dc_unit, ac_unit){
     var option = {
         tooltip: {
             trigger: 'axis',
-            formatter: function (data) {
-                var str = "<p align='left'>" + LANG["TIME"] + "：" + getFmTime(data[0].name) + "</p>";
-                str += "<p align='left'>" + LANG["yy1.PowerGeneration"] + "：" + dealEchartToolTip(data[0].value) + actualData_unit;
+            formatter: function(data){
+                var str = "<p align='left'>" + LANG["TIME"] + "：" + dealTimeNum(data[0].name) + ":00</p>";
+                for(var i = 0; i < data.length; i ++) {
+                    if(LANG["1_1_radiationIntensity"] == data[i].seriesName){
+                        str += "<p align='left'>" + data[i].seriesName + "：" + dealEchartToolTip(data[i].value) + radiaUnit;
+                    }else if (LANG["1_1_realTimePower"] == data[i].seriesName) {
+                        str += "<p align='left'>" + data[i].seriesName + "：" + dealEchartToolTip(data[i].value) + powerUnit;
+                    }else if(LANG["analysis_report_inverterdcpower"] == data[i].seriesName){
+                        str += "<p align='left'>" + data[i].seriesName + "：" + dealEchartToolTip(data[i].value) + dc_unit;
+                    }else if(LANG["analysis_report_inverteracpower"] == data[i].seriesName){
+                        str += "<p align='left'>" + data[i].seriesName + "：" + dealEchartToolTip(data[i].value) + ac_unit;
+                    }
+                }
                 return str;
             }
         },
-        legend: {
-            orient: 'horizontal',      // 布局方式，默认为水平布局，可选为：
-            // 'horizontal' ¦ 'vertical'
-            x: 'right',               // 水平安放位置，默认为全图居中，可选为：
-            // 'center' ¦ 'left' ¦ 'right'
-            // ¦ {number}（x坐标，单位px）
-            y: '10',                  // 垂直安放位置，默认为全图顶端，可选为：
-            // 'top' ¦ 'bottom' ¦ 'center'
-            // ¦ {number}（y坐标，单位px）
-            textStyle: {
-                color: '#FFFFFF',
-                fontFamily : 'Microsoft YaHei'
-            },
-            data: [LANG["yy1.PowerGeneration"]]
-        },
-        // 网格
         grid: {
-            //x: 30,
-            //y: 35,
-            //x2: 0,
-            //y2: 0,
+            x: 60,
+            y: 54,
+            x2: 60,
+            y2: 40,
             //width: 320,
             //height: 160,
             backgroundColor: 'rgba(0,0,0,0)',
             borderWidth: 0,
             borderColor: '#ccc'
         },
-        xAxis: [
+        legend: {
+            data:[LANG["1_1_realTimePower"],LANG["1_1_radiationIntensity"],LANG["analysis_report_inverterdcpower"],LANG["analysis_report_inverteracpower"]],
+            x: 'right',
+            textStyle:{
+                color: "#FFFFFF",
+                fontFamily : 'Microsoft YaHei'
+            }
+        },
+        calculable : true,
+        xAxis : [
             {
-                type: 'category',
-                axisLine: {
-                    show: true,
-                    lineStyle: { // 属性lineStyle控制线条样式
-                        color: '#ffffff'
-                    }
-                },
-                axisLabel: {
-                    show: true,
-                    interval:0,// 是否显示全部标签，0显示
-                    rotate: 0,//逆时针显示标签，不让文字叠加
-                    textStyle: {
-                        color: '#ffffff'
-                    }
+                axisTick:{
+                    show: false
                 },
                 splitLine: {
                     show: false
                 },
-
-                data: dateDate
+                axisLabel:{
+                    textStyle:{
+                        color: '#FFFFFF'
+                    }
+                },
+                axisLine:{
+                    //show:false
+                },
+                data : ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24']
             }
         ],
-        yAxis: [
+        yAxis : [
             {
-                type: 'value',
-                name: actualData_unit,
                 splitLine: {
                     show: false
                 },
-                axisLabel: {
-                    show: true,
-                    textStyle: {
-                        color: '#ffffff'
+                name: powerUnit,
+                type : 'value',
+                axisLabel:{
+                    textStyle:{
+                        color: '#FFFFFF'
                     }
                 },
-                axisLine: {
-                    show: true,
-                    lineStyle: { // 属性lineStyle控制线条样式
-                        color: '#ffffff'
-                    }
+                axisLine:{
+                    color:"#003B5D"
                 },
                 nameTextStyle:{
-                    fontSize: 15,
+                    color: '#FFFFFF',
                     fontFamily : 'Microsoft YaHei'
-                },
-                axisTick: axisTickObj
-            }
-        ],
-        series: [
+                }
+            },
             {
-                name: LANG["yy1.PowerGeneration"],
-                type: 'bar',
-                barMaxWidth:50,
-                stack: 'sum',
-                itemStyle: {
-                    normal: {
-                        color: '#3EB5FF'
+                splitLine: {
+                    show: false
+                },
+                name: radiaUnit,
+                type : 'value',
+                axisLabel:{
+                    textStyle:{
+                        color: '#FFFFFF'
                     }
                 },
-                data: actualData
+                axisLine:{
+                    color:"#003B5D"
+                },
+                nameTextStyle:{
+                    color: '#FFFFFF',
+                    fontFamily : 'Microsoft YaHei'
+                }
+            }
+        ],
+        //color: ["#6293FA",'#03D5AE'],
+        color: ["#a7fffe",'#f8f442','#9f5ba7','#1d5eb6'],
+        series : [
+            {
+                yAxisIndex: 0,
+                name:LANG["1_1_realTimePower"],
+                type:'line',
+                data:powerArr,
+                smooth:true,
+                itemStyle: {normal: {areaStyle: {type: 'default'}}}
+            },
+            {
+                yAxisIndex: 1,
+                name:LANG["1_1_radiationIntensity"],
+                type:'line',
+                data:radiaArr,
+                smooth:true,
+                itemStyle: {normal: {areaStyle: {type: 'default'}}}
+            },
+            {
+                yAxisIndex: 0,
+                name:LANG["analysis_report_inverterdcpower"],
+                type:'line',
+                data:dcArr,
+                smooth:true,
+                itemStyle: {normal: {areaStyle: {type: 'default'}}}
+            },
+            {
+                yAxisIndex: 0,
+                name:LANG["analysis_report_inverteracpower"],
+                type:'line',
+                data:acArr,
+                smooth:true,
+                itemStyle: {normal: {areaStyle: {type: 'default'}}}
             }
         ]
     };
+    var prChart = echarts.init(document.getElementById('realTimeEchart'));
+    prChart.setOption(option);
+}
 
-    $(".showm_bottom .loadingDiv").hide();
-    dialog.trendsChart.setOption(option);
+//加载电站天气
+function loadWeather(){
+    var param = {};
+    param["ps_id"] = dialog.ps_id;
+    param["service"] = "getWeatherInfo";
+    param["req"] = "app";
+    $.ajax({
+        url: "powerAction_loaddata.action",
+        type: "post",
+        dataType: "json", //后台返回的响应数据形式json、xml、html、text、script、_default
+        data: param,
+        contentType: "application/x-www-form-urlencoded; charset=UTF-8",//指定浏览器传输form表单参数时采用的字符集
+        beforeSend: function(){
+            $("#todayvalue").text("--");
+            $("#tomorrowvalue").text("--");
+            var date = new Date();
+            $("#month").text(date.getMonth() + 1);
+            $("#date").text(date.getDate());
+            $("#days").text(dialog.daysArr[date.getDay() + 1]);
+            date.addDays(1);
+            $(".curMonthAdd1").text(date.getMonth() + 1);
+            $(".curDateAdd1").text(date.getDate());
+            date.addDays(1);
+            $(".curMonthAdd2").text(date.getMonth() + 1);
+            $(".curDateAdd2").text(date.getDate());
+            date.addDays(1);
+            $(".curMonthAdd3").text(date.getMonth() + 1);
+            $(".curDateAdd3").text(date.getDate());
+        },
+        success: function (data) {
+            data = eval("(" + data + ")");
+            if(data && data.result_data.length >= 3) {
+                data = data.result_data;
+                var todayWthObj = data[3];//今天
+                $("#wertherName").text(todayWthObj.code_name);
+                //$("#todayImg").attr("src", ctx + "/images/weather/" + todayWthObj.code + ".png");
+                $("#highc").text(todayWthObj.highc);
+                $("#lowc").text(todayWthObj.lowc);
+                $("#todayWind").text((($.isNumeric(todayWthObj.speed) && todayWthObj.speed >= 0.3)? (windDirectionTrans(todayWthObj.direction) + LANG["wind"] + " ") :"") + windLevelTrans(todayWthObj.speed));
+                $(".environmentCom").text(todayWthObj.p83016);
+                $("#batteryPlateCom").text(todayWthObj.p83017);
+                //未来三天天气
+                for(var i = 0; i < data.length - 1; i ++){
+                    var wthObj = data[i];
+                    $("#todayAdd" + (i + 1) + "Img").attr("src", ctx + "/images/weather/" + wthObj.code + ".png");
+                    $("#todayAdd" + (i + 1) + "Highc").text(wthObj.highc);
+                    $("#todayAdd" + (i + 1) + "Lowc").text(wthObj.lowc);
+                    $("#todayAdd" + (i + 1) + "WthName").text(wthObj.code_name);
+                    $("#todayAdd" + (i + 1) + "WinLevel").text(windLevelTrans(wthObj.speed));
+                    if($.isNumeric(wthObj.speed) && wthObj.speed >= 0.3){
+                        $("#todayAdd" + (i + 1) + "WinDir").text(windDirectionTrans(wthObj.direction) + LANG["wind"]);
+                    }
+                }
+            }
+        }
+    });
+}
+
+//展示电站单元
+function showPsUnit(){
+    if($("#user_id",parent.document).val()=="12900"){//东旭集团用户定制，不跳转
+        return;
+    }
+    var url = ctx + "/dialog/dialog_psUnit.jsp?ps_id=" + dialog.ps_id + "&ps_scheme=" + dialog.ps_scheme + "&ps_type=" + dialog.ps_type + "&scrnvs=" + dialog.screenVersion;
+    $("#equalHourFm", parent.document).attr("src", url);
 }

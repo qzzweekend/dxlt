@@ -10,16 +10,6 @@
           type='text/css'/>
     <link rel="stylesheet" href="css/plugin/select/select2.css"/>
     <link rel="stylesheet" href="css/index.css"/>
-    <script src="js/lib/jquery-1.10.2.min.js"></script>
-    <script src="js/lib/vlm.js"></script>
-    <script src="js/lib/vue.js"></script>
-    <script src="js/lib/ejs.js"></script>
-    <script src="js/plugin/jquery-select/select2.min.js"></script>
-    <script src="js/common/common.js"></script>
-    <script src="js/common/esmpbase.js"></script>
-    <script src="js/lib/lang.js"></script>
-    <script src="js/plugin/echarts/build/dist/echarts.js"></script>
-    <script src="js/plugin/echarts-x/build/dist/echarts-x.js"></script>
     <script language="javascript">
         var ctx = '';
         var bathPath = '';
@@ -73,16 +63,14 @@
             </div>
             <div class="Monitor_left_c2" data-clicktip="Monitor_left_c2_highLt" name="portal" @click="showDialogIframe('dialog/dialog_prRank.html',$event)">
                 <div class="Monitor_left_c2_on"></div>
-                <div class="Mc2_title">性能排名<span style="font-size: 14px">(近30天)</span></div>
-                <div class="Mc5_nav fr clearfix" @click="PR_click($event)">
+                <div class="Mc2_title">性能排名<span style="font-size: 14px">( 当月 )</span></div>
+                <div class="Mc5_nav fr clearfix" @click.stop="PR_click($event)">
                     <ul>
                         <li data-sortType="1" class="capacity_btn on"><a href="javascript:;">前七名</a></li>
                         <li data-sortType="2" class="capacity_btn"><a href="javascript:;">后七名</a></li>
                     </ul>
                 </div>
-                <div class="Mc5_con module" id="capacity">
-                </div>
-
+                <div class="Mc5_con module" id="capacity"></div>
             </div>
             <div class="Monitor_left_c3" data-clicktip="Monitor_left_c3_highLt" name="portal" @click="showDialogIframe('dialog/dialog_powerPlan.html',$event)" >
                 <div class="Monitor_left_c3_on"></div>
@@ -142,9 +130,9 @@
                     <div class="Mc4_bg_on"></div>
                     <div class="Mc4_top clearfix">
                         <div class="Mc4_title fl" id="powerTrendTitle">当月发电趋势</div>
-                        <div class="Mc4_nav fr" @click="trendTab($event)">
+                        <div class="Mc4_nav fr" @click.stop="trendTab($event)">
                             <ul>
-                                <li data-dateType="1" class="trends_btn"><a href="javascript:;">日</a></li>
+                                <li data-dateType="0" class="trends_btn"><a href="javascript:;">日</a></li>
                                 <li data-dateType="2" class="trends_btn on"><a href="javascript:;">月</a></li>
                                 <li data-dateType="3" class="trends_btn"><a href="javascript:;">年</a></li>
                             </ul>
@@ -423,6 +411,19 @@
 </script>
 
 <script src="js/lib/star.js"></script>
+
+<script src="js/lib/jquery-1.10.2.min.js"></script>
+<script src="js/lib/vlm.js"></script>
+<script src="js/lib/vue.js"></script>
+<script src="js/lib/ejs.js"></script>
+<script src="js/plugin/jquery-select/select2.min.js"></script>
+<script src="js/common/common.js"></script>
+<script src="js/common/esmpbase.js"></script>
+<script src="js/lib/lang.js"></script>
+<script src="js/plugin/echarts_new/echarts.min.js"></script>
+<script src="js/plugin/echart/echarts.js"></script>
+<script src="js/3d/echarts-x.js"></script>
+
 <script src="js/index.js"></script>
 </body>
 </html>

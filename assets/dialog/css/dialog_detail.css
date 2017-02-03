@@ -1,6 +1,8 @@
 
-body {
+html, body {
     overflow: hidden;
+    /*background-color: transparent;*/
+    background-color: rgba(0,0,0,.2);
 }
 
 .titleDiv {
@@ -122,6 +124,10 @@ img {
     font-size: 14px;
     color: #ffffff;
     line-height: 24px;
+}
+
+.station_desc{
+    text-indent: 1em;
 }
 
 .innerDiv50 {
