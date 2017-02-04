@@ -913,8 +913,7 @@ new Vue({
     mounted: function () {
         this.showEqHourData(1);
     }
-})
-;
+});
 
 
 

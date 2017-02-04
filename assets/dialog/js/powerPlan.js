@@ -46,8 +46,7 @@ new Vue({
                     startDateStr = $('#dateInput').val() + '0101000000';
                     endDateStr = (Number($('#dateInput').val()) + 1) + '0101000000';
                     break;
-                default :
-                    ;
+                default :;
             }
 
             var Parameters = {
@@ -336,6 +335,7 @@ new Vue({
             dialog.dateType = type;
             this.initTime();
             this.setDateInputFormat();  //时间input绑定WdatePicker
+
             this.loadPlanChart();
             this.addActive();
         },
@@ -446,8 +446,8 @@ new Vue({
         }
     },
     mounted: function () {
+        alert(1);
         $('#left_max_btn').css('opacity',1);
         this.showEqHourData(3);
-
     }
 });

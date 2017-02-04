@@ -18,7 +18,7 @@
                     <ul>
                         <li>
                             <span id="unitName" class="dialogTile showInverter"
-                                  style="display:none; float:left; cursor: pointer;color:#0aaafd" onclick="toUnit()">Back</span>
+                                  style="display:none; float:left; cursor: pointer;color:#0aaafd" @click="toUnit()">Back</span>
                             <span class="dialogTile showInverter" style="display:none; float:left">></span>
                             <span id="dialogTile" class="dialogTile" style="float:left"></span>
                         </li>
@@ -42,8 +42,8 @@
                     <div class="time_slide_input fl"><input id="dateInput" type="text" readonly="readonly"/></div>
                     <a href="javascript:;" class="right_min_btn fr" id="right_min_btn" @click="arrowChangeDate"></a>
                 </div>
-                <a href="javascript:;" class="left_max_btn" id="left_max_btn" @click="arrowChangeDate"></a>
-                <a href="javascript:;" class="right_max_btn" id="right_max_btn" @click="arrowChangeDate"></a>
+                <a href="javascript:;" class="left_max_btn" id="left_max_btn" ></a>
+                <a href="javascript:;" class="right_max_btn" id="right_max_btn" ></a>
 
                 <div align="center" class="loadingDiv">
                     <img src="images/loading.gif"/>

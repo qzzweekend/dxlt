@@ -1,5 +1,7 @@
+
 var iFrameSearch = window.location.search.substring(1),
     stationid = iFrameSearch.split('=')[1].toLowerCase();
+
 var dialog = {
     ps_id: stationid,
     //screenVersion: "",
@@ -36,6 +38,7 @@ new Vue({
 
         fd_city: '',
         fd_pr: '--',
+        fd_station_sketchpic:'', //电站示意图
 
         fdboardtemperature: '--',  //环境温度
         fdtemperature: '--', //电池板温度
@@ -43,7 +46,12 @@ new Vue({
         wertherName: '--',
         temprature_low: '--',
         temprature_high: '--',
-        windToday: '--'
+        windToday: '--',
+
+        powerArr: [], //实时功率
+        radiaArr: [], //辐照
+        dclist: [], //直流功率
+        aclist: [], //交流功率
 
     },
     methods: {
@@ -59,7 +67,6 @@ new Vue({
                     "code": "20000010"
                 };
             vlm.loadJson("", JSON.stringify(Parameters), function (result) {
-                //console.log(result);
                 if (result.success) {
                     var result = result.data;
                     _this.fd_station_name = result.fd_station_name;
@@ -72,6 +79,7 @@ new Vue({
                     _this.fdboardtemperature = result.fdboardtemperature.toFixed(1);
                     _this.fdtemperature = result.fdtemperature.toFixed(1);
                     _this.loadWeather(result.fd_city); //天气调用
+                    _this.fd_station_sketchpic=result.fd_station_sketchpic.replace(/\\/g, '/').replace(/:\//g, '://'); //匹配反斜杠;; //电站示意图
 
                     _this.drawTotalPR(result.pr);//累计PR
                     //superSlide
@@ -158,125 +166,17 @@ new Vue({
 
         loadDataForRealTimePower: function () {
             var dates = new Date(),
+                _this = this,
                 endDate = dates.getFullYear() + '-' + (dates.getMonth() + 1) + '-' + dates.getDate() + 'T' + dates.getHours() + ':' + dates.getMinutes() + ':' + dates.getSeconds(),
                 endDateStr = vlm.Utils.format_date(endDate, 'YmdHis'),
                 startDateStr = vlm.Utils.currentDay(),
-                pwArr = [],
-                powerArr = [],
-                radiaArr = [],
-                dclist = [],
-                aclist = [],
                 powerUnit = 'kW',
                 radiaUnit = 'W/㎡',
                 dc_unit = 'kW',
                 ac_unit = 'kW';
 
-            powerArr=[
-                "0",
-                "0",
-                "0",
-                "0",
-                "0",
-                "0",
-                "0",
-                "723.83",
-                "5755.3",
-                "3689.75",
-                "4095.8",
-                "5278.64",
-                "10627.89",
-                "18766.52",
-                "5596.41",
-                "8226.9",
-                "1094.57",
-                "0",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--"
-            ];
-            radiaArr=[
-                "0",
-                "0",
-                "0",
-                "0",
-                "0.1",
-                "0.3",
-                "0.5",
-                "27.7",
-                "162.5",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--"
-            ];
-            dclist=[
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--"
-            ];
-            aclist=[
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--",
-                "--"
-            ]
 
-            //接口2
+            //接口1
             var Parameters = {
                 "parameters": {
                     "stationtype": "",
@@ -285,7 +185,7 @@ new Vue({
                     "sort": '2',
                     "starttime": startDateStr,
                     "endtime": endDateStr,
-                    "topn": "300",
+                    "topn": "1000",
                     "stationid": "gs"
                 },
                 "foreEndType": 2,
@@ -293,98 +193,86 @@ new Vue({
             }
             //console.log(Parameters);
             vlm.loadJson("", JSON.stringify(Parameters), function (res) {
-                console.log(res);
-                //if (res.success) {
-                //    var result = res.data.fd_datas;
-                //    if (result.length) {
-                //        for (var i = 0; i < result.length; i++) {
-                //            pwArr.push(result[i].fd_pw_curr);
-                //        }
-                //        console.log(pwArr);
-                //    }
-                //} else {
-                //    alert(res.message);
-                //}
-
-                    var date = new Date();
-                    var hours = date.getHours();
-                    var min = date.getMinutes();
-                    if(min<5){
-                        hours = hours-1;
+                if (res.success) {
+                    var result = res.data.fd_datas;
+                    if (result.length) {
+                        var hourNum = result[0].fd_datetime < 10 ? result[0].fd_datetime.substring(1) : result[0].fd_datetime;
+                        var hourMaxNum = result[result.length - 1].fd_datetime < 10 ? result[result.length - 1].fd_datetime.substring(1) : result[result.length - 1].fd_datetime;
+                        for (var i = 1; i <= hourMaxNum; i++) {
+                            if (i < hourNum) {
+                                _this.powerArr.push('0');
+                            } else {
+                                _this.powerArr.push(result[i - hourNum].fd_pw_curr.toFixed(2));
+                            }
+                        }
                     }
-                    var result = res.result_data;
-                    var powerArr = result.p83033List.slice(0,hours);
-                    var radiaArr = result.p83012List.slice(0,hours);
-                    var dclist = result.p83039List.slice(0,hours);
-                    var aclist = result.p83002List.slice(0,hours);
-                    var powerUnit = result.p83033_unit;
-                    var radiaUnit = result.p83012_unit;
-                    var dc_unit = result.p83039_unit;
-                    var ac_unit = result.p83002_unit;
-
-                    console.log(dealEchartLineArr(powerArr));
-                    console.log(dealEchartLineArr(radiaArr));
-                    console.log(dealEchartLineArr(dclist));
-                    console.log(dealEchartLineArr(aclist));
-                   });
-            this.drawRealTimeEchart(dealEchartLineArr(powerArr), dealEchartLineArr(radiaArr),dealEchartLineArr(dclist), dealEchartLineArr(aclist), powerUnit, radiaUnit, dc_unit, ac_unit);
-
-            //console.log(dealEchartLineArr(powerArr));
-            //console.log(dealEchartLineArr(radiaArr));
-            //console.log(dealEchartLineArr(dclist));
-            //console.log(dealEchartLineArr(aclist));
-            //this.drawRealTimeEchart(dealEchartLineArr(powerArr), dealEchartLineArr(radiaArr), dealEchartLineArr(dclist), dealEchartLineArr(aclist), powerUnit, radiaUnit, dc_unit, ac_unit);
+                } else {
+                    alert(res.message);
+                }
+            }, true);
 
 
-            //接口1
-            //Parameters = {
-            //    "parameters": {
-            //        "ctype": "2",
-            //        "timetype": "1",
-            //        "sorttype": "1",
-            //        "sort": "1",
-            //        "starttime": startDateStr,
-            //        "endtime": endDateStr,
-            //        "topn": "8000",
-            //        "stationid": "gs",
-            //        "devid": "",
-            //        "ischild": ""
-            //    },
-            //    "foreEndType": 2,
-            //    "code": "30000002"
-            //};
-            //
+            //接口2
+            Parameters = {
+                "parameters": {
+                    "ctype": "3",  //按时间分组实时功率
+                    "timetype": "1",
+                    "sorttype": "1",
+                    "sort": "1",
+                    "starttime": startDateStr,
+                    "endtime": endDateStr,
+                    "topn": "1000",
+                    "stationid": "gs",
+                    "devid": "",
+                    "ischild": ""
+                },
+                "foreEndType": 2,
+                "code": "30000002"
+            };
+
             //console.log(Parameters);
-            //vlm.loadJson("", JSON.stringify(Parameters), function (result) {
-            //    console.log(result);
-            //    if (result.success) {
-            //        var result = result.data;
-            //        if (result.data.length) {
-            //
-            //        }
-            //    } else {
-            //        alert(result.message);
-            //    }
-            //});
+            vlm.loadJson("", JSON.stringify(Parameters), function (res) {
+                if (res.success) {
+                    var result = res.data;
+                    if (result.length) {
+                        var hourNum = result[0].fd_datetime < 10 ? result[0].fd_datetime.substring(1) : result[0].fd_datetime;
+                        var hourMaxNum = result[result.length - 1].fd_datetime < 10 ? result[result.length - 1].fd_datetime.substring(1) : result[result.length - 1].fd_datetime;
 
+                        for (var i = 1; i <= hourMaxNum; i++) {
+                            if (i < hourNum) {
+                                _this.radiaArr.push('0');
+                                _this.dclist.push('--');
+                                _this.aclist.push('--');
+                            } else {
+                                _this.radiaArr.push(result[i - hourNum].fd_radia_real.toString());
+                                _this.dclist.push(result[i - hourNum].fd_pdc_curr.toString());
+                                _this.aclist.push(result[i - hourNum].fd_pw_curr.toString());
+                            }
+                        }
+                    }
+                } else {
+                    alert(res.message);
+                }
+            }, true);
+
+            this.drawRealTimeEchart(dealEchartLineArr(this.powerArr), dealEchartLineArr(this.radiaArr), dealEchartLineArr(this.dclist), dealEchartLineArr(this.aclist), powerUnit, radiaUnit, dc_unit, ac_unit);
         },
-
 
         //实时功率曲线
         drawRealTimeEchart: function (powerArr, radiaArr, dcArr, acArr, powerUnit, radiaUnit, dc_unit, ac_unit) {
             var option = {
                 tooltip: {
                     trigger: 'axis',
-                    formatter: function(data){
+                    formatter: function (data) {
                         var str = "<p align='left'>" + LANG["TIME"] + "：" + dealTimeNum(data[0].name) + ":00</p>";
-                        for(var i = 0; i < data.length; i ++) {
-                            if(LANG["1_1_radiationIntensity"] == data[i].seriesName){
+                        for (var i = 0; i < data.length; i++) {
+                            if (LANG["1_1_radiationIntensity"] == data[i].seriesName) {
                                 str += "<p align='left'>" + data[i].seriesName + "：" + dealEchartToolTip(data[i].value) + radiaUnit;
-                            }else if (LANG["1_1_realTimePower"] == data[i].seriesName) {
+                            } else if (LANG["1_1_realTimePower"] == data[i].seriesName) {
                                 str += "<p align='left'>" + data[i].seriesName + "：" + dealEchartToolTip(data[i].value) + powerUnit;
-                            }else if(LANG["analysis_report_inverterdcpower"] == data[i].seriesName){
+                            } else if (LANG["analysis_report_inverterdcpower"] == data[i].seriesName) {
                                 str += "<p align='left'>" + data[i].seriesName + "：" + dealEchartToolTip(data[i].value) + dc_unit;
-                            }else if(LANG["analysis_report_inverteracpower"] == data[i].seriesName){
+                            } else if (LANG["analysis_report_inverteracpower"] == data[i].seriesName) {
                                 str += "<p align='left'>" + data[i].seriesName + "：" + dealEchartToolTip(data[i].value) + ac_unit;
                             }
                         }
@@ -403,51 +291,51 @@ new Vue({
                     borderColor: '#ccc'
                 },
                 legend: {
-                    data:[LANG["1_1_realTimePower"],LANG["1_1_radiationIntensity"],LANG["analysis_report_inverterdcpower"],LANG["analysis_report_inverteracpower"]],
+                    data: [LANG["1_1_realTimePower"], LANG["1_1_radiationIntensity"], LANG["analysis_report_inverterdcpower"], LANG["analysis_report_inverteracpower"]],
                     x: 'right',
-                    textStyle:{
+                    textStyle: {
                         color: "#FFFFFF",
-                        fontFamily : 'Microsoft YaHei'
+                        fontFamily: 'Microsoft YaHei'
                     }
                 },
-                calculable : true,
-                xAxis : [
+                calculable: true,
+                xAxis: [
                     {
-                        axisTick:{
+                        axisTick: {
                             show: false
                         },
                         splitLine: {
                             show: false
                         },
-                        axisLabel:{
-                            textStyle:{
+                        axisLabel: {
+                            textStyle: {
                                 color: '#FFFFFF'
                             }
                         },
-                        axisLine:{
+                        axisLine: {
                             //show:false
                         },
-                        data : ['1','2','3','4','5','6','7','8','9','10','11','12','13','14','15','16','17','18','19','20','21','22','23','24']
+                        data: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12', '13', '14', '15', '16', '17', '18', '19', '20', '21', '22', '23', '24']
                     }
                 ],
-                yAxis : [
+                yAxis: [
                     {
                         splitLine: {
                             show: false
                         },
                         name: powerUnit,
-                        type : 'value',
-                        axisLabel:{
-                            textStyle:{
+                        type: 'value',
+                        axisLabel: {
+                            textStyle: {
                                 color: '#FFFFFF'
                             }
                         },
-                        axisLine:{
-                            color:"#003B5D"
+                        axisLine: {
+                            color: "#003B5D"
                         },
-                        nameTextStyle:{
+                        nameTextStyle: {
                             color: '#FFFFFF',
-                            fontFamily : 'Microsoft YaHei'
+                            fontFamily: 'Microsoft YaHei'
                         }
                     },
                     {
@@ -455,54 +343,54 @@ new Vue({
                             show: false
                         },
                         name: radiaUnit,
-                        type : 'value',
-                        axisLabel:{
-                            textStyle:{
+                        type: 'value',
+                        axisLabel: {
+                            textStyle: {
                                 color: '#FFFFFF'
                             }
                         },
-                        axisLine:{
-                            color:"#003B5D"
+                        axisLine: {
+                            color: "#003B5D"
                         },
-                        nameTextStyle:{
+                        nameTextStyle: {
                             color: '#FFFFFF',
-                            fontFamily : 'Microsoft YaHei'
+                            fontFamily: 'Microsoft YaHei'
                         }
                     }
                 ],
                 //color: ["#6293FA",'#03D5AE'],
-                color: ["#a7fffe",'#f8f442','#9f5ba7','#1d5eb6'],
-                series : [
+                color: ["#a7fffe", '#f8f442', '#9f5ba7', '#1d5eb6'],
+                series: [
                     {
                         yAxisIndex: 0,
-                        name:LANG["1_1_realTimePower"],
-                        type:'line',
-                        data:powerArr,
-                        smooth:true,
+                        name: LANG["1_1_realTimePower"],
+                        type: 'line',
+                        data: powerArr,
+                        smooth: true,
                         itemStyle: {normal: {areaStyle: {type: 'default'}}}
                     },
                     {
                         yAxisIndex: 1,
-                        name:LANG["1_1_radiationIntensity"],
-                        type:'line',
-                        data:radiaArr,
-                        smooth:true,
+                        name: LANG["1_1_radiationIntensity"],
+                        type: 'line',
+                        data: radiaArr,
+                        smooth: true,
                         itemStyle: {normal: {areaStyle: {type: 'default'}}}
                     },
                     {
                         yAxisIndex: 0,
-                        name:LANG["analysis_report_inverterdcpower"],
-                        type:'line',
-                        data:dcArr,
-                        smooth:true,
+                        name: LANG["analysis_report_inverterdcpower"],
+                        type: 'line',
+                        data: dcArr,
+                        smooth: true,
                         itemStyle: {normal: {areaStyle: {type: 'default'}}}
                     },
                     {
                         yAxisIndex: 0,
-                        name:LANG["analysis_report_inverteracpower"],
-                        type:'line',
-                        data:acArr,
-                        smooth:true,
+                        name: LANG["analysis_report_inverteracpower"],
+                        type: 'line',
+                        data: acArr,
+                        smooth: true,
                         itemStyle: {normal: {areaStyle: {type: 'default'}}}
                     }
                 ]
@@ -614,7 +502,6 @@ new Vue({
     mounted: function () {
         this.getPsDetailInfo1();  //整体信息
         this.loadDataForRealTimePower(); //实时功率
-        this.loadWeather();  //天气
     }
 
 })

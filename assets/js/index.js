@@ -29,6 +29,7 @@ function closeEqualHourFm() {
 }
 
 function powerInfo_detail(e) {
+    $("#grayLayer").addClass("grayLayer");
     var psId = $(e).parent().attr('id');
     hideLoading();
     var url = "dialog/dialog_powerDetail.html?ps_id=" + psId;
@@ -361,7 +362,7 @@ new Vue({
                     y: '90',
                     itemGap: 20,
                     textStyle: {
-                        color: '#fff',
+                        color: '#ffffff',
                         fontFamily: 'Microsoft YaHei',
                         fontSize: 18,
                         fontWeight: '100'
@@ -370,6 +371,7 @@ new Vue({
                 color: ['#2F7FFA', '#20B126', '#FDD600'],
                 series: [
                     {
+                        hoverAnimation: false,
                         name: pieName,
                         type: 'pie',
                         center: ['50%', '45%'],
@@ -503,6 +505,7 @@ new Vue({
         //PR define
         getPRChart: function (sortType) {
             //console.log(sortType);
+            psObj.psIdArr.length=0;
             var _this = this;
             if (!sortType) {
                 sortType = "1";
@@ -827,9 +830,9 @@ new Vue({
             for (var i = 0; i < planData.length; i++) {
                 var plan = isNotNull(planData[i]) ? planData[i] : 0;
                 allPlan = allPlan + parseFloat(plan);
-                if(i<month){
+                if (i < month) {
                     completionRt.push(CalculatedCompletionRate(temArr[i], temSum[i]));
-                }else{
+                } else {
                     completionRt.push('--');
                 }
 
@@ -854,19 +857,19 @@ new Vue({
                 tooltip: {
                     trigger: 'axis',
                     formatter: function (data) {
-                        var year=_this.myDate.getFullYear();
+                        var year = _this.myDate.getFullYear();
                         var dataName = data[0].name;
-                        if(typeof dataName == 'undefined' || dataName == null || dataName == ""){
-                            for(var i = 0; i < data.length; i ++) {
+                        if (typeof dataName == 'undefined' || dataName == null || dataName == "") {
+                            for (var i = 0; i < data.length; i++) {
                                 var temDname = data[i].name;
-                                if(typeof temDname !== 'undefined' && temDname !== null && temDname !== ""){
+                                if (typeof temDname !== 'undefined' && temDname !== null && temDname !== "") {
                                     dataName = temDname;
                                     break;
                                 }
                             }
                         }
-                        var str = year+"/"+ dataName;
-                        for(var i = 0; i < data.length; i ++) {
+                        var str = year + "/" + dataName;
+                        for (var i = 0; i < data.length; i++) {
                             if (LANG["actualGeneration"] == data[i].seriesName || LANG["planGeneration"] == data[i].seriesName) {
                                 str += "<p align='left'>" + data[i].seriesName + "：" + dealEchartToolTip(data[i].value) + unit;
                             } else {
@@ -887,9 +890,9 @@ new Vue({
                     // ¦ {number}（y坐标，单位px）
                     textStyle: {
                         color: '#FFFFFF',
-                        fontFamily : 'Microsoft YaHei'
+                        fontFamily: 'Microsoft YaHei'
                     },
-                    data: [LANG["planGeneration"], LANG["actualGeneration"],LANG["1_1_planned_completion_rate"]]
+                    data: [LANG["planGeneration"], LANG["actualGeneration"], LANG["1_1_planned_completion_rate"]]
                 },
                 // 网格
                 grid: {
@@ -921,7 +924,7 @@ new Vue({
                         splitLine: {
                             show: false
                         },
-                        boundaryGap: [0,0.01],
+                        boundaryGap: [0, 0.01],
                         data: ['1', '2', '3', '4', '5', '6', '7', '8', '9', '10', '11', '12']
                     }
                 ],
@@ -944,8 +947,8 @@ new Vue({
                         splitLine: {
                             show: false
                         },
-                        nameTextStyle:{
-                            fontFamily : 'Microsoft YaHei'
+                        nameTextStyle: {
+                            fontFamily: 'Microsoft YaHei'
                         },
                         axisTick: axisTickObj
                     },
@@ -970,8 +973,8 @@ new Vue({
                         min: 0,
                         max: 120,
                         splitNumber: 6,
-                        nameTextStyle:{
-                            fontFamily : 'Microsoft YaHei'
+                        nameTextStyle: {
+                            fontFamily: 'Microsoft YaHei'
                         },
                         axisTick: axisTickObj
                     }
@@ -982,9 +985,11 @@ new Vue({
                         type: 'bar',
                         barMaxWidth: 6,
                         smooth: true,
-                        itemStyle: { normal: {
-                            color: '#0096ff',
-                        }},
+                        itemStyle: {
+                            normal: {
+                                color: '#0096ff',
+                            }
+                        },
                         data: planData
                     },
                     {
@@ -1005,12 +1010,14 @@ new Vue({
                         type: 'line',
                         yAxisIndex: 1,
                         smooth: true,
-                        itemStyle: { normal: {
-                            color: '#fdd600',
-                            lineStyle: {        // 系列级个性化折线样式
-                                width: 2
+                        itemStyle: {
+                            normal: {
+                                color: '#fdd600',
+                                lineStyle: {        // 系列级个性化折线样式
+                                    width: 2
+                                }
                             }
-                        }},
+                        },
                         data: completionRt
                     }
                 ]
@@ -1296,20 +1303,20 @@ new Vue({
 
         //处理日发电数据
         dealPowerData_day: function (res) {
-            //console.log(res)
             var _this = this;
             if (res.success) {
                 var result = res.data;
                 var glData = [], actualData = [], dateDate = []; //功率、发电量、日期区间
                 for (var i = 0; i < result.fd_datas.length; i++) {
-                    glData.push(result.fd_datas[i].fd_pw_curr.toFixed(2));
+                    if (result.fd_datas[i].fd_pw_curr < 0) {
+                        glData.push('0');
+                    }else{
+                        glData.push(result.fd_datas[i].fd_pw_curr.toFixed(2));
+                    }
                     actualData.push(result.fd_datas[i].fd_power_day);
                     dateDate.push(result.fd_datas[i].fd_datetime);
                 }
-
                 var unit = result.fd_unit, glUnit = 'kW';//功率单位、发电量单位
-
-                //console.log(actualData);
                 _this.drawDayChart(actualData, glData, dateDate, unit, glUnit);
             } else {
                 alert(res.message);
@@ -1318,7 +1325,7 @@ new Vue({
 
         //绘制日发电趋势
         drawDayChart: function (actualDataDay, glData, dateDate, punit, glUnit) {
-            glData = dealArray(glData);
+            //glData = dealArray(glData);
             var option = {
                 tooltip: {
                     trigger: 'axis',

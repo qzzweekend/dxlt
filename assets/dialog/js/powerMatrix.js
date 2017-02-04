@@ -6,9 +6,7 @@ new Vue({
             psScheme: '2',//电站方案
             deviceType: '1',//psScheme==2(组串式),deviceType=17(单元); 其他,deviceType=1(逆变器);
             dateType: '1', //等效小时、发电量 排名  1:日  2:月  3:年
-            psId: "",
-            deviceArr: [],//所有电站设备数组
-            avg: 0,//平均 效率
+            psId: ""
         },
         curYearGen: {
             pageSize: 15,//每页显示条目数
@@ -16,26 +14,12 @@ new Vue({
             rowCount: 0,//总条目数
             pageCount: 0,//总页数
             uuid_index: "", //一个具体设备的uuid，用来查询该设备下面的所有设备
-            psTemType: "",
-            deviceArr: []
+            psTemType: "2", //箱变和逆变器矩阵判断
+            deviceArr: [] //所有电站设备数组
         },
         items: [], //tab小图标
     },
     methods: {
-        //判断展示title
-        showTitle: function () {
-            if (this.dialog_psunit.psScheme == 2) {
-                $("#dialogTile").html("箱变矩阵");
-                this.dialog_psunit.deviceType = "17";
-            } else {
-                $("#dialogTile").html("逆变器矩阵");
-            }
-
-            var iFrameSearch = window.location.search.substring(1),
-                stationid = iFrameSearch.split('=')[1].toLowerCase();
-            this.dialog_psunit.ps_Id=stationid;
-        },
-
         //关闭时 显示电站详细信息
         toDetailInfo: function () {
             var url = "dialog/dialog_powerDetail.html?ps_id=" + this.dialog_psunit.ps_Id;
@@ -44,6 +28,9 @@ new Vue({
 
         //加载所有电站设备
         loadPsAllDevice: function () {
+            var iFrameSearch = window.location.search.substring(1),
+                stationid = iFrameSearch.split('=')[1].toLowerCase();
+            this.dialog_psunit.ps_Id = stationid; //记录电站id
             $(".showm_bottom .loadingDiv").show();
             var _this = this,
                 dateType = this.dialog_psunit.dateType,
@@ -76,8 +63,7 @@ new Vue({
                     var month = dateNum.substring(4);
                     if (month < 10) {
                         month = month.substring(1);
-                    }
-                    ;
+                    };
                     date.setFullYear(year, month, 0);
                     var day = date.getDate();
                     startDateStr = dateNum + '01000000';
@@ -88,8 +74,13 @@ new Vue({
                     startDateStr = $('#dateInput').val() + '0101000000';
                     endDateStr = (Number($('#dateInput').val()) + 1) + '0101000000';
                     break;
-                default :
-                    ;
+                default :;
+            }
+
+            var devid = '', ischild = '';
+            if (this.curYearGen.psTemType == 1) {
+                devid = this.curYearGen.uuid_index;
+                ischild = '1';
             }
 
             var Parameters = {
@@ -99,10 +90,10 @@ new Vue({
                     "sort": "1",
                     "starttime": startDateStr,
                     "endtime": endDateStr,
-                    "topn": "7",
+                    "topn": "1000",
                     "stationid": "gs",
-                    "devid": "",
-                    "ischild": ""
+                    "devid": devid,
+                    "ischild": ischild
                 },
                 "foreEndType": 2,
                 "code": "30000002"
@@ -110,7 +101,9 @@ new Vue({
 
             //console.log(Parameters);
             vlm.loadJson("", JSON.stringify(Parameters), function (res) {
-                //console.log(res);
+                _this.items.length=0; //先清空每页内容
+                _this.curYearGen.deviceArr.length = 0;  //先清空数据
+                _this.curYearGen.pageCount = 0;  //先清空页数按钮
                 if (res.success) {
                     var result = res.data,
                         devNameArr = [];
@@ -131,6 +124,9 @@ new Vue({
                     }
                     if (_this.curYearGen.pageCount > 1) {
                         _this.showPageantion();
+                        $('#pagenation').show();
+                    }else{
+                        $('#pagenation').hide();
                     }
                     _this.curYearGen.currentPage = 1;
                     _this.loadPsCurPageDevice();
@@ -140,6 +136,7 @@ new Vue({
 
         //绘制电站设备
         loadPsCurPageDevice: function () {
+            var _this = this;
             $(".showm_bottom .loadingDiv").show();
             var startIndex = this.curYearGen.pageSize * (this.curYearGen.currentPage - 1);
             var endIndex = this.curYearGen.currentPage * this.curYearGen.pageSize;
@@ -157,7 +154,7 @@ new Vue({
                  }*/
                 j++;
                 if (this.curYearGen.psTemType == 2) {
-                    lis += '<li onclick="showInveter(' + obj.uuid + ')" class="' + c + '">' +
+                    lis += '<li data-uuid="' + obj.fd_dev_id + '" class="' + c + '">' +
                         '<h3 style="align-self: center">' + pr + '%</h3>' +
                         '<h5 style="align-self: center">' + obj.fd_name + '</h5>' +
                         '</li>';
@@ -170,6 +167,13 @@ new Vue({
             }
             $(".showm_bottom .loadingDiv").hide();
             $("#deviceUl").html(lis);
+            $("#deviceUl >li").click(function () {  //箱变矩阵点击
+                if ($(this).attr('data-uuid')) {
+                    var uuid = $(this).attr('data-uuid');
+                    _this.showInveter(uuid);
+                }
+            });
+
             if (this.curYearGen.psTemType == 2) {
                 $("#dialogTile").html("箱变矩阵");
                 $("#deviceUl li").css("cursor", "pointer");
@@ -201,35 +205,6 @@ new Vue({
                 this.loadPsCurPageDevice();
                 this.showCurPage();
             }
-        },
-
-        sumOfDevicePr: function (arr) {
-            var sum = 0;
-            for (var i = 0; i < arr.length; i++) {
-                var obj = arr[i];
-                if ($.isNumeric(obj.p81022)) {
-                    sum += parseFloat(obj.p81022);
-                }
-            }
-            return sum;
-        },
-
-        getClassByPr: function (val) {
-            if ($.isNumeric(dialog_psunit.avg) && dialog_psunit.avg > 0 && $.isNumeric(val)) {
-                var temVal = ((val - dialog_psunit.avg) / dialog_psunit.avg) * 100;
-                if (temVal > 20) {
-                    return "deviceNice";
-                } else if (temVal > 10) {
-                    return "deviceFine";
-                } else if (temVal > -10) {
-                    return "deviceCommon";
-                } else if (temVal > -20) {
-                    return "deviceWorse";
-                } else {
-                    return "deviceBad";
-                }
-            }
-            return "deviceNoState";
         },
 
         getClassByPr_new: function (val) {
@@ -288,15 +263,10 @@ new Vue({
             if (this.dialog_psunit.dateType == "2") {
                 thisDate = year + "/" + month1;
             } else if (this.dialog_psunit.dateType == "3") {
-                thisDate = year;
+                thisDate = year + "";
             }
             $("#dateInput").val(thisDate);
             this.isIncreaseDateAvailable(this.dialog_psunit.dateType, thisDate, false);
-        },
-
-        addActive: function () {
-            $('#right_min_btn').removeClass('active');
-            $('#right_max_btn').removeClass('active');
         },
 
         //根据时间类型type 刷新数据 1:日  2:月  3:年
@@ -317,26 +287,26 @@ new Vue({
             this.initTime();
             this.setDateInputFormat();  //时间input绑定WdatePicker
             this.loadPsAllDevice();
-            this.addActive();
+            $('#right_min_btn').removeClass('active');
         },
 
         //判断能否增长日期 val(eg:2016-01-01)
         isIncreaseDateAvailable: function (type, val, isInner) {
             var now = new Date();
             if (type == 1) {//日
-                if (now.Format("yyyyMMdd") > val.substring(0, 10).replace(/\//g, "")) {
-                    showIncreaseDate = true;
+                if (now.Format("yyyyMMdd") >= val.replace(/\//g, "")) {
+                    this.showIncreaseDate = true;
                 } else {
-                    showIncreaseDate = false;
+                    this.showIncreaseDate = false;
                 }
             } else if (type == 2) {//月
-                if (now.Format("yyyyMM") >= val.substring(0, 7).replace(/\//g, "")) {
+                if (now.Format("yyyyMM") >= val.replace(/\//g, "")) {
                     this.showIncreaseDate = true;
                 } else {
                     this.showIncreaseDate = false;
                 }
             } else if (type == 3) {//年
-                if (now.Format("yyyy") >= val.substring(0, 4).replace(/\//g, "")) {
+                if (now.Format("yyyy") >= val.replace(/\//g, "")) {
                     this.showIncreaseDate = true;
                 } else {
                     this.showIncreaseDate = false;
@@ -345,16 +315,28 @@ new Vue({
 
             if (this.showIncreaseDate) {  //可以增加
                 $("#dateInput").val(val);
-                if (now.Format("yyyy") == val.substring(0, 4).replace(/\//g, "")) {
-                    this.addActive();
-                } else {
-                    $('#right_min_btn').addClass('active');
-                    $('#right_max_btn').addClass('active');
+                if (type == 1) {
+                    if (now.Format("yyyyMMdd") == val.replace(/\//g, "")) {
+                        $('#right_min_btn').removeClass('active');
+                    } else {
+                        $('#right_min_btn').addClass('active');
+                    }
+                } else if (type == 2) {
+                    if (now.Format("yyyyMM") == val.replace(/\//g, "")) {
+                        $('#right_min_btn').removeClass('active');
+                    } else {
+                        $('#right_min_btn').addClass('active');
+                    }
+                } else if (type == 3) {
+                    if (now.Format("yyyy") == val.replace(/\//g, "")) {
+                        $('#right_min_btn').removeClass('active');
+                    } else {
+                        $('#right_min_btn').addClass('active');
+                    }
                 }
-                $("#dateInput").val(val);
                 this.loadPsAllDevice();
             } else {
-                this.addActive();
+                $('#right_min_btn').removeClass('active');
             }
         },
 
@@ -385,7 +367,6 @@ new Vue({
                 temdate = d1.Format("yyyy");
                 this.isIncreaseDateAvailable(3, temdate, false);
             }
-            $("#dateInput").val(temdate);
         },
 
         getInputDate: function () {
@@ -465,9 +446,9 @@ new Vue({
 
         toUnit: function () {
             $(".showInverter").hide();
-            this.dialog_psunit.psTemType = "2";
+            this.curYearGen.psTemType = "2";
             this.dialog_psunit.deviceType = "17";
-            this.dialog_psunit.uuid_index = "";
+            this.curYearGen.uuid_index = "";
             this.loadPsAllDevice();
         },
 
@@ -478,14 +459,13 @@ new Vue({
             var h5 = $(li).find('H5');
             var name = $(h5).text();
             $("#unitName").text(name);
-            this.dialog_psunit.psTemType = "1";
+            this.curYearGen.psTemType = "1";
             this.dialog_psunit.deviceType = "1";
-            this.dialog_psunit.uuid_index = uuid;
+            this.curYearGen.uuid_index = uuid;
             this.loadPsAllDevice();
         },
     },
     mounted: function () {
-        this.showTitle();
         this.initTime();
         this.setDateInputFormat();
         this.loadPsAllDevice();
