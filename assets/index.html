@@ -24,6 +24,115 @@
     <input type="hidden" id="user_id" value="8643"/>
     <input type="hidden" id="org_id" value="3040"/>
 
+    <div id="grayLayer">
+        <div id="showPsInfo" class="maps_show">
+            <div class="maps_showmain">
+                <div class="show_top clearfix">
+                    <!--v-text="fd_station_name"-->
+                    <div class="show_top_title fl" id="powerInfoName" >内蒙赤峰I期20MW</div>
+                    <a href="javascript:;" class="fl close" @click="closeLayer">关闭</a>
+                </div>
+                <div class="show_c1 clearfix">
+                    <div class="show_c1_list fl">
+                        <div class="show_c1_con">
+                            <ul>
+                                <li>
+                                    <span class="fl">地理位置</span>
+                                    <div  class="fl" style="display: inline-block;">
+                                        <!--v-text="fd_city"-->
+                                        <b id="powerInfoLocation" class="stationLocation" >内蒙古赤峰市</b>
+                                    </div>
+                                </li>
+                                <li>
+                                    <span  class="fl">电站类型</span>
+                                    <b  class="fl" id="powerInfoType">地面电站</b>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    <div class="show_c1_list fl" style="border-right:none;">
+                        <div class="show_c1_con">
+                            <ul>
+                                <li>
+                                    <span >预计并网时间</span>
+                                    <b id="expectInstallDate">--</b>
+                                </li>
+                                <li>
+                                    <span >装机功率</span>
+                                    <b id="powerInfoNormalCapacity"></b>
+                                    <span id="powerInfoNormalCapacityUnit">20MWp</span>
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+                <div class="show_c2 clearfix">
+                    <ul>
+                        <li class="clearfix">
+                            <div class="fl showc2_left clearfix">
+                                <div class="showc2_left_ico1 fl"></div>
+                                <div class="showc2_left_text fl"><span>日发电量</span></div>
+                            </div>
+                            <div class="fl showc2_right clearfix">
+                                <b id="powerInfoDayEnergy">--</b>
+                                <span id="powerInfoDayEnergyUnit"></span>
+                            </div>
+                        </li>
+                        <li class="clearfix">
+                            <div class="fl showc2_left clearfix">
+                                <div class="showc2_left_ico2 fl"></div>
+                                <div class="showc2_left_text fl"><span>日辐射量</span></div>
+                            </div>
+                            <div class="fl showc2_right clearfix">
+                                <b id="powerInfoRadiation">--</b>
+                                <span id="powerInfoRadiationUnit">Wh/㎡</span>
+                            </div>
+                        </li>
+                        <li class="clearfix">
+                            <div class="fl showc2_left clearfix">
+                                <div class="showc2_left_ico3 fl"></div>
+                                <div class="showc2_left_text fl"><span>环境温度</span></div>
+                            </div>
+                            <div class="fl showc2_right clearfix">
+                                <b id="powerInfoTemperature">--</b>
+                                <span>度</span>
+                            </div>
+                        </li>
+                        <li class="clearfix">
+                            <div class="fl showc2_left clearfix">
+                                <div class="showc2_left_ico4 fl"></div>
+                                <div class="showc2_left_text fl"><span>风速</span></div>
+                            </div>
+                            <div class="fl showc2_right clearfix">
+                                <b id="powerInfoWindLevel">--</b>
+                            </div>
+                        </li>
+                        <li class="clearfix">
+                            <div class="fl showc2_left clearfix">
+                                <div class="showc2_left_ico5 fl"></div>
+                                <div class="showc2_left_text fl"><span>风向</span></div>
+                            </div>
+                            <div class="fl showc2_right clearfix">
+                                <b id="powerInfoWindDirection">--</b>
+                            </div>
+                        </li>
+                    </ul>
+                </div>
+                <div class="show_c3 clearfix">
+                    <div class="show_c3_top clearfix">
+                        <div class="show_c3_top_title fl">电站介绍</div>
+
+                        <a href="javascript:;" class="show_c3_top_link fr" @click="psDetailInfo">电站详细信息</a>
+                    </div>
+                    <div class="show_c3_con clearfix">
+                        <img src="images/sungrowsamsung.png" class="fl" id="powerInfoPic"/>
+                        <p id="powerInfoContent" v-text="fd_station_desc"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!--主页头部-->
     <div class="Monitor_top clearfix">
         <div class="Monitor_top_user_logo fl">
@@ -90,9 +199,7 @@
 
                 <div class="Monitor_header_right clearfix fl">
                     <div class="M_search_sel fl">
-                        <select id="psSearchName" class="M_search_ipt" onchange="searchPS(this.value)">
-                            <!--<option v-for="option in options" v-text="option.text"></option>-->
-                        </select>
+                        <select id="psSearchName" class="M_search_ipt" onchange="searchPS(this.value)"></select>
                     </div>
                     <div class="Monitor_header_tag fl clearfix">
                         <div class="Monitor_header_tag_title fl">电站状态：</div>
@@ -268,122 +375,10 @@
         <div class="mask_showdiv_header_title fl">在线项目进度排名</div>
         <a href="javascript:;" class="mask_showdiv_header_close fr">关闭</a>
     </div>
-    <div class="mask_showdiv_con">
-
-    </div>
+    <div class="mask_showdiv_con"></div>
 </div>
 
-<div id="grayLayer">
-    <div id="showPsInfo" class="maps_show">
-        <div class="maps_showmain">
-            <div class="show_top clearfix">
-                <div class="show_top_title fl" id="powerInfoName"></div>
-                <a href="javascript:;" class="fl close" onclick="closeLayer()">关闭</a>
-            </div>
-            <div class="show_c1 clearfix">
-                <div class="show_c1_list fl">
-                    <div class="show_c1_con">
-                        <ul>
-                            <li>
-                                <span class="fl">地理位置</span>
-                                <div  class="fl" style="display: inline-block;">
-                                    <b id="powerInfoLocation" style="display: inline-block;width: 129px;overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"></b>
-                                </div>
-                            </li>
-                            <li>
-                                <span  class="fl">电站类型</span>
-                                <b  class="fl" id="powerInfoType"></b>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-                <div class="show_c1_list fl" style="border-right:none;">
-                    <div class="show_c1_con">
-                        <ul>
-                            <li>
-                                <span >预计并网时间</span>
-                                <b id="expectInstallDate"></b>
-                            </li>
-                            <li>
-                                <span >装机功率</span>
-                                <b id="powerInfoNormalCapacity"></b>
-                                <span id="powerInfoNormalCapacityUnit"></span>
-                            </li>
-                        </ul>
-                    </div>
-                </div>
-            </div>
-            <div class="show_c2 clearfix">
-                <ul>
-                    <li class="clearfix">
-                        <div class="fl showc2_left clearfix">
-                            <div class="showc2_left_ico1 fl"></div>
-                            <div class="showc2_left_text fl"><span>日发电量</span></div>
-                        </div>
-                        <div class="fl showc2_right clearfix">
-                            <b id="powerInfoDayEnergy"></b>
-                            <span id="powerInfoDayEnergyUnit"></span>
-                        </div>
-                    </li>
-                    <li class="clearfix">
-                        <div class="fl showc2_left clearfix">
-                            <div class="showc2_left_ico2 fl"></div>
-                            <div class="showc2_left_text fl"><span>日辐射量</span></div>
-                        </div>
-                        <div class="fl showc2_right clearfix">
-                            <b id="powerInfoRadiation"></b>
-                            <span id="powerInfoRadiationUnit"></span>
-                        </div>
-                    </li>
-                    <li class="clearfix">
-                        <div class="fl showc2_left clearfix">
-                            <div class="showc2_left_ico3 fl"></div>
-                            <div class="showc2_left_text fl"><span>环境温度</span></div>
-                        </div>
-                        <div class="fl showc2_right clearfix">
-                            <b id="powerInfoTemperature"></b>
-                            <span>度</span>
-                        </div>
-                    </li>
-                    <li class="clearfix">
-                        <div class="fl showc2_left clearfix">
-                            <div class="showc2_left_ico4 fl"></div>
-                            <div class="showc2_left_text fl"><span>风速</span></div>
-                        </div>
-                        <div class="fl showc2_right clearfix">
-                            <b id="powerInfoWindLevel"></b>
-                        </div>
-                    </li>
-                    <li class="clearfix">
-                        <div class="fl showc2_left clearfix">
-                            <div class="showc2_left_ico5 fl"></div>
-                            <div class="showc2_left_text fl"><span>风向</span></div>
-                        </div>
-                        <div class="fl showc2_right clearfix">
-                            <b id="powerInfoWindDirection"></b>
-                        </div>
-                    </li>
-                </ul>
-            </div>
-            <div class="show_c3 clearfix">
-                <div class="show_c3_top clearfix">
-                    <div class="show_c3_top_title fl">电站介绍</div>
-
-                    <a href="#" class="show_c3_top_link fr" onclick="psDetailInfo()">电站详细信息</a>
-                </div>
-                <div class="show_c3_con clearfix">
-                    <img src="images/sungrowsamsung.png" class="fl" id="powerInfoPic"/>
-                    <p id="powerInfoContent">
-
-                    </p>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-
-<iframe id="equalHourFm" style="display: none; position: absolute; width: 100%; height: 1080px; overflow: hidden; border: 0px; z-index: 9999; top: 0px;" src="">
-</iframe>
+<iframe id="equalHourFm" style="display: none; position: absolute; width: 100%; height: 1080px; overflow: hidden; border: 0px; z-index: 9999; top: 0px;" src=""></iframe>
 
 <!--背景星星-->
 <canvas id="canvas" width="1893" height="1080"></canvas>
@@ -393,15 +388,15 @@
     <%for(var i=0;i< dataArr.length; i++){ %>
         <% if(dataArr[i].fd_station_status == 2){ %>
         <div id="<%=dataArr[i].fd_station_code %>" class="location" style="left:<%=dataArr[i].fd_left%>px;top:<%=dataArr[i].fd_top%>px">
-            <em title="<%=dataArr[i].fd_station_name%>" onclick="powerInfo_detail(this)"><%=dataArr[i].fd_station_name%></em>
+            <em title="<%=dataArr[i].fd_station_name%>" ><%=dataArr[i].fd_station_name%></em>
         </div>
         <% }else if(dataArr[i].fd_station_status == 1){ %>
         <div id="<%=dataArr[i].fd_station_code %>" class="location2" style="left:<%=dataArr[i].fd_left%>px;top:<%=dataArr[i].fd_top%>px">
-            <em title="<%=dataArr[i].fd_station_name%>" onclick="powerInfo_detail(this)"><%=dataArr[i].fd_station_name%></em>
+            <em title="<%=dataArr[i].fd_station_name%>" ><%=dataArr[i].fd_station_name%></em>
         </div>
         <% }else if(dataArr[i].fd_station_status == 0){ %>
         <div id="<%=dataArr[i].fd_station_code %>" class="location3" style="left:<%=dataArr[i].fd_left%>px;top:<%=dataArr[i].fd_top%>px">
-            <em title="<%=dataArr[i].fd_station_name%>" onclick="powerInfo_detail(this)"><%=dataArr[i].fd_station_name%></em>
+            <em title="<%=dataArr[i].fd_station_name%>" ><%=dataArr[i].fd_station_name%></em>
         </div>
         <% } %>
     <% } %>

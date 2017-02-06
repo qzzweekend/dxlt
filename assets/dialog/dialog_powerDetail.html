@@ -55,7 +55,7 @@
                     <div class="N_box_list1">
                         <div class="N_box_list_top"><img src="images/weather_pic_1.png" /></div>
                         <div class="N_box_list_center">环境温度</div>
-                        <div class="N_box_list_bottom"><span id="environmentCom" class="environmentCom" v-text="fdboardtemperature"></span>℃</div>
+                        <div class="N_box_list_bottom"><span id="environmentCom" class="environmentCom" v-text="fdboardtemperature"></span></div>
                     </div>
                     <div class="N_box_list2">
                         <div class="N_box_list_top"><img id="todayweather" src="images/weather_pic_1.png" /></div>
@@ -64,7 +64,7 @@
                     </div>
                 </div>
                 <div class="N_box_center fl">
-                    <div class="N_box_center_top"><span id="days"></span>  <span id="month"></span>月<span id="date"></span>日 （实时温度：<span class="environmentCom" v-text="fdboardtemperature"></span>℃）</div>
+                    <div class="N_box_center_top"><span id="days"></span>  <span id="month"></span>月<span id="date"></span>日 （实时温度：<span class="environmentCom" v-text="fdboardtemperature"></span>）</div>
                     <div class="N_box_center_bottom clearfix">
                         <div class="N_box_we_left fl">
                             <div class="N_box_we_left_head clearfix">
@@ -114,7 +114,7 @@
             </div>
             <div class="innerDiv50 fl" @click="showPsUnit" style="cursor: pointer">
                 <h3>电站示意图</h3>
-                <div class="show_img"><img id="psDiagram" src="images/ps_unit.png" :src="fd_station_sketchpic"></div>
+                <div class="show_img"><img id="psDiagram" :src="fd_station_sketchpic"></div>
             </div>
         </div>
     </div>

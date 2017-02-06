@@ -82,7 +82,6 @@ new Vue({
                 devid = this.curYearGen.uuid_index;
                 ischild = '1';
             }
-
             var Parameters = {
                 "parameters": {
                     "ctype": "1",
@@ -91,7 +90,7 @@ new Vue({
                     "starttime": startDateStr,
                     "endtime": endDateStr,
                     "topn": "1000",
-                    "stationid": "gs",
+                    "stationid": this.dialog_psunit.ps_Id,
                     "devid": devid,
                     "ischild": ischild
                 },
@@ -99,7 +98,7 @@ new Vue({
                 "code": "30000002"
             };
 
-            //console.log(Parameters);
+            console.log(Parameters);
             vlm.loadJson("", JSON.stringify(Parameters), function (res) {
                 _this.items.length=0; //先清空每页内容
                 _this.curYearGen.deviceArr.length = 0;  //先清空数据
@@ -286,7 +285,6 @@ new Vue({
             this.dialog_psunit.dateType = type;
             this.initTime();
             this.setDateInputFormat();  //时间input绑定WdatePicker
-            this.loadPsAllDevice();
             $('#right_min_btn').removeClass('active');
         },
 

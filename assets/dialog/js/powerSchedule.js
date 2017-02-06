@@ -1,6 +1,5 @@
 var dialog = {
     dateType: '3', //pr  1:日  2:月  3:年
-    curtOrgId_refresh: "" //当前组织id，用于 定时刷新
 };
 
 new Vue({
@@ -74,8 +73,8 @@ new Vue({
                             completionRt = [],  //完成率
                             unit = result.fd_unit;
                         for (var i = 0; i < planArray.length; i++) {
-                            planData.push(planArray[i].fd_sched_power_mon); //每个月发电计划
-                            newActualData.push(planArray[i].datapower);    //当月实际发电
+                            planData.push(planArray[i].fd_sched_power_mon.toFixed(2)); //每个月发电计划
+                            newActualData.push(planArray[i].datapower.toFixed(2));    //当月实际发电
                         }
 
                         if (dialog.dateType == 2) {//日发电计划数组赋值
@@ -446,7 +445,6 @@ new Vue({
         }
     },
     mounted: function () {
-        alert(1);
         $('#left_max_btn').css('opacity',1);
         this.showEqHourData(3);
     }

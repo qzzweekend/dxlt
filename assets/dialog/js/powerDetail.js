@@ -1,4 +1,3 @@
-
 var iFrameSearch = window.location.search.substring(1),
     stationid = iFrameSearch.split('=')[1].toLowerCase();
 
@@ -38,7 +37,7 @@ new Vue({
 
         fd_city: '',
         fd_pr: '--',
-        fd_station_sketchpic:'', //电站示意图
+        fd_station_sketchpic: 'images/ps_unit.png', //电站示意图
 
         fdboardtemperature: '--',  //环境温度
         fdtemperature: '--', //电池板温度
@@ -57,11 +56,9 @@ new Vue({
     methods: {
         getPsDetailInfo1: function () {
             var _this = this,
-                iFrameSearch = window.location.search.substring(1),
-                stationid = iFrameSearch.split('=')[1].toLowerCase(),
                 Parameters = {
                     "parameters": {
-                        "stationid": stationid
+                        "stationid": dialog.ps_id
                     },
                     "foreEndType": 2,
                     "code": "20000010"
@@ -76,11 +73,12 @@ new Vue({
                     _this.fd_co2_reduce = result.fd_co2_reduce + result.fd_co2_reduce_unit; //二氧化碳
                     _this.fd_station_desc = result.fd_station_desc; //电站介绍
                     _this.fd_pr = result.pr; //pr
-                    _this.fdboardtemperature = result.fdboardtemperature.toFixed(1);
+                    //_this.fdboardtemperature = result.fdboardtemperature.toFixed(1);
                     _this.fdtemperature = result.fdtemperature.toFixed(1);
                     _this.loadWeather(result.fd_city); //天气调用
-                    _this.fd_station_sketchpic=result.fd_station_sketchpic.replace(/\\/g, '/').replace(/:\//g, '://'); //匹配反斜杠;; //电站示意图
-
+                    if (result.fd_station_sketchpic) {
+                        _this.fd_station_sketchpic = result.fd_station_sketchpic.replace(/\\/g, '/').replace(/:\//g, '://'); //匹配反斜杠;; //电站示意图
+                    }
                     _this.drawTotalPR(result.pr);//累计PR
                     //superSlide
                     if (result.fd_station_pic && result.fd_station_pic.length) {
@@ -174,8 +172,6 @@ new Vue({
                 radiaUnit = 'W/㎡',
                 dc_unit = 'kW',
                 ac_unit = 'kW';
-
-
             //接口1
             var Parameters = {
                 "parameters": {
@@ -186,24 +182,29 @@ new Vue({
                     "starttime": startDateStr,
                     "endtime": endDateStr,
                     "topn": "1000",
-                    "stationid": "gs"
+                    "stationid": dialog.ps_id
                 },
                 "foreEndType": 2,
                 "code": "20000005"
             }
-            //console.log(Parameters);
+            console.log(Parameters);
             vlm.loadJson("", JSON.stringify(Parameters), function (res) {
                 if (res.success) {
-                    var result = res.data.fd_datas;
+                    var result = res.data.fd_datas,hourMaxNum='';
                     if (result.length) {
                         var hourNum = result[0].fd_datetime < 10 ? result[0].fd_datetime.substring(1) : result[0].fd_datetime;
-                        var hourMaxNum = result[result.length - 1].fd_datetime < 10 ? result[result.length - 1].fd_datetime.substring(1) : result[result.length - 1].fd_datetime;
+                        hourMaxNum = result[result.length - 1].fd_datetime < 10 ? result[result.length - 1].fd_datetime.substring(1) : result[result.length - 1].fd_datetime;
                         for (var i = 1; i <= hourMaxNum; i++) {
                             if (i < hourNum) {
                                 _this.powerArr.push('0');
                             } else {
                                 _this.powerArr.push(result[i - hourNum].fd_pw_curr.toFixed(2));
                             }
+                        }
+                    }else{
+                        hourMaxNum=new Date().getHours()
+                        for (var i = 1; i <= hourMaxNum; i++) {
+                            _this.powerArr.push('--');
                         }
                     }
                 } else {
@@ -222,7 +223,7 @@ new Vue({
                     "starttime": startDateStr,
                     "endtime": endDateStr,
                     "topn": "1000",
-                    "stationid": "gs",
+                    "stationid": dialog.ps_id,
                     "devid": "",
                     "ischild": ""
                 },
@@ -233,10 +234,10 @@ new Vue({
             //console.log(Parameters);
             vlm.loadJson("", JSON.stringify(Parameters), function (res) {
                 if (res.success) {
-                    var result = res.data;
+                    var result = res.data,hourMaxNum='';
                     if (result.length) {
                         var hourNum = result[0].fd_datetime < 10 ? result[0].fd_datetime.substring(1) : result[0].fd_datetime;
-                        var hourMaxNum = result[result.length - 1].fd_datetime < 10 ? result[result.length - 1].fd_datetime.substring(1) : result[result.length - 1].fd_datetime;
+                        hourMaxNum = result[result.length - 1].fd_datetime < 10 ? result[result.length - 1].fd_datetime.substring(1) : result[result.length - 1].fd_datetime;
 
                         for (var i = 1; i <= hourMaxNum; i++) {
                             if (i < hourNum) {
@@ -248,6 +249,13 @@ new Vue({
                                 _this.dclist.push(result[i - hourNum].fd_pdc_curr.toString());
                                 _this.aclist.push(result[i - hourNum].fd_pw_curr.toString());
                             }
+                        }
+                    }else{
+                        hourMaxNum=new Date().getHours()
+                        for (var i = 1; i <= hourMaxNum; i++) {
+                            _this.radiaArr.push('--');
+                            _this.dclist.push('--');
+                            _this.aclist.push('--');
                         }
                     }
                 } else {
@@ -425,6 +433,9 @@ new Vue({
                         _this.temprature_high = tempArr[0];
                         _this.temprature_low = tempArr[1].replace('℃', '');
                         _this.windToday = todayWthObj.wind;
+
+                        _this.fdboardtemperature = weatherArr[0].date.match(/\d*℃/ig)[0];
+
                         //未来三天天气
                         var newWeatherArr = [], imgType = '', weather = '', wind = '', monthNum = '', dayNum = '';
 
@@ -461,22 +472,6 @@ new Vue({
                         var weatherStr = $('#weatherTpl').html();
                         var weatherLi = ejs.render(weatherStr, {newWeatherArr: newWeatherArr});
                         $('#weatherUl').html(weatherLi);
-
-
-                        //for (var i = 0; i < weatherArr.length - 1; i++) {
-                        //    var wthObj = weatherArr[i];
-                        //    var tempArr=wthObj.temperature.split('~');
-                        //    tempArr[0]=vlm.Utils.trim(tempArr[0]);
-                        //    tempArr[1]=vlm.Utils.trim(tempArr[1]);
-                        //    var temprature_high_future=tempArr[0];
-                        //    var temprature_low_future=tempArr[1].replace('℃','');
-                        //    //$("#todayAdd" + (i + 1) + "Img").attr("src", "../images/weather/" +28+ ".png");
-                        //    //$("#todayAdd" + (i + 1) + "Highc").text(temprature_high_future);
-                        //    //$("#todayAdd" + (i + 1) + "Lowc").text(temprature_low_future);
-                        //    //$("#todayAdd" + (i + 1) + "WthName").text(wthObj.weather);
-                        //    //$("#todayAdd" + (i + 1) + "WinLevel").text(windLevelTrans(wthObj.wind));
-                        //    //$("#todayAdd" + (i + 1) + "WinDir").text(windDirectionTrans(wthObj.direction) + LANG["wind"]);
-                        //}
                     }
                 },
                 error: function (res) {

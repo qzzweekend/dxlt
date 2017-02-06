@@ -50,6 +50,15 @@ html, body {
     float: left;
 }
 
+#psName {
+    display: none;
+}
+
+#psNameA {
+    background-image: none;
+    width: 255px;
+}
+
 .showm_top_left ul li a {
     float: left;
     display: block;
@@ -619,7 +628,8 @@ html, body {
     font-weight: bold;
     font-size: 1.3em;
 }
-#deviceUl >li{
+
+#deviceUl > li {
     cursor: pointer;
 }
 
@@ -851,16 +861,8 @@ html, body {
     padding-left: 40px;
 }
 
-.show_icon_list ul li {
-    width: 202px;
-    height: 130px;
-    float: left;
-    margin: 0 30px 10px 40px;
-    background: url("../../images/icon/list_bg.png") no-repeat;
-}
-
 .Sicon_1 {
-    background: url("../../images/icon/list_icon1.png") center left no-repeat;
+    background: url("../images/list_icon1.png") center left no-repeat;
     height: 27px;
     line-height: 27px;
     padding-left: 35px;
@@ -871,7 +873,7 @@ html, body {
 }
 
 .Sicon_2 {
-    background: url("../../images/icon/list_icon2.png") center left no-repeat;
+    background: url("../images/list_icon2.png") center left no-repeat;
     height: 27px;
     line-height: 27px;
     padding-left: 35px;

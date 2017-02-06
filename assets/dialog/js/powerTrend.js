@@ -11,7 +11,8 @@ var dialog = {
     rowCount: 0,//总条目数
     pageCount: 0,//总页数
 
-    //scrnvs: scrnvs,
+    dateLine: 0,  //单电站发电趋势点击后的数据根据时间区分
+    dateFlag: 0,  // 0 代表所有电站日期切换  1 单电站日期切换
     scrnvs: 3,
     psName: "",
     psId: "",
@@ -51,15 +52,14 @@ new Vue({
                 $("#dxxsAll").hide();
                 $("#genTrends").hide();
                 $("#psName").hide();
-                this.loadDXXOrFDL(1);
+                dialog.dateFlag = 0; //多电站日期切换模式
+                this.loadDXXOrFDL('1');
             } else if (tabType == 'hour') {
                 //点击等效小时btn
                 $('.showm_top_left ul li').eq(1).addClass('on');
                 $("#dxxsAll").show();
                 $("#fdlAllChart").hide();
-                dialog.dateType = '1';
                 this.loadDXXOrFDL();
-
             }
 
         },
@@ -133,17 +133,23 @@ new Vue({
                 dates = new Date(),
                 endDate = dates.getFullYear() + '-' + (dates.getMonth() + 1) + '-' + dates.getDate() + 'T' + dates.getHours() + ':' + dates.getMinutes() + ':' + dates.getSeconds(),
                 endDateStr = vlm.Utils.format_date(endDate, 'YmdHis');
-
             switch (dateType) {
                 case '1':
                     dateStr = '2';
                     var dateNum = this.getInputDate($('#dateInput').val());
                     startDateStr = this.getInputDate(dateNum) + '000000';
+                    var year = dateNum.substring(0, 4);
+                    var month = dateNum.substring(4, 6);
+                    var day = dateNum.substring(6);
+                    if (month < 10) {
+                        month = month.substring(1);
+                    }
                     var date = new Date();
+                    date.setFullYear(year, month - 1, day);
                     date.setDate(date.getDate() + 1);
-                    var day = date.getDate();
-                    var month = date.getMonth() + 1;
-                    endDateStr = date.getFullYear() + '' + dealDate(month) + '' + dealDate(day) + '000000';
+                    day = date.getDate();
+                    var Month = date.getMonth() + 1;
+                    endDateStr = date.getFullYear() + '' + dealDate(Month) + '' + dealDate(day) + '000000';
                     break;
                 case '2':
                     dateStr = '6';
@@ -153,23 +159,20 @@ new Vue({
                     var month = dateNum.substring(4);
                     if (month < 10) {
                         month = month.substring(1);
-                    }
-                    ;
+                    };
                     date.setFullYear(year, month, 0);
                     var day = date.getDate();
                     startDateStr = dateNum + '01000000';
-
                     endDateStr = dateNum.substring(0, 6) + day + '000000';
                     break;
                 case '3':
-                    dateStr = '6';
+                    dateStr = '7';
                     startDateStr = $('#dateInput').val() + '0101000000';
                     endDateStr = (Number($('#dateInput').val()) + 1) + '0101000000';
                     break;
                 default :
                     ;
             }
-
             var Parameters = {
                 "parameters": {
                     "stationtype": "allstation",
@@ -194,12 +197,19 @@ new Vue({
                         unit = '小时';
                     var resultArray = result_data.fd_datas;
                     if (resultArray.length) {
+                        for (var i = 0; i < resultArray.length; i++) {
+                            resultArray[i].equivalenthour = parseFloat(resultArray[i].equivalenthour);
+                        }
                         resultArray = vlm.Utils.sortArr(resultArray, 'equivalenthour');
+
                         for (var i = 0; i < resultArray.length; i++) {
                             dxxsData.push(resultArray[i].equivalenthour);
                             areaData.push(resultArray[i].fd_station_name);
                         }
                         _this.showDXXSAll(dxxsData, areaData, unit);
+                    }else{
+                      $('.loadingDiv').hide();
+                      $('#dxxsAll').hide();
                     }
                 }
             });
@@ -319,7 +329,6 @@ new Vue({
         loadFDLAll: function () {
             dialog.genOrEqHr = 2;
             dialog.fdlChart = echarts.init(document.getElementById('fdlAllChart'));
-
             var _this = this,
                 dateType = dialog.dateType,
                 dateStr = '',
@@ -359,18 +368,16 @@ new Vue({
                     date.setFullYear(year, month, 0);
                     var day = date.getDate();
                     startDateStr = dateNum + '01000000';
-
                     endDateStr = dateNum.substring(0, 6) + day + '000000';
                     break;
                 case '3': //所有电站按年
-                    dateStr = '6';
+                    dateStr = '7';
                     startDateStr = $('#dateInput').val() + '0101000000';
                     endDateStr = (Number($('#dateInput').val()) + 1) + '0101000000';
                     break;
                 default :
                     ;
             }
-
             var Parameters = {
                 "parameters": {
                     "stationtype": "allstation",
@@ -400,6 +407,8 @@ new Vue({
                             dialog.psIdArr.push(resultArray[i].fd_station_id);
                         }
                         _this.showFDLAll(generationData, areaData, unit);
+                    }else{
+                        $('.loadingDiv').hide();
                     }
                 }
             });
@@ -522,6 +531,7 @@ new Vue({
                 if (dialog.scrnvs == 3) {
                     dialog.psName = params.name;
                     dialog.psId = dialog.psIdArr[index];
+                    dialog.dateFlag = 1;
                     _this.showPsGenTrends();
                 }
             });
@@ -570,7 +580,15 @@ new Vue({
                         $('#right_min_btn').addClass('active');
                     }
                 }
-                this.loadDXXOrFDL('1');
+
+                if (dialog.genOrEqHr == 1) {
+                    this.loadDXXOrFDL();
+                } else if (dialog.genOrEqHr == 2) {
+                    this.loadDXXOrFDL('1');
+                }else{
+                    this.loadDXXOrFDL('3');
+                }
+
             } else {
                 $('#right_min_btn').removeClass('active');
             }
@@ -739,9 +757,10 @@ new Vue({
                     day = date.getDate();
                     var Month = date.getMonth() + 1;
                     endDateStr = date.getFullYear() + '' + dealDate(Month) + '' + dealDate(day) + '000000';
+                    dialog.dateLine = 24;
                     break;
                 case '2':
-                    dateStr = '6';
+                    dateStr = '2';
                     var dateNum = this.getInputDate($('#dateInput').val());
                     var date = new Date();
                     var year = dateNum.substring(0, 4);
@@ -753,44 +772,62 @@ new Vue({
                     date.setFullYear(year, month, 0);
                     var day = date.getDate();
                     startDateStr = dateNum + '01000000';
-
                     endDateStr = dateNum.substring(0, 6) + day + '000000';
+                    var dateObj = new Date();
+                    dateObj.setMonth(dateObj.getMonth() + 1, 0)
+                    dialog.dateLine = dateObj.getDate();
                     break;
                 case '3':
-                    dateStr = '6';
+                    dateStr = '3';
                     startDateStr = $('#dateInput').val() + '0101000000';
                     endDateStr = (Number($('#dateInput').val()) + 1) + '0101000000';
+                    dialog.dateLine = 12;
                     break;
                 default :
                     ;
             }
-
             var Parameters = {
                 "parameters": {
-                    "stationtype": "all",
+                    "stationtype": "",
                     "timetype": dateStr,
                     "sorttype": "1",
-                    "sort": "1",
+                    "sort": "2",
                     "starttime": startDateStr,
                     "endtime": endDateStr,
                     "topn": "300",
-                    "stationid": "LW"
+                    "stationid": dialog.psId
                 },
                 "foreEndType": 2,
                 "code": "30000003"
             };
 
-
             vlm.loadJson("", JSON.stringify(Parameters), function (res) {
-                console.log(res);
+                //console.log(res);
                 if (res.success) {
                     var result = res.data,
+                        resultData = result.fd_datas,
                         unit = result.fd_unit,
                         actualData = [],
-                        dateDate = [];
-                    for (var i = 0; i < result.fd_datas.length; i++) {
-                        actualData.push(result.fd_datas[i].fd_power_day);
-                        dateDate.push(i + 1);
+                        dateDate = [],
+                        hourNum = '',
+                        hourMaxNum = '';
+                    if (dateType == 1) {
+                        hourNum = resultData[0].fd_datetime < 10 ? resultData[0].fd_datetime.substring(1) : resultData[0].fd_datetime;
+                        hourMaxNum = resultData[resultData.length - 1].fd_datetime < 10 ? resultData[resultData.length - 1].fd_datetime.substring(1) : resultData[resultData.length - 1].fd_datetime;
+                    } else if (dateType == 2) {
+                        hourNum = resultData[0].fd_datetime;
+                        hourMaxNum = resultData[resultData.length - 1].fd_datetime;
+                    } else if (dateType == 3) {
+                        hourNum = resultData[0].fd_datetime.substring(6);
+                        hourMaxNum = resultData[resultData.length - 1].fd_datetime.substring(6);
+                    }
+                    for (var i = 1; i <= dialog.dateLine; i++) {
+                        if (i < hourNum || i > hourMaxNum) {
+                            actualData.push(0);
+                        } else {
+                            actualData.push(resultData[i - hourNum].fd_power_day);
+                        }
+                        dateDate.push(i);
                     }
                     _this.drawTrendsChart(actualData, unit, dateDate);
                 }

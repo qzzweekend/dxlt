@@ -1,62 +1,25 @@
 /**
  * Created by Administrator on 2016/12/24.
  */
-
-var screen3 = {
-    ps_id: "", //被点击电站的ps_id
-    earthChart: null,
-    isFrist: true,//是否点击操作页面
-    version: "",
-    preVersion: false,//之前的版本
-    ps_target: 0, //电站指标(1：点击刷新)
-    show_dinfo: 0, //是否显示‘电站详细信息’按钮（0：不显示）
-    //psScheme: 2,//电站类型; (2:组串式,显示单元；其他 显示逆变器)
-    showEarthOrChina: true//关闭弹出框时显示 true:3D地球，false;ChinaMap
-
-};
-
-var psObj = {
-    psIdArr: [],
-    psSchemeArr: []
-};
-
-
-//dialog关闭弹窗*/
-function closeEqualHourFm() {
-    $("#equalHourFm").slideToggle();
-    $("#equalHourFm").attr("src", "");
-    $("#grayLayer").removeClass("grayLayer");
-}
-
-function powerInfo_detail(e) {
-    $("#grayLayer").addClass("grayLayer");
-    var psId = $(e).parent().attr('id');
-    hideLoading();
-    var url = "dialog/dialog_powerDetail.html?ps_id=" + psId;
-    $("#equalHourFm").attr("src", url);
-    $("#equalHourFm").slideToggle();
-}
-
-//flat select电站
-function searchPS(psName) {
-    $("#img_china em").each(function (i, obj) {
-        $(obj).removeClass();
-        $(obj).parent().css("z-index", "1000");
-        $(obj).css("zoom", "");
-    });
-    if (psName) {
-        $("#img_china em").each(function (i, obj) {
-            if ($(obj).text().indexOf(psName) >= 0) {
-                $(obj).addClass("slideInUp animated").parent().css("z-index", "9999");
-            }
-        });
-    }
-}
-
 //页面加载时vue
 new Vue({
     el: '#dx_tot',
     data: {
+        screen3 : {
+            ps_id: "", //被点击电站的ps_id
+            earthChart: null,
+            isFrist: true,//是否点击操作页面
+            version: "",
+            preVersion: false,//之前的版本
+            ps_target: 0, //电站指标(1：点击刷新)
+            show_dinfo: 0, //是否显示‘电站详细信息’按钮（0：不显示）
+            //psScheme: 2,//电站类型; (2:组串式,显示单元；其他 显示逆变器)
+            showEarthOrChina: true//关闭弹出框时显示 true:3D地球，false;ChinaMap
+        },
+        psObj : {
+            psIdArr: [],
+            psSchemeArr: []
+        },
         earthTimer: null,
         topTimer: null,
         allTimer: null,
@@ -92,10 +55,57 @@ new Vue({
         fd_unit: '',   //总MW单位
         fd_safety_daycount: '--',   //安全天数
 
-        options: []
+        options: [],
+
+        fd_station_name:'', //项目名称
+        fd_city:'', //地理位置
+        fd_pw_capacity:'', //装机功率
+        fd_station_desc:'', //项目描述
 
     },
     methods: {
+        //关闭缩略框
+        closeLayer: function () {
+            $("#grayLayer").removeClass("grayLayer");
+            this.screen3.ps_id = "";
+            $(".maps_show").removeClass("mapbox_show");
+        },
+
+        //flat点击
+        powerInfo_detail: function (obj) {
+            var _this=this;
+            $("#grayLayer").addClass("grayLayer");
+            this.screen3.ps_id = $(obj).attr('id');
+            if ($(obj).attr('class') == 'location') {
+                //并网
+                var url = "dialog/dialog_powerDetail.html?ps_id=" + this.screen3.ps_id;
+                $("#equalHourFm").attr("src", url);
+                $("#equalHourFm").slideToggle();
+
+            } else {
+                //未建、在建
+                $('#showPsInfo').addClass('mapbox_show');
+                var Parameters = {
+                    "parameters": {
+                        "stationid": this.screen3.ps_id
+                    },
+                    "foreEndType": 2,
+                    "code": "20000010"
+                };
+                vlm.loadJson("", JSON.stringify(Parameters), function (res) {
+                    if (res.success) {
+                        var result = res.data;
+                        _this.fd_station_name=result.fd_station_name;  //项目名称
+                        _this.fd_city=result.fd_city; //地理位置
+                        if(result.fd_station_name){
+                            _this.fd_pw_capacity=result.fd_station_name.match(/\d/ig)[0]+'MWp'; //装机功率
+                        }
+                        _this.fd_station_desc=result.fd_station_desc; //项目描述
+                    }
+                });
+            }
+        },
+
         //获取本月天数
         getDays: function () {
             var date = new Date();
@@ -158,8 +168,8 @@ new Vue({
             ], function (ec) {
                 _this.do3DMap(ec);
             });
-            if (screen3.earthChart) {
-                screen3.earthChart.dispose();
+            if (this.screen3.earthChart) {
+                this.screen3.earthChart.dispose();
             }
         },
 
@@ -177,10 +187,10 @@ new Vue({
         },
 
         do3DMap: function (ec) {
-            screen3.earthChart = ec.init(document.getElementById('main'));
+            this.screen3.earthChart = ec.init(document.getElementById('main'));
             var ecConfig = require('echarts/config'), _this = this;
 
-            screen3.earthChart.setOption({
+            this.screen3.earthChart.setOption({
                 title: {
                     text: '',
                     x: 'center',
@@ -260,10 +270,10 @@ new Vue({
             });
 
             //地图坐标图标点击
-            screen3.earthChart.on(ecConfig.EVENT.CLICK, function (param) {
+            this.screen3.earthChart.on(ecConfig.EVENT.CLICK, function (param) {
                 var name = param.name;
                 if (name == 'China') {
-                    screen3.showEarthOrChina = false;
+                    _this.screen3.showEarthOrChina = false;
                     _this.chinaClick();
                 }
             });
@@ -298,7 +308,10 @@ new Vue({
                     optStr += "<option>" + dataArr[i]["fd_station_name"] + "</option>";
                 }
                 $("#psSearchName").html(optStr);
-                $('#psSearchName').select2()
+                $('#psSearchName').select2();
+                $("#img_china >div").click(function(){
+                   _this.powerInfo_detail($(this));
+                });
 
             }
         },
@@ -505,7 +518,7 @@ new Vue({
         //PR define
         getPRChart: function (sortType) {
             //console.log(sortType);
-            psObj.psIdArr.length=0;
+            this.psObj.psIdArr.length = 0;
             var _this = this;
             if (!sortType) {
                 sortType = "1";
@@ -544,7 +557,7 @@ new Vue({
                 listData = _this.sortCapacityArr(listData, sortType);
                 for (var i = 0; i < length; i++) {
                     xdata.push(listData[i].fd_station_name);
-                    psObj.psIdArr.push(listData[i].fd_station_id);
+                    _this.psObj.psIdArr.push(listData[i].fd_station_id);
                     var cap_value = listData[i].pr;
                     if (cap_value == null || cap_value == undefined || !$.isNumeric(cap_value)) {
                         ydata1.push(0);
@@ -749,7 +762,7 @@ new Vue({
             ptChart.on('click', function (params) {
                 var index = params.dataIndex;
                 event.stopPropagation();
-                screen3.ps_id = psObj.psIdArr[index];
+                _this.screen3.ps_id = _this.psObj.psIdArr[index];
                 $("#grayLayer").addClass("grayLayer");
                 _this.psDetailInfo();
             });
@@ -757,10 +770,9 @@ new Vue({
 
         //性能排名点击后的电站详细信息
         psDetailInfo: function () {
-            $("#showPsInfo").hide();
-            if (screen3.ps_id) {
-                hideLoading();
-                var url = "dialog/dialog_powerDetail.html?ps_id=" + screen3.ps_id;
+            $("#showPsInfo").removeClass('mapbox_show');
+            if (this.screen3.ps_id) {
+                var url = "dialog/dialog_powerDetail.html?ps_id=" + this.screen3.ps_id;
                 $("#equalHourFm").attr("src", url);
                 $("#equalHourFm").slideToggle();
             }
@@ -1310,7 +1322,7 @@ new Vue({
                 for (var i = 0; i < result.fd_datas.length; i++) {
                     if (result.fd_datas[i].fd_pw_curr < 0) {
                         glData.push('0');
-                    }else{
+                    } else {
                         glData.push(result.fd_datas[i].fd_pw_curr.toFixed(2));
                     }
                     actualData.push(result.fd_datas[i].fd_power_day);
@@ -1646,7 +1658,32 @@ new Vue({
             _this.getAllPower(); //获取总电量(1min)
         }, 60000);
     }
-})
+});
+
+
+//dialog关闭弹窗*/
+function closeEqualHourFm() {
+    $("#equalHourFm").slideToggle();
+    $("#equalHourFm").attr("src", "");
+    $("#grayLayer").removeClass("grayLayer");
+}
+
+
+//flat select电站
+function searchPS(psName) {
+    $("#img_china em").each(function (i, obj) {
+        $(obj).removeClass();
+        $(obj).parent().css("z-index", "1000");
+        $(obj).css("zoom", "");
+    });
+    if (psName) {
+        $("#img_china em").each(function (i, obj) {
+            if ($(obj).text().indexOf(psName) >= 0) {
+                $(obj).addClass("slideInUp animated").parent().css("z-index", "9999");
+            }
+        });
+    }
+}
 
 
 
