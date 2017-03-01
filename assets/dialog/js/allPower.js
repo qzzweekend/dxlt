@@ -34,9 +34,9 @@ new Vue({
             var Parameters = {
                 "parameters": {
                     "sorttype": "1",
-                    "sort": 1,
+                    "sort": 2,
                     "starttime": startDateStr,
-                    "topn": "7",
+                    "topn": "1000",
                     "stationid": "ALL"
                 },
                 "foreEndType": 2,

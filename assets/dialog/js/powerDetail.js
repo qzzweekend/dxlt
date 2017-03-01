@@ -112,7 +112,7 @@ new Vue({
                         trigger: "click"
                     })
                 } else {
-                    alert(result.message);
+                    //alert(result.message+1);
                 }
             });
         },
@@ -187,7 +187,6 @@ new Vue({
                 "foreEndType": 2,
                 "code": "20000005"
             }
-            console.log(Parameters);
             vlm.loadJson("", JSON.stringify(Parameters), function (res) {
                 if (res.success) {
                     var result = res.data.fd_datas,hourMaxNum='';
@@ -231,7 +230,6 @@ new Vue({
                 "code": "30000002"
             };
 
-            //console.log(Parameters);
             vlm.loadJson("", JSON.stringify(Parameters), function (res) {
                 if (res.success) {
                     var result = res.data,hourMaxNum='';
@@ -259,10 +257,9 @@ new Vue({
                         }
                     }
                 } else {
-                    alert(res.message);
+                    //alert(res.message+2);
                 }
             }, true);
-
             this.drawRealTimeEchart(dealEchartLineArr(this.powerArr), dealEchartLineArr(this.radiaArr), dealEchartLineArr(this.dclist), dealEchartLineArr(this.aclist), powerUnit, radiaUnit, dc_unit, ac_unit);
         },
 
@@ -475,7 +472,7 @@ new Vue({
                     }
                 },
                 error: function (res) {
-                    alert(res.error);
+                    alert(res.message);
                 }
 
             });

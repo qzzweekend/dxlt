@@ -21,6 +21,7 @@ new Vue({
             this.loadPlanChart();
             this.showPageantion(this.dialog.currentPage - 1);
             this.isPageArrowAvilable();
+            this.showCurPage();
         },
 
         //分页箭头可用
@@ -101,19 +102,23 @@ new Vue({
             var solar_pgArr = [], booster_pgArr = [], outside_pgArr = [];
             var total_pgArr = [], xData = [], pageList = this.powerRes;
             var startIndex = this.dialog.pageSize * (this.dialog.currentPage - 1);
-            var endIndex = this.dialog.currentPage * this.dialog.pageSize;
+            var endIndex = this.dialog.currentPage * this.dialog.pageSize,
+                buildString = '',
+                buildIndex = 0;
             this.isPageArrowAvilable();
             if (this.dialog.rowCount < endIndex) {
-                endIndex=this.dialog.rowCount;
+                endIndex = this.dialog.rowCount;
             }
             for (var i = startIndex; i < endIndex; i++) {
                 solar_pgArr.push(pageList[i].fd_pv_area_const);
                 booster_pgArr.push(pageList[i].fd_elec_swit_const);
                 outside_pgArr.push(pageList[i].fd_outside_const);
                 total_pgArr.push(pageList[i].fd_total_proj_progress);
+                buildString = pageList[i].fd_station_name.match(/\d+MW/ig)[0];
+                buildIndex = pageList[i].fd_station_name.indexOf(buildString);
                 xData.push(
                     {
-                        value: pageList[i].fd_station_name,//文本内容，如指定间隔名称格式器formatter，则这个值将被作为模板变量值或参数传入
+                        value: pageList[i].fd_station_name.substring(0, buildIndex) + "\n" + pageList[i].fd_station_name.match(/\d+MW/ig)[0],
                         textStyle: {             //详见textStyle
                             //color : 'red'
                         }
@@ -127,6 +132,20 @@ new Vue({
         //绘制进度chart
         drawPowerPlanChart: function (solar_pgArr, booster_pgArr, outside_pgArr, total_pgArr, xData) {
             var option = {
+                title: {
+                    show: false,
+                    text: LANG["yy1.PowerGenerationPalnY"],
+                    x: 'left',                 // 水平安放位置，默认为左对齐，可选为：
+                    // 'center' ¦ 'left' ¦ 'right'
+                    // ¦ {number}（x坐标，单位px）
+                    y: 'top',
+                    textStyle: {
+                        fontFamily: 'Microsoft YaHei',
+                        fontSize: 26,
+                        fontWeight: 200,
+                        color: 'white'
+                    },
+                },
                 tooltip: {
                     trigger: 'axis',
                     formatter: function (data) {
@@ -137,7 +156,6 @@ new Vue({
                         return str;
                     }
                 },
-                color:'#fff',
                 legend: {
                     orient: 'horizontal',      // 布局方式，默认为水平布局，可选为：
                     // 'horizontal' ¦ 'vertical'
@@ -146,7 +164,7 @@ new Vue({
                     // ¦ {number}（x坐标，单位px）
                     y: '10',                  // 垂直安放位置，默认为全图顶端，可选为：
                     // 'top' ¦ 'bottom' ¦ 'center'
-                    // ¦ {number}（y坐标，单位px）e
+                    // ¦ {number}（y坐标，单位px）
                     textStyle: {
                         color: '#FFFFFF',
                         fontFamily: 'Microsoft YaHei'
@@ -157,7 +175,7 @@ new Vue({
                 grid: {
                     backgroundColor: 'rgba(0,0,0,0)',
                     borderWidth: 0,
-                    borderColor: '#ccc'
+                    borderColor: '#ccc',
                 },
                 calculable: true,
                 xAxis: [
@@ -224,7 +242,6 @@ new Vue({
                                 color: '#DFE895'
                             }
                         },
-                        barCategoryGap: '20%',
                         data: solar_pgArr
                     },
                     {
@@ -232,7 +249,6 @@ new Vue({
                         type: 'bar',
                         yAxisIndex: 0,
                         barMaxWidth: 10,
-                        barCategoryGap: '20%',
                         itemStyle: {
                             normal: {
                                 color: '#F65D33'
@@ -245,7 +261,6 @@ new Vue({
                         type: 'bar',
                         yAxisIndex: 0,
                         barMaxWidth: 10,
-                        barCategoryGap: '20%',
                         itemStyle: {
                             normal: {
                                 color: '#0196DB'
@@ -257,7 +272,6 @@ new Vue({
                         name: LANG["1_1_actual_totalProgress"],
                         type: 'bar',
                         barMaxWidth: 10,
-                        barCategoryGap: '20%',
                         yAxisIndex: 0,
                         itemStyle: {
                             normal: {

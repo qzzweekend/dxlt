@@ -30,22 +30,21 @@ new Vue({
                         month = month.substring(1);
                     }
                     ;
-                    date.setFullYear(year, month, 0);
-                    var day = date.getDate();
+                    date.setFullYear(year,month-1,1);
                     startDateStr = dateNum + '01000000';
-                    endDateStr = dateNum.substring(0, 6) + day + '000000';
+                    date.setMonth(month, 1)
+                    var yearNew=date.getFullYear();
+                    var day = date.getDate();
+                    var monthNew=date.getMonth()+1;
+                    endDateStr = yearNew +''+ vlm.Utils.format_add_zero(monthNew) + vlm.Utils.format_add_zero(day) + '000000';
                     break;
-                //case '2':
-                //    dateStr = 'month';
-                //    sort = '1';
-                //    startDateStr = vlm.Utils.currentMonth();
-                //    break;
                 case '3':
                     dateStr = 'year';
                     startDateStr = $('#dateInput').val() + '0101000000';
                     endDateStr = (Number($('#dateInput').val()) + 1) + '0101000000';
                     break;
-                default :;
+                default :
+                    ;
             }
 
             var Parameters = {
@@ -55,14 +54,13 @@ new Vue({
                     "sort": '1',
                     "starttime": startDateStr,
                     "endtime": endDateStr,
-                    "topn": "7",
+                    "topn": "1000",
                     "stationid": ""
                 },
                 "foreEndType": 2,
                 "code": "20000004"
             };
             vlm.loadJson("", JSON.stringify(Parameters), function (res) {
-                //console.log(res);
                 if (res.success) {
                     var result = res.data;
                     if (result.datas.length) {
@@ -90,15 +88,12 @@ new Vue({
                                 var strDate = date.getDate();
                                 var today_power = $("#currentPowerValue_virgin", parent.document).val();//今日发电
                                 actualData[strDate - 1] = today_power;//补当前实际发电量
-                                actualData = actualData.slice(0, strDate);
                                 planData = planData.slice(0, strDate);
                             }
-
-                            //actualData = addUpArr(actualData);
                             planData = addUpArr(planData);
                         }
                         //完成率
-                        if (dialog.dateType == 2) {//月完成率
+                        if (dialog.dateType == 2) {//月完成率(每一天)
                             for (var i = 0; i < planData.length; i++) {
                                 xData.push(i + 1);
                                 completionRt.push(CalculatedCompletionRate(newActualData[i], planData[i]));
@@ -110,16 +105,16 @@ new Vue({
                             var month = now.getMonth() + 1;
                             for (var i = 0; i < planData.length; i++) {
                                 xData.push(i + 1);
-                                if(i<month){
+                                if (i < month) {
                                     completionRt.push(CalculatedCompletionRate(temAddedArr[i], temSum[i]));
-                                }else{
+                                } else {
                                     completionRt.push('--');
                                 }
                             }
                         }
                         _this.drawPowerPlanChart(dealEchartBarArr(newActualData), dealEchartBarArr(planData), unit, xData, dealEchartLineArr(completionRt));
 
-                    }else{
+                    } else {
                         $(".showm_bottom .loadingDiv").hide();
                         $("#powerPlanAll").hide();
                     }
@@ -137,12 +132,12 @@ new Vue({
                 lengendName1 = LANG["1_1_total_planned_genarate"];
                 lengendName2 = LANG["1_1_total_actual_genarate"];
             }
-            var myDate = new Date();
+            var year = this.getInputDate($('#dateInput').val()).substring(0, 4);
             var option = {
                 tooltip: {
                     trigger: 'axis',
                     formatter: function (data) {
-                        var str = "<p align='left'>" + LANG["TIME"] + "：" + myDate.getFullYear() + "/" + (dialog.dateType == 3 ? "" : ($("#dateInput").val().substring(5, 7) + "/")) + dealDate(data[0].name) + "</p>";
+                        var str = "<p align='left'>" + LANG["TIME"] + "：" + year + "/" + (dialog.dateType == 3 ? "" : ($("#dateInput").val().substring(5, 7) + "/")) + dealDate(data[0].name) + "</p>";
                         for (var i = 0; i < data.length; i++) {
                             if (lengendName1 == data[i].seriesName || lengendName2 == data[i].seriesName) {
                                 str += "<p align='left'>" + data[i].seriesName + "：" + dealEchartToolTip(data[i].value) + unit;
@@ -314,7 +309,7 @@ new Vue({
             $("#dateInput").val(thisDate);
         },
 
-        addActive:function(){
+        removeActive: function () {
             $('#right_min_btn').removeClass('active');
             $('#right_max_btn').removeClass('active');
         },
@@ -336,7 +331,7 @@ new Vue({
             this.setDateInputFormat();  //时间input绑定WdatePicker
 
             this.loadPlanChart();
-            this.addActive();
+            this.removeActive();
         },
 
         //判断能否增长日期 val(eg:2016-01-01)
@@ -355,18 +350,26 @@ new Vue({
                     this.showIncreaseDate = false;
                 }
             }
-
             if (this.showIncreaseDate) {  //可以增加
-                if (now.Format("yyyy") == val.substring(0, 4).replace(/\//g, "")) {
-                    this.addActive();
-                }else{
-                    $('#right_min_btn').addClass('active');
-                    $('#right_max_btn').addClass('active');
+                if (type == 2) {
+                    if (now.Format("yyyyMM") == val.replace(/\//g, "")) {
+                        this.removeActive();
+                    } else {
+                        $('#right_max_btn').addClass('active');
+                        $('#right_min_btn').addClass('active');
+                    }
+                } else if (type == 3) {
+                    if (now.Format("yyyy") == val.replace(/\//g, "")) {
+                        this.removeActive();
+                    } else {
+                        $('#right_max_btn').addClass('active');
+                        $('#right_min_btn').addClass('active');
+                    }
                 }
                 $("#dateInput").val(val);
                 this.loadPlanChart();
             } else {
-                this.addActive();
+                this.removeActive();
             }
         },
 
@@ -381,12 +384,6 @@ new Vue({
             }
             var date = $("#dateInput").val();
             date = date.substring(0, 10);
-            //if (dialog.dateType == "1") {
-            //    var d1 = new Date(date.replace(/\-/g, "\/"));
-            //    d1.addDays(val);//加、减日 操作
-            //    temdate = d1.Format("yyyy/MM/dd");
-            //    this.isIncreaseDateAvailable(1, temdate, false);
-            //} else
             if (dialog.dateType == "2") {
                 var d1 = new Date(date.replace(/\-/g, "\/"));
                 d1.addMonths(val);
@@ -445,7 +442,7 @@ new Vue({
         }
     },
     mounted: function () {
-        $('#left_max_btn').css('opacity',1);
+        $('#left_max_btn').css('opacity', 1);
         this.showEqHourData(3);
     }
 });

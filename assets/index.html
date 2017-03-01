@@ -235,7 +235,7 @@
                     <div class="Mc4_bg_on"></div>
                     <div class="Mc4_top clearfix">
                         <div class="Mc4_title fl" id="powerTrendTitle">当月发电趋势</div>
-                        <div class="Mc4_nav fr" @click.stop="trendTab($event)">
+                        <div class="Mc4_nav fr" @click.stop="showGenTrends($event)">
                             <ul>
                                 <li data-dateType="0" class="trends_btn"><a href="javascript:;">日</a></li>
                                 <li data-dateType="2" class="trends_btn on"><a href="javascript:;">月</a></li>
@@ -307,8 +307,10 @@
                                 <div class="Mc3_con_right_title">并网</div>
                                 <div class="clearfix">
                                     <div class="fl box_green"></div>
-                                    <div class="Mc3_con_right_text fl"><span id="mc3_exist_capacity" v-text="fd_intercon_cap_finish"></span>&nbsp;&nbsp;<span
-                                            id="exist_ps_count" v-text="fd_station_count_finish"></span></div>
+                                    <div class="Mc3_con_right_text fl">
+                                        <span id="mc3_exist_capacity" v-text="fd_intercon_cap_finish"></span>&nbsp;&nbsp;<span
+                                            id="exist_ps_count" v-text="fd_station_count_finish"></span>
+                                    </div>
                                 </div>
                             </li>
                             <li>
@@ -378,7 +380,7 @@
     <div class="mask_showdiv_con"></div>
 </div>
 
-<iframe id="equalHourFm" style="display: none; position: absolute; width: 100%; height: 1080px; overflow: hidden; border: 0px; z-index: 9999; top: 0px;" src=""></iframe>
+<iframe id="equalHourFm" style="display: none; position: absolute; width: 100%;min-height:1080px; height: 1080px; overflow: hidden; border: 0px; z-index: 9999; top: 0px;" src=""></iframe>
 
 <!--背景星星-->
 <canvas id="canvas" width="1893" height="1080"></canvas>

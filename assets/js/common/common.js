@@ -190,9 +190,9 @@ function addUpArr(arr){
     var restArr = arr.slice(0);
     for(var i = 1; i < restArr.length; i ++){
         if($.isNumeric(restArr[i - 1]) && $.isNumeric(restArr[i])){
-            restArr[i] = parseFloat(restArr[i - 1]) +　parseFloat(restArr[i]);
+            restArr[i] = (parseFloat(restArr[i - 1]) +　parseFloat(restArr[i])).toFixed(2);
         }else if($.isNumeric(restArr[i - 1])){
-            restArr[i] = parseFloat(restArr[i - 1]);
+            restArr[i] = parseFloat(restArr[i - 1]).toFixed(2);
         }
     }
     return restArr;

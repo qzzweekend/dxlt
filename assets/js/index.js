@@ -5,7 +5,7 @@
 new Vue({
     el: '#dx_tot',
     data: {
-        screen3 : {
+        screen3: {
             ps_id: "", //被点击电站的ps_id
             earthChart: null,
             isFrist: true,//是否点击操作页面
@@ -16,7 +16,7 @@ new Vue({
             //psScheme: 2,//电站类型; (2:组串式,显示单元；其他 显示逆变器)
             showEarthOrChina: true//关闭弹出框时显示 true:3D地球，false;ChinaMap
         },
-        psObj : {
+        psObj: {
             psIdArr: [],
             psSchemeArr: []
         },
@@ -57,10 +57,10 @@ new Vue({
 
         options: [],
 
-        fd_station_name:'', //项目名称
-        fd_city:'', //地理位置
-        fd_pw_capacity:'', //装机功率
-        fd_station_desc:'', //项目描述
+        fd_station_name: '', //项目名称
+        fd_city: '', //地理位置
+        fd_pw_capacity: '', //装机功率
+        fd_station_desc: '', //项目描述
 
     },
     methods: {
@@ -73,7 +73,7 @@ new Vue({
 
         //flat点击
         powerInfo_detail: function (obj) {
-            var _this=this;
+            var _this = this;
             $("#grayLayer").addClass("grayLayer");
             this.screen3.ps_id = $(obj).attr('id');
             if ($(obj).attr('class') == 'location') {
@@ -95,12 +95,12 @@ new Vue({
                 vlm.loadJson("", JSON.stringify(Parameters), function (res) {
                     if (res.success) {
                         var result = res.data;
-                        _this.fd_station_name=result.fd_station_name;  //项目名称
-                        _this.fd_city=result.fd_city; //地理位置
-                        if(result.fd_station_name){
-                            _this.fd_pw_capacity=result.fd_station_name.match(/\d/ig)[0]+'MWp'; //装机功率
+                        _this.fd_station_name = result.fd_station_name;  //项目名称
+                        _this.fd_city = result.fd_city; //地理位置
+                        if (result.fd_station_name) {
+                            _this.fd_pw_capacity = result.fd_station_name.match(/\d/ig)[0] + 'MWp'; //装机功率
                         }
-                        _this.fd_station_desc=result.fd_station_desc; //项目描述
+                        _this.fd_station_desc = result.fd_station_desc; //项目描述
                     }
                 });
             }
@@ -309,8 +309,8 @@ new Vue({
                 }
                 $("#psSearchName").html(optStr);
                 $('#psSearchName').select2();
-                $("#img_china >div").click(function(){
-                   _this.powerInfo_detail($(this));
+                $("#img_china >div").click(function () {
+                    _this.powerInfo_detail($(this));
                 });
 
             }
@@ -506,7 +506,6 @@ new Vue({
                         tempp["color"] = colorArray[i];
                         dz_data.push(tempp);
                     }
-                    //console.log(dz_data);
                     _this.loadPowerNumChart(dz_data, pieName, lengendData, title);
                 } else {
                     alert(result.message);
@@ -1038,19 +1037,9 @@ new Vue({
             var ptChart = echarts.init(document.getElementById('plan'));
             ptChart.setOption(option);
         },
-
-        //右上角发电趋势tab切换
-        trendTab: function (e) {
-            //console.log(e.target);
-            if ($(e.target).parent().hasClass('trends_btn')) {
-                $('.trends_btn').removeClass('on');
-                $(e.target).parent().addClass('on');
-                this.getResultTrends($(e.target).parent().attr('data-dateType'));
-            }
-
-        },
         //右上角发电趋势show
-        showGenTrends: function (genTrendsDateType) {
+        showGenTrends: function (e) {
+            var genTrendsDateType=$(e.target).parent().attr('data-dateType');
             var _this = this;
             $(".Mc4_con .loadingDiv").show();
             var temChart = echarts.init(document.getElementById('power'));
@@ -1060,10 +1049,11 @@ new Vue({
             if (genTrendsDateType == 3) {//year
                 $("#powerTrendTitle").text(LANG["generationTrend_year"]);
                 $(".trends_btn:eq(2)").addClass("on");
-            } else if (genTrendsDateType == 2) {//month
+            } else if (genTrendsDateType == 2 || genTrendsDateType == undefined ) {//month
+                genTrendsDateType='2';
                 $("#powerTrendTitle").text(LANG["generationTrend_month"]);
                 $(".trends_btn:eq(1)").addClass("on");
-            } else {//day
+            } else if (genTrendsDateType == 0) {//day
                 $("#powerTrendTitle").text(LANG["generationTrend_day"]);
                 $(".trends_btn:eq(0)").addClass("on");
             }
@@ -1075,21 +1065,18 @@ new Vue({
         getResultTrends: function (dateType) {
             $(".Mc4_con .loadingDiv").show();
             var _this = this;
-            var dateStr = '', sort = '', startDateStr;
+            var dateStr = '', startDateStr = '';
             switch (dateType) {
-                case '0':
+                case '0': //日
                     dateStr = '0';
-                    sort = '2';
                     startDateStr = vlm.Utils.currentDay();
                     break;
-                case '2':
+                case '2': //月
                     dateStr = '2';
-                    sort = '1';
                     startDateStr = vlm.Utils.currentMonth();
                     break;
-                case '3':
+                case '3':  //年
                     dateStr = '3';
-                    sort = '2';
                     startDateStr = vlm.Utils.currentYear();
                     break;
                 default :
@@ -1104,7 +1091,7 @@ new Vue({
                     "stationtype": "all",
                     "timetype": dateStr,
                     "sorttype": "1",
-                    "sort": sort,
+                    "sort": "2",
                     "starttime": startDateStr,
                     "endtime": endDateStr,
                     "topn": "300",
@@ -1131,16 +1118,17 @@ new Vue({
         },
         //解析发电趋势数据(月)
         dealPowerData_month: function (res) {
+
             var result = res.data,
                 _this = this,
                 todayPower = '',
                 unit = result.fd_unit,
                 actualData = [];
             if (result.fd_datas.length == 1) {  //当月第一天，只有实时数据
-                todayPower = result.fd_datas[0].fd_power_day;
+                todayPower = this.fd_all_power_day;
             } else if (result.fd_datas.length > 1) {
-                todayPower = result.fd_datas[0].fd_power_day;
-                for (var i = 1; i < result.fd_datas.length; i++) {
+                todayPower = this.fd_all_power_day;
+                for (var i = 0; i < result.fd_datas.length-1; i++) {
                     actualData.push(result.fd_datas[i].fd_power_day);
                 }
             }
@@ -1148,8 +1136,8 @@ new Vue({
             var dateCount = _this.getDays();   //当月天数
             var dateDate = [], actualData_today = [];
             for (var i = 1; i <= dateCount; i++) {
-                if (date <= i) {
-                    actualData.push(0);   //累计未来发电趋势初始为0
+                if (i >= date) {
+                    actualData.push('--');   //累计未来发电趋势初始为0
                 }
                 if (date == i) {//今日数据
                     var object = {
@@ -1166,10 +1154,9 @@ new Vue({
                             }
                         }
                     };
-
                     actualData_today.push(object);
                 } else {
-                    actualData_today.push(0);
+                    actualData_today.push('--');
                 }
                 dateDate.push(i);
             }
@@ -1202,9 +1189,10 @@ new Vue({
                         if (date == data[0].name) {//今日
                             return year + "/" + month + "/" + data[1].name + "<br>" + data[1].seriesName + "：" + data[1].value + unit;
                         } else {
-                            return year + "/" + month + "/" + data[0].name + "<br>" + data[0].seriesName + "：" + data[0].value + unit;
+                            return year + "/" + month + "/" + data[1].name + "<br>" + data[0].seriesName + "：" + data[0].value + unit;
                         }
                     }
+
                 },
                 legend: {
                     orient: 'horizontal',      // 布局方式，默认为水平布局，可选为：

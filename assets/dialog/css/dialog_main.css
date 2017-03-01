@@ -126,35 +126,6 @@ html, body {
     margin-right: 47px;
 }
 
-.indexc_ico1 {
-    background: url(../../images/ico7.png) center left no-repeat;
-    padding-left: 25px;
-    line-height: 18px;
-    font-family: "Microsoft YaHei";
-    font-size: 21px;
-    color: #ffffff;
-    font-weight: bold;
-}
-
-.indexc_ico2 {
-    background: url(../../images/ico8.png) center left no-repeat;
-    padding-left: 25px;
-    line-height: 18px;
-    font-family: "Microsoft YaHei";
-    font-size: 21px;
-    color: #ffffff;
-    font-weight: bold;
-}
-
-.indexc_ico3 {
-    background: url(../../images/ico9.png) center left no-repeat;
-    padding-left: 25px;
-    line-height: 18px;
-    font-family: "Microsoft YaHei";
-    font-size: 21px;
-    color: #ffffff;
-    font-weight: bold;
-}
 
 .idnex_c_title {
     padding-top: 70px;
@@ -166,15 +137,6 @@ html, body {
 
 .indexc_slide {
     padding-top: 50px;
-}
-
-.indexc_slide .bd ul li {
-    display: block;
-    background: url(../../images/bj15.png) no-repeat;
-    width: 230px;
-    height: 159px;
-    margin-right: 47px;
-    margin-bottom: 45px;
 }
 
 .slide_title {
@@ -191,39 +153,6 @@ html, body {
     padding-top: 12px;
     padding-left: 35px;
 }
-
-.slide_ico1 {
-    background: url(../../images/ico7.png) center left no-repeat;
-    padding-left: 25px;
-    line-height: 22px;
-    font-family: "Microsoft YaHei";
-    font-size: 21px;
-    color: #ffffff;
-    text-align: left;
-    margin-bottom: 12px;
-}
-
-.slide_ico2 {
-    background: url(../../images/ico8.png) center left no-repeat;
-    padding-left: 25px;
-    line-height: 22px;
-    font-family: "Microsoft YaHei";
-    font-size: 21px;
-    color: #ffffff;
-    text-align: left;
-    margin-bottom: 12px;
-}
-
-.slide_ico3 {
-    background: url(../../images/ico9.png) center left no-repeat;
-    padding-left: 25px;
-    line-height: 22px;
-    font-family: "Microsoft YaHei";
-    font-size: 21px;
-    color: #ffffff;
-    text-align: left;
-}
-
 .indexc_slide .bd ul li {
     margin-right: 47px;
     float: left;
@@ -233,20 +162,6 @@ html, body {
 .indexc_slide .hd {
     padding-top: 35px;
     text-align: center;
-}
-
-.indexc_slide .hd a.prev {
-    display: inline-block;
-    background: url(../../images/left.png) no-repeat;
-    width: 29px;
-    height: 28px;
-}
-
-.indexc_slide .hd a.next {
-    display: inline-block;
-    background: url(../../images/right.png) no-repeat;
-    width: 29px;
-    height: 28px;
 }
 
 .indexc_slide .hd ul {
@@ -404,17 +319,6 @@ html, body {
     padding-bottom: 25px;
 }
 
-.tablebox_close {
-    background: url(../../images/tablebox_close.png) no-repeat;
-    width: 52px;
-    height: 52px;
-    text-indent: -9999px;
-    display: block;
-    position: absolute;
-    right: 25px;
-    top: 25px;
-}
-
 .tablebox_time {
     width: 100%;
     height: 32px;
@@ -430,22 +334,6 @@ html, body {
 .table_tabmenu ul li {
     float: left;
     margin-right: 20px;
-}
-
-.table_tabmenu ul li a {
-    width: 65px;
-    height: 36px;
-    line-height: 36px;
-    text-align: center;
-    font-family: "Microsoft YaHei";
-    font-size: 20px;
-    color: #ffffff;
-    display: block;
-    background: url(../../images/time_menubg.png) no-repeat;
-}
-
-.table_tabmenu ul li.on a {
-    background: url(../../images/time_menubg_on.png) no-repeat;
 }
 
 .center_tabbox_bg {
@@ -492,14 +380,6 @@ html, body {
     background: #066487;
 }
 
-.table_boxslide .bd {
-    height: 742px;
-    width: 873px;
-    border: 1px solid #1CA0BF;
-    box-shadow: 0 1px 8px rgba(0, 0, 0, 0.3);
-    background: url(../../images/tabbg.png);
-}
-
 .table_boxslide .bd ul {
     height: 100%;
 }
@@ -540,11 +420,6 @@ html, body {
     font-family: "Microsoft YaHei";
     font-size: 14px;
     color: #ffffff;
-}
-
-.table_max_bottom table tr:nth-child(2n - 1) td {
-    background: url(../../images/tabbg_h.png);
-    background-color: #0181A8;
 }
 
 .module {
