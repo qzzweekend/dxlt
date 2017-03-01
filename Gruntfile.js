@@ -41,6 +41,9 @@ module.exports = function (grunt) {
         //压缩js
         uglify: {
             options: {
+                compress: {
+                    drop_console: true   //去掉console
+                },
                 stripBanners: true, //合并时允许输出头部信息
                 banner: '/*!<%= pkg.name %> - <%= pkg.version %>-' + '<%=grunt.template.today("yyyy-mm-dd") %> */\n'
             },
@@ -84,7 +87,14 @@ module.exports = function (grunt) {
                     cwd: 'assets',//assets目录下
                     src: '**/*.html',//所有html文件
                     dest: 'dist'//输出到此目录下
-                }]
+                },
+                    {
+                        expand: true,
+                        cwd: 'assets',
+                        src: ['**/*.{png,jpg,jpeg,gif,db,htm}'],
+                        dest: 'dist/'
+                    }
+                ]
             }
         },
         //watch自动化
